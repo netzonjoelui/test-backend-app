@@ -1,0 +1,110 @@
+/**************************************************************************************
+*	LIB:		CContentTable
+*	Purpose:	aereus.lib.js class used throughout ant for each content table
+***************************************************************************************/
+/* outer table */
+.ContentTable 
+{
+	border-width:1px; 
+	border-style:solid; 
+	border-left-color:#A3C7E2; 
+	border-left-width:1px; 
+	border-top-width:1px; 
+	border-top-color:#A3C7E2; 
+	border-bottom-color:#A3C7E2; 
+	border-bottom-width:1px;  
+	border-right-color:#A3C7E2; 
+	border-right-width:1px;
+}
+/* Upper Left Corner */
+.ContentTableTitleLeftCorn
+{
+	width:0px;
+}
+/* Center of title bar */
+.ContentTableTitleCenter
+{
+	background-color:#FFFFFF; 
+	background-image:url(/images/themes/blue/windowHeaderShade.gif);
+	background-position:0px 0px; 
+	background-repeat:repeat-x;
+}
+/* Upper Right Corner */
+.ContentTableTitleRightCorn
+{
+	width:0px;
+}
+/* Label Container - For title */
+.ContentTableTitleLabel
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-size:12px; 
+	font-weight:bold; 
+	color:#000000; 
+	padding-left:3px;
+	padding-top:3px;
+}
+/* Context Container - For title */
+.ContentTableTitleContext
+{
+}
+/* The body where content is placed */
+.ContentTableBodyLeft
+{
+	width:0px;
+}
+.ContentTableBody /* The body where content is placed */
+{
+	background-color:#FFFFFF; 
+	padding:0px; 
+	background-image:url(/images/templates/windowBodyShade.gif); 
+	background-position:0px 0px; 
+	background-repeat:repeat-x;
+	height:100%;
+}
+.ContentTableBodyRight
+{
+	width:0px;
+}
+
+/* Small 1px hr at the bottom of the table */
+.ContentTableFooterHrLeft
+{
+	width:0px;
+}
+.ContentTableFooterHr  /* Small 1px hr at the bottom of the table */
+{
+	background-color:#FFFFFF;
+	height:1px;
+}
+.ContentTableFooterHrRight
+{
+	width:0px;
+}
+
+/* The fotter row where the menu might optionally be placed */
+.ContentTableFooterLeftCorn
+{
+	width:0px;
+}
+
+.ContentTableFooterRow
+{
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/blue/windowFooterShade.png);
+				background-position:0px 0px;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/blue/windowFooterShade.png, sizingMethod='scale');";
+	}
+	?>
+}
+.ContentTableFooterRightCorn
+{
+	width:0px;
+}

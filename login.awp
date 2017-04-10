@@ -1,0 +1,311 @@
+<?php    
+	require_once("lib/AntConfig.php");    
+	require_once("settings/settings_functions.php");
+    require_once("ant.php");
+	require_once("lib/CDatabase.awp");
+	require_once("users/user_functions.php");
+	
+	$requestedPage = $_REQUEST['p'];
+
+	
+
+	// Get forwarded variables
+	// -------------------------------------------------------------------------------
+	$err = $_GET['e'];
+	$FWD = "";
+	if ($_GET['user'])
+		$FWD .= "&user=".$_GET['user'];
+	if ($requestedPage)
+		$FWD .= "&p=".$requestedPage;
+	if ($_GET['e'])
+		$FWD .= "&e=".$_GET['e'];
+
+	// Get forwarded variables
+	// -------------------------------------------------------------------------------
+	if ($_SERVER['SERVER_PORT'] != "443" && !isset($settings_no_https))
+		header("Location: https://".$_SERVER['SERVER_NAME']."/login.awp".(($FWD)?"?$FWD":''));
+
+	// Get account information
+	// -------------------------------------------------------------------------------
+	$account = settingsGetAccountName();
+	if ($account)
+	{
+		if ($ANT->accountIsActive())
+		{
+			$custom_login = $ANT->settingsGet("general/login_image");
+			$settings_login_logo = (is_numeric($custom_login)) ? $custom_login : "images/main_ant_med.png";
+		}
+		else
+			$err = 4;
+	}
+	else
+		$settings_login_logo = ($settings_login_logo) ? $settings_login_logo : "images/ant1.gif";
+
+	
+	// User is logged in via cookie
+	// -------------------------------------------------------------------------------
+	if ($err == NULL)
+	{
+		if (Ant::getSessionVar('uname') && Ant::getSessionVar('uid') && Ant::getSessionVar('aname') && Ant::getSessionVar('aid'))
+		{
+			header("Location: /authenticate.php".(($FWD)?"?$FWD":''));
+			exit();
+		}
+	}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>Aereus Network Tools [ ANT&#8482; ] - Software Without Limitations</title>
+	<link rel="shortcut icon" href="/favicon.ico" type="image/ico">	
+<?php
+	if ($mobile_browser)
+		echo '<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />';
+
+	include("lib/aereus.lib.js/js_lib.php");
+?>
+	<script type="text/javascript">
+	
+	var mobile_browser = <?php print($mobile_browser); ?>;
+	
+	function main()
+	{
+		var fwdpage = "<?php print(($requestedPage)?base64_decode($requestedPage):""); ?>";
+		if (fwdpage && document.location.hash)
+		{
+			fwdpage += document.location.hash;
+		}
+
+		if (fwdpage)
+			document.logon.p.value = fwdpage;
+			
+		focusForm();
+	}
+	
+	var g_frmFocussed = false;
+	
+	function focusForm()
+	{ 
+		try
+		{
+			if (!g_frmFocussed)
+				document.logon.user.focus();
+		}
+		catch(e){};
+	}
+	</script>
+
+	<style type="text/css">
+	body 
+	{ 
+		margin: 0px;
+		padding: 0px;
+		font-family:Arial, Helvetica, sans-serif; 
+		font-size:10px;
+		<?php 
+			/*
+			if (!$mobile_browser) 
+				echo "background-color:#0E0E0E;\n";
+			else
+				echo "background-color:#0194BE;\n";
+			*/
+			echo "background-color:#0E0E0E;\n";
+		?>
+
+		<?php if (!$mobile_browser) { ?>
+		background-image:url("/images/login/bg-<?php print(rand(1, 7)); ?>-1280.jpg");
+		background-position:top center;
+		background-repeat:no-repeat;
+		<?php } ?>
+	}
+
+	form
+	{
+		margin: 0px;
+	}
+
+	input
+	{
+		margin: 0px;
+	}
+
+	#maincon
+	{ 
+		margin-top: 10px;
+		margin-right: auto;
+		margin-left: auto;
+		<?php if (!$mobile_browser) { ?>
+		width: 500px;
+		height: 800px;
+		<?php } ?>
+		text-align:center;
+	}
+	#header
+	{
+		padding-top: 10px;
+		text-align:center;
+		height: 75px;
+	}
+	#loginBox
+	{
+		background-image:url("/images/login/login-box-bg.png");
+		background-position:center; 
+		background-repeat:no-repeat;
+		height: 300px;
+		width: 282px;
+		<?php if (!$mobile_browser) { ?>
+		margin-top: 158px;
+		<?php } ?>
+		margin-left: auto;
+		margin-right: auto;
+		display: table;
+	}
+	#loginBoxLogo
+	{
+		margin: 20px 0 0 0;
+		text-align: center;
+		height: 120px;
+	}
+	#loginBoxForm
+	{
+		margin: 3px 50px 0px 50px;
+	}
+	#footer
+	{
+		text-align:center;	
+		width:243px;
+		padding:20px;
+		border:solid 0px #FFF;
+		margin:0 auto 0 auto;
+		font-family: arial, verdana, helvitica, sans-serif; 
+		font-size: 11px;
+		color: #6699cc;
+		display:table;	
+	}
+	.loginMessage
+	{
+		color:#9A0000;
+		text-align:center;
+		font-family: arial, verdana, helvitica, sans-serif; 
+		font-size: 16px; 
+		font-weight: bold;
+		padding:30px 20px 0 20px;
+	}
+	input.inputstyle
+	{
+		height:20px; 
+		width:182px; 
+		font-size:12px; 
+		font-family:Arial, Helvetica, sans-serif; 
+		border: 0;
+
+		padding:3px 3px 0px 5px;
+		color:#4c4c4c;
+		background: transparent url(/images/login/inputbg-off.png) no-repeat; 
+	}
+
+	input.inputstyle:focus
+	{
+		background: transparent url(/images/login/inputbg-on.png) no-repeat; 
+	}
+
+	</style>
+</head>
+
+<body onLoad="main();" topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0">
+
+
+<div id="maincon">
+
+	<div id="header">
+		<img src="/images/login/header-logo-1024.gif" />
+	</div>
+
+	<!--
+	<div class="loginHeader">
+	<img src="<?php print($settings_login_logo); ?>" border="0">	</div>
+	-->
+
+	<div id="loginBox">
+		<div id="loginBoxLogo">
+			<?php
+				// check the error code and generate an appropriate error message switch
+				if ($err != NULL)
+				{
+					switch ($err) 
+					{
+						case -1:
+							$message = "No such user.";
+							$message .= "<br />Please try logging in again.";
+							break;
+						
+						case 0:
+							$message = "Invalid username and/or password.";
+							$message .= "<br />Please try logging in again.";
+							break;
+						
+						case 2:
+							$message = "Invalid username and/or password.";
+							$message .= "<br />Please try logging in again.";
+							break;
+
+						case 3:
+							$message = "You have logged in from another location.";
+							break;
+
+						case 4:
+							$message = "ANT Account is not active!";
+							$message .= "<br /><br /><a href='http://www.aereus.com/products/ant/order'>www.aereus.com</a>";
+							break;
+					
+						default:
+							$message = "An unspecified error occurred.";
+							$message .= "<br />Please try logging in again.";
+							break;
+					}
+					echo "<div class='loginMessage'>$message</div>";
+				}	
+				else
+				{
+					if (is_numeric($settings_login_logo))
+						$settings_login_logo = "/files/images/$settings_login_logo/238/120";
+					echo "<img src='$settings_login_logo'>";
+				}
+			?>
+		</div>
+		<div id="loginBoxForm">
+			<form name="logon" method="post" action="authenticate.php">
+				<?php if ($err != '4') { ?>
+				<div style='text-align:left;font-weight:bold;margin:0px 0px 2px 0px;'>Username</div>
+				<input class='inputstyle' name="user" type="text" maxlength="40" value="<?php print($_GET['user']);?>" onfocus="g_frmFocussed=true"><br>
+				<div style='text-align:left;font-weight:bold;margin:0px 0px 2px 0px;'>Password</div>
+				<input class="inputstyle" name="password" type="password" maxlength="40" onfocus="g_frmFocussed=true">
+				<?php
+					echo "<input type='hidden' name=\"account\" type=\"text\" value=\"$account\" maxlength=\"40\">";
+				?>
+				<?php } ?>
+				<!--
+				<div align='right' style="padding: 0px; margin:0px;">		
+				<?php if ($err != '4') { ?>
+					Remember me on this computer
+					<input style="padding: 0px; margin:0px;" name="save_password" type="checkbox">
+				<?php } ?>
+				</div>
+				-->
+				<div align='right'>
+				<?php if ($err != '4') { ?>
+					<input type="image" src="/images/login/btn-sign-in.png" name='SUBMIT'></div>
+				<?php } ?>
+				<input type="hidden" name="p" value="" />
+			</form>		
+		</div>
+	</div>
+</div>
+
+<div id="footer">	
+	&copy; Aereus Corporation, <?php echo date("Y"); ?>
+</div> 	
+										
+</body>
+</html>

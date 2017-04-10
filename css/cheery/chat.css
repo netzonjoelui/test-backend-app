@@ -1,0 +1,90 @@
+a.chat
+{
+	color:#FF0000;
+	text-decoration:underline;
+	font-size:11px;
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+}
+a.chat:hover
+{
+	color:#660000;
+	text-decoration:none;
+	font-size:11px;
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+}
+a.chat:visited
+{
+	color:#ABABAB;
+	text-decoration:none;
+	font-size:11px;
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+}
+
+.antChatStyles 
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	font-size: 12px; 
+	border: #D4D0C8; 
+	border-style:solid; 
+	border-top-width: 1px;
+   	border-right-width: 1px; 
+	border-bottom-width: 1px; 
+	border-left-width: 1px; 
+	width:100%; 
+	height: 30px;
+	padding: 3px;
+}
+
+/**************************************************************************************
+*	Chat:		For Chat Classes
+***************************************************************************************/
+
+.ChatInputWindowImage
+{
+	margin-top: 2px;
+}
+.ChatInputWindow
+{
+	padding-right:6px;
+	padding-top:3px;
+	margin-left: 4px;
+	margin-right: 6px;
+}
+.ChatActionsBar
+{
+	padding-right:3px;
+	padding-left:3px;
+	text-align: right;
+	font-size: 9px;
+}
+.ChatViewWindow
+{
+	width:100%;
+	padding-left:3px;
+	padding-right:3px;
+	padding-top:3px;
+}
+.ChatMainFrame
+{
+	background-color:#FFFFFF;
+	border:1px solid #D4D0C8;
+	padding-left:3px;
+	padding-top:3px;
+	overflow:auto;
+}
+.ChatTitle
+{
+	color:#000066;
+	font-size:14px; 
+	padding-left:3px; 
+	padding-top:3px;
+	font-weight:bold;
+}
+.ChatStatusTitle
+{
+	color:#000066;
+	font-size:11px; 
+	padding-left:3px; 
+	padding-top:3px;
+	font-weight:bold;
+}

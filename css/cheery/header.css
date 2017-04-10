@@ -1,0 +1,37 @@
+/**************************************************************************************
+*	Page:		/lib/templates/header.awp
+*	Purpose:	Header and title file
+***************************************************************************************/
+.header
+{
+	background-color:#A6CAF0;
+	background-image:url(/images/themes/ant_os/antOsHeaderBGOne.png);
+	background-position:top left;
+	background-repeat:repeat-y;
+	color:#333366;
+}
+
+.header a
+{
+	color:#FFFFFF;
+	font-weight:bold; 
+	font-size:12px; 
+	text-decoration:none;
+}
+
+.headerTitle
+{
+	padding: 5px;
+	color:#fff;
+	font-size:20px; 
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+	font-weight:bold; 
+	font-style:normal;
+}
+
+.headerLink
+{
+	color:#0A246A;
+	font-size:12px; 
+	text-decoration:none;
+}

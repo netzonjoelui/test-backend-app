@@ -1,0 +1,137 @@
+/**************************************************************************************
+*	Page:		Dynamically Generated List Pages message_list.awp
+***************************************************************************************/
+div.DynDivAct
+{
+	font-family:Arial, Helvetica, sans-serif;
+	cursor:pointer;
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	background-color:#000000;
+}
+div.DynDivInact
+{
+	font-family:Arial, Helvetica, sans-serif;
+	cursor:pointer;
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	background-color:transparent;
+}
+div.DynDivInact table
+{
+	color:#FFFFFF;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:11px;
+}
+div.DynDivAlert
+{
+	font-family:Arial, Helvetica, sans-serif;
+	cursor:pointer;
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	background-color:#000099;
+}
+.DynDivBold
+{
+	color:#FFFFFF;
+	font-size:11px;
+	font-weight:bold;
+}
+.DynDivTopLeft
+{
+	color:#FFCC33;
+	font-size:11px;
+}
+.DynDivTopRight
+{
+	color:#FFFF66;
+	font-size:11px;
+}
+.DynDivMain
+{
+	border-top-color:#CCCCCC; 
+	border-top-style:solid; 
+	border-top-width:1px;
+	
+	border-left-color:#CCCCCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#CCCCCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+}
+.orderdiv
+{
+	
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	
+	border-left-color:#CCCCCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#CCCCCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+	
+	width:auto;
+	background-color:#CCCCCC;
+	color:#000000;
+}
+
+.MessageListSearch
+{
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	
+	border-left-color:#CCCCCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#CCCCCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+
+	color:#000000;	
+	background-color:#CCCCCC;
+}
+
+.DynDivPaginate
+{
+	border-left-color:#CCCCCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#CCCCCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+}
+
+.DynDivPage
+{
+
+	border-top-color:#CCCCCC; 
+	border-top-style:solid; 
+	border-top-width:1px;
+
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	
+	border-left-color:#CCCCCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#CCCCCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+	background-color:#000000;
+	
+	width:auto;
+}

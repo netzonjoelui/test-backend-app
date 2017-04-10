@@ -1,0 +1,50 @@
+/**************************************************************************
+*	CToolbar.js
+**************************************************************************/
+.CToolbar
+{
+	padding:4px;
+	background-color:transparent;
+	background-position:0 0;
+	border-bottom:1px solid #CCCCCC;
+	margin-bottom: 3px;
+	border-top:1px solid #CCCCCC;
+}
+
+.CToolbar button.CButton 
+{
+	margin:0px;
+}
+@-moz-document url-prefix() 
+{
+     .CToolbar button.CButton { margin:0 -3px; }
+}
+.CToolbarInputBlur
+{
+	color: #333;
+}
+
+/* Used for standard text labels in toolbars */
+
+.CToolbarLabel
+{
+	float:right;
+	padding-right:6px;
+	font-family:Arial, Verdana,  Helvetica, sans-serif; 
+	font-size:12px;
+	font-weight:bold;
+	color:#FFFF66;	
+}
+.CToolbarSpacer
+{
+	width: 1px;
+	background-color: gray;
+	height: 18px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+}
+.CToolbarIcon
+{
+	width: 22px;
+	height: 22px;
+}

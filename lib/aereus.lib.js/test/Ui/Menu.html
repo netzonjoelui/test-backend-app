@@ -1,0 +1,158 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Test Menus in ANT</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<link rel="STYLESHEET" type="text/css" href="../../style.css" />
+
+	<script language="javascript" type="text/javascript" src="../../jquery.min.js"></script>
+	<script language="javascript" type="text/javascript" src="../../alib.js"></script>
+	<script language="javascript" type="text/javascript" src="../../dom.js"></script>
+	<script language="javascript" type="text/javascript" src="../../events.js"></script>
+	<script language="javascript" type="text/javascript" src="../../events/EventWrapper.js"></script>
+	<script language="javascript" type="text/javascript" src="../../CEffect.js"></script>
+	<script language="javascript" type="text/javascript" src="../../CDialog.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/Button.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/Menu.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/MenuItem.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/Popup.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/PopupMenu.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/FilteredMenu.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/SubMenu.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/MenuButton.js"></script>
+	<script language="javascript" type="text/javascript" src="../../userAgent.js"></script>
+	<script language="javascript" type="text/javascript" src="../../CDropdownMenu.js"></script>
+	<script language="javascript" type="text/javascript" src="../../CButton.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ckeditor/ckeditor.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ckeditor/adapters/jquery.js"></script>
+</head>
+<body>
+	<h1>Menu Demo</h1>
+
+	<h2>Plain Menu</h2>
+	<button id='menu_add'>Add Item</button>
+	<div style='height:100px;'>
+		<div id='menu_only' style='height:100px;position:absolute;'></div>
+	</div>
+	<script type='text/javascript'>
+		var menu = new alib.ui.Menu();
+		menu.addItem(new alib.ui.MenuItem("Item 1"));
+		menu.addItem(new alib.ui.MenuItem("Item 2", {icon:"0"}));
+		var item = new alib.ui.MenuItem("Click Me");
+		item.onclick = function() { alert("Clicked"); };
+		menu.addItem(item);
+
+		var submenu = new alib.ui.SubMenu("Sub-Menu");
+		submenu.addItem(new alib.ui.MenuItem("Sub 1"));
+		submenu.addItem(new alib.ui.MenuItem("Sub 2"));
+		menu.addItem(submenu);
+
+		var submenu2 = new alib.ui.SubMenu("Sub-Sub-Menu");
+		submenu2.addItem(new alib.ui.MenuItem("Sub 1"));
+		submenu2.addItem(new alib.ui.MenuItem("Sub 2"));
+		submenu.addItem(submenu2);
+
+		menu.render(document.getElementById("menu_only"));
+
+		// Test adding a dynamic item
+		var btn = document.getElementById("menu_add");
+		btn.menu = menu;
+		btn.onclick = function()
+		{
+			this.menu.refresh();
+			this.menu.addItem(new alib.ui.MenuItem("Dynamically Added"));
+		}
+	</script>
+
+	<h2>Mobile Mode</h2>
+	<div style='height:100px;'>
+		<div id='menu_mobile' style='height:100px;position:absolute;'></div>
+	</div>
+	<script type='text/javascript'>
+		var menu = new alib.ui.Menu();
+		menu.setMobileMode(true);
+		menu.addItem(new alib.ui.MenuItem("Item 1"));
+		menu.addItem(new alib.ui.MenuItem("Item 2", {icon:"0"}));
+		var item = new alib.ui.MenuItem("Click Me");
+		item.onclick = function() { alert("Clicked"); };
+		menu.addItem(item);
+
+		var submenu = new alib.ui.SubMenu("Sub-Menu", {mobile:true});
+		submenu.setMobileMode(true);
+		submenu.addItem(new alib.ui.MenuItem("Sub 1"));
+		submenu.addItem(new alib.ui.MenuItem("Sub 2"));
+		menu.addItem(submenu);
+
+		var submenu2 = new alib.ui.SubMenu("Sub-Sub-Menu", {mobile:true});
+		submenu2.setMobileMode(true);
+		submenu2.addItem(new alib.ui.MenuItem("Sub 1"));
+		submenu2.addItem(new alib.ui.MenuItem("Sub 2"));
+		submenu.addItem(submenu2);
+
+		menu.render(document.getElementById("menu_mobile"));
+
+	</script>
+
+	<h2>Popup Menu</h2>
+	<button id='popupButton'>Show Drop-Down Menu</button>
+	<script type='text/javascript'>
+		var menu = new alib.ui.PopupMenu();
+		menu.addItem(new alib.ui.MenuItem("Item 1"));
+		menu.addItem(new alib.ui.MenuItem("Item 2"));
+		menu.addItem(new alib.ui.MenuItem("Item 3"));
+		var item = new alib.ui.MenuItem("Click Me");
+		item.onclick = function() { alert("Clicked"); };
+		menu.addItem(item);
+
+		var submenu = new alib.ui.SubMenu("Sub-Menu");
+		submenu.addItem(new alib.ui.MenuItem("Sub 1"));
+		submenu.addItem(new alib.ui.MenuItem("Sub 2"));
+		menu.addItem(submenu);
+
+		var submenu2 = new alib.ui.SubMenu("Sub-Sub-Menu");
+		submenu2.addItem(new alib.ui.MenuItem("Sub 1"));
+		submenu2.addItem(new alib.ui.MenuItem("Sub 2"));
+		submenu.addItem(submenu2);
+
+		menu.attach(document.getElementById("popupButton"));
+	</script>
+
+	<h2>MenuButton Demo</h2>
+	<div id='menu_button'></div>
+	<script type='text/javascript'>
+		var menu = new alib.ui.PopupMenu();
+		menu.addItem(new alib.ui.MenuItem("Item 1"));
+		menu.addItem(new alib.ui.MenuItem("Item 2"));
+		menu.addItem(new alib.ui.MenuItem("Item 3"));
+		var item = new alib.ui.MenuItem("Click Me");
+		item.onclick = function() { alert("Clicked"); };
+		menu.addItem(item);
+
+		var submenu = new alib.ui.SubMenu("Sub-Menu");
+		submenu.addItem(new alib.ui.MenuItem("Sub 1"));
+		submenu.addItem(new alib.ui.MenuItem("Sub 2"));
+		menu.addItem(submenu);
+
+		var btn = new alib.ui.MenuButton("DropDown", menu);
+		btn.print(document.getElementById("menu_button"));
+	</script>
+
+	<h2>Filtered Menu</h2>
+	<div id='menu_filtered'></div>
+	<script type='text/javascript'>
+		var menu = new alib.ui.FilteredMenu();
+		menu.addItem(new alib.ui.MenuItem("Item 1"));
+		menu.addItem(new alib.ui.MenuItem("Item 2"));
+		menu.addItem(new alib.ui.MenuItem("Item 3"));
+		var item = new alib.ui.MenuItem("Click Me");
+		item.onclick = function() { alert("Clicked"); };
+		menu.addItem(item);
+
+		var btn = new alib.ui.MenuButton("DropDown", menu);
+		btn.print(document.getElementById("menu_filtered"));
+	</script>
+
+</body>
+</html>

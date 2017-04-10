@@ -1,0 +1,129 @@
+<?php
+global $DEFINE_LIB_BUTTON;
+
+if (!$DEFINE_LIB_BUTTON)
+{
+	$DEFINE_LIB_BUTTON = true;
+	
+	/***********************************************************************************************************
+	*	Function:	ButtonCreate
+	*
+	*	Purpose:	Create an enhanced image-based button rather than depending on the respective GDI button
+	*
+	*	Params:		1. title - Plain text "My Button"
+	*				2. onclick - either submit a form via SUBMIT:formname:buttonname or onclick action
+	*				3. scheme (default 1) - determines the scheme(style) to be used for this button\
+	*				4. width (optional) - The width of the button in px
+	*				5. mouseover (optional) - additional mouse over functions
+	*				6. mouseout (optional) - additional mouse out functions
+	*	
+	*	Example 1: Simple onClick button
+	*				echo ButtonCreate("Next Page", "document.location='somepage.htm'");
+	*	Example 2: Sample form submission
+	*				echo "<form name='myform' method='post' action='submitpage.htm'>";
+	*				echo ButtonCreate("Save", "SUBMIT:myform:save_changes");
+	*				echo "</form>";
+	***********************************************************************************************************/
+	function ButtonCreate($title, $onclick, $scheme = "b1", $width = NULL, $mouseover = NULL, $mouseout = NULL, $float='left', $other='')
+	{
+		// Submit string should look like this SUBMIT:formname:buttonname otherwise its a simple onclick
+		if (substr($onclick, 0, 6) == "SUBMIT")
+		{
+			$parts = explode(":", $onclick);
+			$onclick = "if(window.GBL_CHECKFORDIRTY) GBL_CHECKFORDIRTY=false;document.".$parts[1]."['".$parts[2]."'].value='1'; document.".$parts[1].".submit();";
+			$hidden_field = "<input type='hidden' name='".$parts[2]."' value=''>";
+		}
+		
+		// Scheme switch - this is where the colors and styles are defined based on scheme
+		// it should default to 1 or whatever the default grey button is.
+		// That way the function only requires the third parameter if a different color is needed.
+		switch ($scheme)
+		{
+		case "b1";
+			// Standard grey button
+			$img_letter_name = "1";
+			break;
+		case "b2";
+			$img_letter_name = "2";
+			break;
+		case "b3";
+			$img_letter_name = "3";
+			break;
+		}
+		
+		// Get user theme
+		global $_SESSION, $dbh;
+		if ($dbh && $_SESSION["USER_NAME"])
+		{
+			$USERNAME = $_SESSION["USER_NAME"];
+			$USERID = $_SESSION["USER_ID"];
+			$tname = UserGetTheme($dbh, $USERID, 'name');
+		}
+		else
+			$tname = "default";
+
+
+		$ret = "$hidden_field
+				<button type='button' onclick=\"$onclick\" style='".
+					(($width) ? "width:$width;" : '')."' $other 
+				".(($mouseout) ? "onMouseOut=\"$mouseout\"" : '')." ".(($mouseover) ? "onMouseOver=\"$mouseover\"" : '')." class='CButton $scheme'>
+				<span><span>$title</span></span>
+			    </button>";
+		/*
+		$ret = "<div style='float:$float;padding-left:1px;padding-right:1px;;".
+					(($width) ? "width:$width;" : '')."' $other 
+				".(($mouseout) ? "onMouseOut=\"$mouseout\"" : '')." ".(($mouseover) ? "onMouseOver=\"$mouseover\"" : '')." nowrap>
+				$hidden_field
+				<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" nowrap style='display:inline;'>
+				 <tr>
+					<td class='CButtonTopLeft_$scheme'></td>
+					<td class='CButtonTopCenter_$scheme'></td>
+					<td class='CButtonTopRight_$scheme'></td>
+				 </tr>
+				 <tr>
+					<td class='CButtonBodyLeft_$scheme'></td>
+					<td class='CButtonBody_b$img_letter_name CButton_b$img_letter_name'
+						onClick=\"$onclick\" onMouseOver=\"this.className='CButtonBody_b".$img_letter_name."Over';\" 
+						onMouseOut=\"this.className='CButtonBody_b$img_letter_name';\">$title</td>
+					<td  class='CButtonBodyRight_$scheme'></td>
+				 </tr>
+				 <tr>
+					<td class='CButtonBottomLeft_$scheme'></td>
+					<td class='CButtonBottomCenter_$scheme'></td>
+					<td class='CButtonBottomRight_$scheme'></td>
+				 </tr>
+				</table>
+			   </div>";
+		*/
+
+		// Combine results position:relative;
+		/*
+		$ret = "<div style='".(($float != '') ? "float:$float;" : '')."padding-left:1px;padding-right:1px;".(($width) ? "width:$width;" : '')."' $other 
+				".(($mouseout) ? "onMouseOut=\"$mouseout\"" : '')." ".(($mouseover) ? "onMouseOver=\"$mouseover\"" : '')." nowrap>
+				$hidden_field
+				<table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" nowrap>
+				 <tr>
+					<td><img src='/images/themes/$tname/buttons/tl".$img_letter_name."_off.gif' border='0' style='vertical-align: top;display:block;'></td>
+					<td style=\"background-image:url('/images/themes/$tname/buttons/bt".$img_letter_name."_off.gif'); background-repeat:repeat-x;\"></td>
+					<td><img src='/images/themes/$tname/buttons/tr".$img_letter_name."_off.gif' border='0' style='vertical-align: top;display:block;'></td>
+				 </tr>
+				 <tr>
+					<td style=\"background-image:url('/images/themes/$tname/buttons/ml".$img_letter_name."_off.gif'); background-repeat:repeat-y;\"></td>
+					<td class='CButtonBody_b$img_letter_name CButton_b$img_letter_name'
+						onClick=\"$onclick\" onMouseOver=\"this.className='CButtonBody_b".$img_letter_name."Over';\" 
+						onMouseOut=\"this.className='CButtonBody_b$img_letter_name';\">$title</td>
+					<td style=\"background-image:url('/images/themes/$tname/buttons/mr".$img_letter_name."_off.gif'); background-repeat:repeat-y;\"></td>
+				 </tr>
+				 <tr>
+					<td><img src='/images/themes/$tname/buttons/bl".$img_letter_name."_off.gif' border='0' style='vertical-align: top;display:block;'></td>
+					<td style=\"background-image:url('/images/themes/$tname/buttons/bm".$img_letter_name."_off.gif'); background-repeat:repeat-x;\"></td>
+					<td><img src='/images/themes/$tname/buttons/br".$img_letter_name."_off.gif' border='0' style='vertical-align: top;display:block;'></td>
+				 </tr>
+				</table>
+				</div>";
+		*/
+		// Return button
+		return $ret;
+	}
+}
+?>

@@ -1,0 +1,48 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../users/user_functions.php");
+	require_once("datacenter_functions.awp");
+
+	$dbh = new CDatabase();
+	$dbh_dc = new CDatabase($settings_db_server, $settings_db_datacenter, 
+						    $settings_db_user, $settings_db_password, "pgsql");
+
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$TABLE = $_GET['table'];
+	$DBID = $_GET['dbid'];
+
+	header("Content-type: text/xml");			// Returns XML document
+	echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'; 
+
+	echo "<collist>";
+
+	$result = $dbh->GetTableColumns($TABLE, null, "zudb_".$DBID);
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+
+		$pkey = ($dbh->IsPrimaryKey($TABLE, $row['column_name'], "zudb_".$DBID)) ? 't' : '';
+
+		$type = $row['data_type'];
+		// Look for serial
+		if ($row['column_default'] == "nextval('zudb_".$DBID.".".$TABLE."_".$row['column_name']."_seq'::regclass)")
+			$type = "serial";
+
+		echo "<column>";
+		echo "<name>".rawurlencode(stripslashes($row['column_name']))."</name>";
+		echo "<type>".rawurlencode($type)."</type>";
+		echo "<primary>".rawurlencode($pkey)."</primary>";
+		//echo "<type>".rawurlencode(dc_getColTypeName($row['typename']))."</type>";
+		echo "<notes>".rawurlencode($dbh->GetColumnComment($TABLE, $row['column_name']))."</notes>";
+		echo "</column>";
+
+	}
+	$dbh->FreeResults($result);
+
+	echo "</collist>";
+?>

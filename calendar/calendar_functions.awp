@@ -1,0 +1,2139 @@
+<?php
+$CAL_ACLS = array("View Public Events", "View Private Events", "Delete Events", "Edit Events");
+
+require_once("email/email_functions.awp");
+require_once("lib/Email.php");
+
+function CalGetTimeBlock($time_str)
+{
+	$start_time = strtotime("00:00:00");
+	$now_time = strtotime($time_str);
+
+	return ($now_time-$start_time)/60;
+}
+
+function GetBlockName($block, $toget = 'all')
+{
+	if ($block == "1440")
+		return "12:59 PM";
+
+	if ($block == "1")
+		return "12:00 AM";
+
+	// Get whole hour and remaining minutes
+	if ($block < 60)
+	{
+		if ($block == 0)
+			$remain = 0;
+		else
+			$remain = 60 - $block;
+		$hour = 0;
+	}
+	else
+	{
+		$remain = $block % 60;
+		$hour = ($remain) ? (($block-$remain)/60) : $block / 60;
+	}
+	// Now set min
+	if ($remain && $remain < 10)
+		$min = "0".$remain;
+	else if ($remain && $remain >= 10)
+		$min = $remain;
+	else
+		$min = "00";
+	
+	// Create AM-PM string
+	if ($hour < 12 || $hour == 24)
+	{
+		if ($hour == 0 || $hour == 24) 
+			$hour = 12;
+		$ante = "AM";
+		//$res .= ":$min AM";
+	}
+	else if ($hour == 12)
+	{
+		//$res = $res.":$min PM";
+		$ante = "PM";
+	}
+	else if ($hour >= 12)
+	{
+		//$res = ($res-12).":$min PM";
+		$hour = ($hour-12);
+		$ante = "PM";
+	}
+	
+	switch ($toget)
+	{
+	case 'all':
+		return "$hour:$min $ante";
+		//return $block;
+		break;
+	case 'hour':
+		return $hour;
+		break;
+	case 'ante':
+		return $ante;
+		break;
+	case 'minute':
+		return $min;
+		break;
+	}
+}
+
+function GetBlockName24($block)
+{
+	// Get whole hour and remaining minutes
+	$remain = $block % 60;
+	$res = ($remain) ? (($block-$remain)/60) : $block / 60;
+	
+	// Now set min
+	if ($remain && $remain < 10)
+		$min = "0".$remain;
+	else if ($remain && $remain >= 10)
+		$min = $remain;
+	else
+		$min = "00";
+	
+	$res = $res.":".$min;
+	
+	return $res;
+}
+
+function GetBlockHour($block)
+{
+	// Get whole hour and remaining minutes
+	$remain = $block % 60;
+	$res = ($remain) ? (($block-$remain)/60) : $block / 60;
+	
+	return $res;
+}
+
+function GetBlockMin($block)
+{
+	// Get whole hour and remaining minutes
+	$remain = $block % 60;
+	
+	return $remain;
+}
+
+function GetNextMonth($curmonth)
+{
+	if ($curmonth == 12)
+		return 1;
+	else
+		return $curmonth + 1;
+}
+
+function GetPreviousMonth($curmonth)
+{
+	if ($curmonth == 1)
+		return 12;
+	else
+		return $curmonth - 1;
+}
+
+function GetNextWeek($month, $day, $year)
+{
+	$update = date("Y-m-d", strtotime("+ 1 week", strtotime("$year-$month-$day")));
+	return $update;
+}
+
+function GetPreviousWeek($month, $day, $year)
+{
+	$update = date("Y-m-d", strtotime("-1 week", strtotime("$year-$month-$day")));
+	return $update;
+}
+
+function GetNextWeekString($month, $day, $year)
+{
+	$nextweek = GetNextWeek($month, $day, $year);
+	$res = "month=".date("m", strtotime($nextweek));
+	$res .= "&year=".date("Y", strtotime($nextweek));
+	$res .= "&day=".date("d", strtotime($nextweek));
+
+		
+	return $res;
+}
+
+function GetPreviousWeekString($month, $day, $year)
+{
+	$prevweek = GetPreviousWeek($month, $day, $year);
+	$res = "month=".date("m", strtotime($prevweek));
+	$res .= "&year=".date("Y", strtotime($prevweek));
+	$res .= "&day=".date("d", strtotime($prevweek));
+		
+	return $res;
+}
+
+
+function GetNextMonthString($curmonth, $curyear)
+{
+	$nextmon = GetNextMonth($curmonth);
+	if ($nextmon == 1)
+		$res = "month=$nextmon&year=".($curyear+1);
+	else
+		$res = "month=$nextmon&year=$curyear";
+		
+	return $res;
+}
+
+function GetPreviousMonthString($curmonth, $curyear)
+{
+	$prevmon = GetPreviousMonth($curmonth);
+	if ($prevmon == 12)
+		$res = "month=$prevmon&year=".($curyear-1);
+	else
+		$res = "month=$prevmon&year=$curyear";
+		
+	return $res;
+}
+
+function GetNextDayString($month, $day, $year)
+{
+	$res = "month=".date("m", strtotime("+1 day", strtotime("$year-$month-$day")));;
+	$res .= "&year=".date("Y", strtotime("+1 day", strtotime("$year-$month-$day")));;
+	$res .= "&day=".date("d", strtotime("+1 day", strtotime("$year-$month-$day")));;
+
+		
+	return $res;
+}
+
+function GetPreviousDayString($month, $day, $year)
+{
+	$res = "month=".date("m", strtotime("-1 day", strtotime("$year-$month-$day")));;
+	$res .= "&year=".date("Y", strtotime("-1 day", strtotime("$year-$month-$day")));;
+	$res .= "&day=".date("d", strtotime("-1 day", strtotime("$year-$month-$day")));;
+
+		
+	return $res;
+}
+
+function GetDayNumberCols($dbh, $stime, $etime, $timeint, $year, $month, $day)
+{
+	global $cals_cond;
+	
+	// Set default number of columns
+	$numcols = 1;
+	
+	// Find out how many columns we need
+	for ($i=($stime/$timeint); $i<=($etime/$timeint); $i++)
+	{
+		$curblock = $i*$timeint;
+		// Look for events taking place during this period
+		$tev = "calendar_events"; // main events table
+		$query = "select $tev.id from $tev, calendars
+				  where $tev.date_start ='$year-$month-$day' and $tev.date_end='$year-$month-$day'
+				  and ($tev.start_block <='".(($curblock+$timeint)-1)."') 
+				  and $tev.end_block >'".($curblock)."'
+				  and all_day!='t'
+				  and $tev.calendar=calendars.id and ($cals_cond)";
+		
+		$res = $dbh->Query($query);
+		$num = $dbh->GetNumberRows($res);
+		$numcols = ($num > $numcols) ? $num : $numcols;
+		$dbh->FreeResults($res);
+	}
+	return $numcols;
+}
+
+function GetEvCol($evid, $numcols)
+{
+	$res = 0;
+	$bFound = false;
+	global $COLS;
+	
+	if (is_array($COLS))
+	{
+		for($i=0; $i<count($COLS); $i++)
+		{
+			if ($COLS[$i] == $evid)
+			{
+				$bFound = true;
+				$res = $i;
+			}
+		}
+		// Find empty column if not already entered
+		if ($bFound == false)
+		{
+			for($i=0; $i<$numcols; $i++)
+			{
+				if (!$COLS[$i])
+				{
+					$res = $i;
+					$COLS[$i] = $evid;
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		$COLS = array();
+		$COLS[0] = $evid;
+	}
+	
+	return $res;
+}
+
+function GetWeekFirstDay($month, $day, $year)
+{
+	$days = array('Sun'=>1, 'Mon'=>2, 'Tue'=>3, 'Wed'=>4, 'Thu'=>5, 'Fri'=>6, 'Sat'=>7);
+	// Get the day of selected date
+	$today = date("D", strtotime("$year-$month-$day"));
+	
+	if ($today != 'Sun')
+	{
+		foreach($days as $dname=>$dnum)
+		{
+			if ($dname == $today)
+				$first = ($day - $dnum) + 1;
+		}
+	}
+	else
+		$first = $day;
+	
+	return $first;
+}
+
+function GetDefaultCalendar($dbh, $userid)
+{
+	$query = "select id from calendars where user_id='$userid' and def_cal='t'";
+	$result = $dbh->Query($query);
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result);
+		$id = $row['id'];
+		$dbh->FreeResults($result);
+	}
+	else
+	{
+		$dbh->Query("insert into calendars(name, user_id, def_cal, date_created) values('My Calendar', '$userid', 't', 'now');
+					 select currval('calendars_id_seq') as id;");
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result);
+			$id = $row['id'];
+			$dbh->FreeResults($result);
+		}
+	}
+	
+	return $id;
+}
+
+function GetProjectCalendar($dbh, $PID, $project_name)
+{
+	$query = "select id from calendars where project_id='$PID' and def_cal='t'";
+	$result = $dbh->Query($query);
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result);
+		$id = $row['id'];
+		$dbh->FreeResults($result);
+	}
+	else
+	{
+		$dbh->Query("insert into calendars(name, project_id, def_cal, date_created) values('$project_name', '$PID', 't', 'now');
+					 select currval('calendars_id_seq') as id;
+					 insert into calendar_events_labels(project_id, name, color) values('$PID', 'Deadlines', 'FF9484');
+					 insert into calendar_events_labels(project_id, name, color) values('$PID', 'Meetings', 'EEEEEE');
+					 insert into calendar_events_labels(project_id, name, color) values('$PID', 'Holidays', 'FFE773')");
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result);
+			$id = $row['id'];
+			$dbh->FreeResults($result);
+		}
+	}
+	
+	return $id;
+}
+function CalendarGetProjectId($dbh, $CALID)
+{
+	$id = NULL;
+	$query = "select project_id as id from calendars where id='$CALID'";
+	$result = $dbh->Query($query);
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result);
+		$id = $row['id'];
+		$dbh->FreeResults($result);
+	}
+	
+	return $id;
+}
+
+function CalGetNumEvents($dbh, $calid)
+{
+	$result = $dbh->Query("select count(*) as num from calendar_events where calendar='$calid'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result);
+		$num = $row['num'];
+		$dbh->FreeResults($result);
+	}
+	
+	$num = (is_numeric($num)) ? $num : 0;
+	return $num;
+}
+
+function CalGetNumSharedUsers($dbh, $calid)
+{
+	$result = $dbh->Query("select count(*) as num from calendar_sharing where 
+							calendar='$calid' and accepted='t'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result);
+		$num = $row['num'];
+		$dbh->FreeResults($result);
+	}
+	
+	$num = (is_numeric($num)) ? $num : 0;
+	return $num;
+}
+
+function CalSharedColor($dbh, $calid, $user_id)
+{
+	global $g_CalSharedColroCache;
+
+	$ret = '2A4BD7';
+
+	if (!$g_CalSharedColroCache)
+		$g_CalSharedColroCache = array();
+
+	if (!$g_CalSharedColroCache[$calid][$user_id])
+	{
+		$query = "select calendar_sharing.color from calendar_sharing
+					where calendar_sharing.user_id='$user_id'
+					and calendar_sharing.calendar='$calid'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+			$ret = $dbh->GetValue($result, 0, "color");
+		$g_CalSharedColroCache[$calid][$user_id] = $ret;
+	}
+	else
+	{
+		$ret = $g_CalSharedColroCache[$calid][$user_id];
+	}
+
+	return $ret;
+}
+
+function CalCreateRecurArrLinks($dbh, $calarr, $month, $day, $year)
+{
+	foreach ($calarr as $cal)
+		RecurringCreateLinks($dbh, $cal[0], $month, $day, $year);
+}
+
+/******************************************************************************************************************
+	Function:	CreateRecurringLink($dbh, $calid, $month, $day, $year)
+	
+	Purpose:	Check for and create events with link to a recurring event
+	
+	Details:	There are 4 types of recurring events
+				1:	Daily
+					Check date_start - date_end, interval, and day for match
+				2:	Weekly
+					Check date_start - date_end, interval, and week_days for match
+				3:	Monthly
+					Check date_start - date_end, (day, interval) or (relative_type, relative_section) for match
+				4:	Yearly
+					Check date_start - date_end, month, (dat) or (relative_type, relative_section) for match
+******************************************************************************************************************/
+function RecurringCreateLinks($dbh, $calid, $month, $day, $year)
+{
+
+	$current_date_str = "$month/$day/$year";
+	$current_date = strtotime($current_date_str);
+	$dow = date("w", $current_date);
+	$wkdayinmonth =  calGetWkDayInMonth($year, $month, $day); // 2nd Monday, 1st Tuesday etc...
+	$f_lastwkdayinmonth = calDateIsLastWkDayInMonth($year, $month, $day); // Last thursday etc...
+
+	$tmpdate = strtotime("$type $weekday", strtotime("$month/1/$year"));
+
+	if (!$calid)
+		return;
+
+	if (is_array($calid))
+	{
+		$cals_cond = "";
+		foreach ($calid as $cal)
+		{
+            if($cal[0] > 0)
+            {
+                $cals_cond .= ($cals_cond) ? " or " : '';
+                $cals_cond .= "calendar='".$cal[0]."'";
+            }			
+		}
+        
+        if(!empty($cals_cond))
+		    $cals_cond = "($cals_cond) and ";
+	}
+	else
+	{
+        if($calid > 0)
+		    $cals_cond = "calendar='$calid' and ";
+	}
+
+	$query = "SELECT id, name, interval, date_start, date_end, calendar, start_block,
+			  end_block, location, notes, sharing, all_day, user_id, type, day, month, relative_type, relative_section,
+			  week_days[1] as day0, week_days[2] as day1, week_days[3] as day2, week_days[4] as day3, 
+			  week_days[5] as day4, week_days[6] as day5, week_days[7] as day6
+			  FROM calendar_events_recurring ";
+	
+	$query .= "WHERE
+				$cals_cond
+				date_start <='$current_date_str' and (date_end>='$current_date_str' or date_end is NULL)
+				and id not in (select recur_id as id from calendar_events where $cals_cond date_start='$current_date_str' and recur_id is not NULL)
+				and id not in (select recurring_id as id from calendar_events_recurring_ex where $cals_cond exception_date='$current_date_str')
+				and (";
+
+	// Add types
+	// ------------------------------------------------------------
+
+	// Daily
+	$query .= "(type='1' and (('$current_date_str'::date-date_start)%interval)='0')";
+
+	
+	$query .= " OR ";
+
+	// Weekly
+	$query .= "(type='2' and ((('$current_date_str'::date-date_start)/7)%interval)='0' and week_days[".($dow+1)."]='t')";
+
+	$query .= " OR ";
+
+	// Monthly
+	$query .= "(
+				type='3' and (((extract('years' from age('$current_date_str'::date, date_start))*12)::integer 
+				+ extract('months' from age('$current_date_str'::date, date_start)))::integer % interval)='0' 
+				and
+				(
+					((relative_type='$wkdayinmonth' ".(($f_lastwkdayinmonth)?"or relative_type='5'":'').") and relative_section='".($dow+1)."')
+					or
+					(relative_type is null and day=extract('day' from '$current_date_str'::date))
+				)
+			   ) ";
+	// extract('day' from date_start)=extract('day' from '$current_date_str'::date))
+	
+	$query .= " OR ";
+
+	// Yearly
+	$query .= "(
+				type='4' and ((extract('years' from age('$current_date_str'::date, date_start))::integer % interval)='0' or interval is null)
+				and
+				(
+					(relative_type is null and month='$month' and day='$day')
+					or
+					((relative_type='$wkdayinmonth' ".(($f_lastwkdayinmonth)?" or relative_type='5'":'').") and relative_section='".($dow+1)."' and month='$month')
+				)
+			   )";
+
+	$query .= ");";
+    
+	$result = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($result);
+	for ($i=0; $i<$num;$i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$id = $row['id'];
+		$type = $row['type'];
+		$interval = ($row['interval']) ? $row['interval'] : 1;
+		$time_start_str = GetBlockName($row['start_block']);
+		$time_end_str = GetBlockName($row['end_block']);
+		
+		// Insert new event
+		$query = "insert into calendar_events
+					(start_block, end_block, location, calendar, 
+					name, sharing, notes, date_start, date_end, ts_start, ts_end,
+					all_day, recur_id, user_id)
+					values
+					('".$row['start_block']."', '".$row['end_block']."', 
+					'".$dbh->Escape($row['location'])."', '".$row['calendar']."', '".$dbh->Escape($row['name'])."',  
+					'".$row['sharing']."', '".$dbh->Escape($row['notes'])."', ".db_UploadDate("$month/$day/$year").", 
+					".db_UploadDate("$month/$day/$year").", '$month/$day/$year $time_start_str', '$month/$day/$year $time_end_str',
+					'".$row['all_day']."', '$id', ".db_CheckNumber($row['user_id']).");
+					select currval('calendar_events_id_seq') as id;";
+		$idres = $dbh->Query($query);
+		if ($dbh->GetNumberRows($idres))
+		{
+			$idrow = $dbh->GetNextRow($idres, 0);
+
+			RecurringCopyReminders($dbh, $id, $idrow['id']);
+			
+			$dbh->Query("insert into calendar_event_associations(event_id, contact_id, customer_id, lead_id, opportunity_id)
+							select '".$idrow['id']."' as event_id, contact_id, customer_id, lead_id, opportunity_id 
+							from calendar_event_associations where event_recur_id='$id'");
+		}
+	}
+	$dbh->FreeResults($result);
+}
+
+function calDateIsLastWkDayInMonth($year, $month, $day)
+{
+	$date_cur = strtotime("$month/$day/$year");
+	if ($month == 12)
+		$date_next = mktime(0,0,0,1,1,$year+1);
+	else
+		$date_next = mktime(0,0,0,$month+1,1,$year);
+
+	$last = strtotime("last ".date('l', $date_cur), $date_next);
+
+	return ($date_cur == $last) ? true : false;
+}
+
+function calGetWkDayInMonth($year, $month, $day)
+{
+	$date_cur = strtotime("$month/$day/$year");
+	if ($month == 1)
+		$date_next = mktime(0,0,0,12,31,$year-1);
+	else
+		$date_next = mktime(0,0,0,$month-1,calGetNumDaysInMonth($year, $month-1),$year);
+
+	$cnt = 0;
+
+	$tmp_date = strtotime("next ".date('l', $date_cur), $date_next);
+	while (date("n", $tmp_date) == $month)
+	{
+		$cnt++;
+
+		if ($tmp_date == $date_cur)
+			return $cnt;
+
+		$tmp_date = strtotime("next ".date('l', $date_cur), $tmp_date);
+	}
+
+	return 0;
+}
+
+function calGetNumDaysInMonth($year, $month)
+{
+	$date_cur = strtotime("$month/1/$year");
+	return date('t', $date_cur);
+}
+
+function RecurringEventExists($dbh, $calid, $recurid, $date_start, $date_end)
+{
+	$query = "select id from calendar_events_recurring where calendar='$calid'
+				and (id in (select recur_id from calendar_events where date_start='$date_start' and recur_id='$recurid')
+					or 
+					id in (select recurring_id from calendar_events_recurring_ex where recurring_id='$recurid' and exception_date='$date_start'))";
+	$result = $dbh->Query($query);
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result);
+		$exists = ($row['id']) ? true : false;
+		$dbh->FreeResults($result);
+	}
+	
+	return $exists;
+}
+
+function RecurringGetFirstToLastDay($month, $year, $type, $week_day)
+{
+	$weekday = CalGetWeekdayName($week_day);
+	// Get first, second, third, fourth, or last day of the week in the week_day variable
+	$tmpdate = strtotime("$type $weekday", strtotime("$month/1/$year"));
+	if (date("m", $tmpdate) > $month || date("m", $tmpdate) > $year) // we went one past the last day into the next month
+	{
+		$retday = RecurringGetFirstToLastDay($month, $year, $type-1, $week_day);
+	}
+	else
+	{
+		$retday = date("d", $tmpdate);
+	}
+
+	return $retday;
+}
+
+function EventGetName($dbh, $EID, $RID=null)
+{
+	if ($EID)
+		$res = $dbh->Query("select name from calendar_events where id='$EID'");
+	else if ($RID)
+		$res = $dbh->Query("select name from calendar_events_recurring where id='$RID'");
+	
+	if ($dbh->GetNumberRows($res))
+	{
+		$row = $dbh->GetNextRow($res, 0);
+		$retval = $row['name'];
+		$dbh->FreeResults($res);
+	}
+	
+	return $retval;
+}
+
+function EventIsMine($dbh, $EID, $USERID)
+{
+	$retval = false;
+
+	$result = $dbh->Query("select calendar from calendar_events where id='$EID'");
+	if ($dbh->GetNumberRows($result))
+		$cid = $dbh->GetValue($result, 0, 'calendar');
+
+	/* excluded shared calendars for now
+		 union all
+						select calendars.id from calendar_sharing, calendars left outer join users on (calendars.user_id = users.id)
+							where calendar_sharing.user_id='$USERID' and calendar_sharing.accepted = 't'
+							and calendars.id=calendar_sharing.calendar
+	*/
+	$result = $dbh->Query("select id from calendars where user_id='$USERID'");
+	$num = $dbh->GetNumberRows($result);
+    for ($i=0; $i<$num; $i++)
+    {
+	    $row = $dbh->GetNextRow($result, $i);
+		if ($row['id'] == $cid)
+			$retval = true;
+    }
+	
+	return $retval;
+}
+
+function EventCoordGetName($dbh, $ECID)
+{
+	if ($ECID)
+		$res = $dbh->Query("select name from calendar_event_coord where id='$ECID'");
+	
+	if ($dbh->GetNumberRows($res))
+	{
+		$row = $dbh->GetNextRow($res, 0);
+		$retval = $row['name'];
+		$dbh->FreeResults($res);
+	}
+	
+	return $retval;
+}
+
+function EventCoordIsMine($dbh, $ECID, $USERID)
+{
+	$retval = false;
+
+	$result = $dbh->Query("select user_id from calendar_event_coord where id='$ECID'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$uid = $dbh->GetValue($result, 0, 'user_id');
+
+		if ($USERID == $uid)
+			$retval = true;
+	}
+
+	return $retval;
+}
+function CalEventGetDetStr($dbh, $EID)
+{
+	$retval = "";
+	if ($EID)
+	{
+		$res = $dbh->Query("select location, to_char(ts_start, 'MM/DD/YYYY HH12:MI AM') as time_start, 
+							to_char(ts_end, 'MM/DD/YYYY HH12:MI AM') as time_end, start_block, end_block, date_start, date_end
+									  from calendar_events where id='$EID'");
+	
+		if ($dbh->GetNumberRows($res))
+		{
+			$row = $dbh->GetNextRow($res, 0);
+
+			$time_start = ($row['time_start']) ? $row['time_start'] : $row['date_start']." ".GetBlockName($row['start_block']);
+			$time_end = ($row['time_end']) ? $row['time_end'] : $row['date_end']." ".GetBlockName($row['end_block']);
+
+			if ($row['location'])
+				$retval .= $row['location'].": ";
+			$retval .= $time_start." - ".$time_end;
+			$dbh->FreeResults($res);
+		}
+	}
+	
+	return $retval;
+}
+
+
+function CalGetName($dbh, $CID)
+{
+	global $USERID;
+	
+	if ($CID)
+		$res = $dbh->Query("select calendars.name, users.id as uid, users.name as uname from calendars 
+							left outer join users on 
+							(calendars.user_id = users.id) where calendars.id='$CID'");
+	
+	if ($dbh->GetNumberRows($res))
+	{
+		$row = $dbh->GetNextRow($res, 0);
+		if ($USERID != $row['uid'])
+			$retval = "[".$row['uname']."] ";
+		$retval .= $row['name'];
+		$dbh->FreeResults($res);
+	}
+	
+	return $retval;
+}
+
+function CalGetReminderTypeName($id)
+{
+	switch ($id)
+	{
+	case 0:
+		return "None";
+	case 1:
+		return "Send Email";
+	case 2:
+		return "Send Text Message";
+	case 3:
+		return "Popup Alert";
+	}
+}
+
+function CalGetReminderIntervalName($id)
+{
+	switch ($id)
+	{
+	case 1:
+		return "Minute(s)";
+	case 2:
+		return "Hour(s)";
+	case 3:
+		return "Day(s)";
+	case 4:
+		return "Week(s)";
+	}
+}
+
+function RecurringCopyReminders($dbh, $recur_id, $event_id)
+{
+	$result = $dbh->Query("select * from calendar_events_reminders where recur_id='$recur_id'");
+	$num = $dbh->GetNumberRows($result);
+	for($i=0; $i<$num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$query = "insert into calendar_events_reminders(complete, event_id, count, interval, type, send_to)
+					values('".(($row['complete'] == 't') ? 't' : 'f')."', '$event_id', ".db_CheckNumber($row['count']).", 
+					".db_CheckNumber($row['interval']).", ".db_CheckNumber($row['type']).", '".$row['send_to']."');
+				  select currval('calendar_events_reminders_id_seq') as id;";
+		$idres = $dbh->Query($query);
+		if ($dbh->GetNumberRows($idres))
+		{
+			$idrow = $dbh->GetNextRow($idres, 0);
+			CalReminderSetExeTime($dbh, $event_id, $idrow['id'], $row['count'], $row['interval']);
+			$dbh->FreeResults($idres);
+		}
+	}
+	$dbh->FreeResults($result);
+}
+
+function CalReminderSetExeTime($dbh, $eid, $remid, $count, $interval)
+{
+	// Only fire reminders for future events
+	if ($eid)
+	{
+		$result = $dbh->Query("select start_block, date_start, all_day from calendar_events where id='$eid' and date_start>=now() - INTERVAL '1 WEEK'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			
+			if ($row['all_day'] == 't')
+				$start_time = "0:00";
+			else
+				$start_time = GetBlockName24($row['start_block']);
+			
+			switch ($interval)
+			{
+			case 1:
+				$instr = "MINUTES";
+				break;
+			case 2:
+				$instr = "HOURS";
+				break;
+			case 3:
+				$instr = "DAYS";
+				break;
+			case 4:
+				$instr = "WEEKS";
+				break;
+			}
+			if ($count)
+				$cond = " - INTERVAL '$count $instr'";
+			$query = "update calendar_events_reminders set execute_time='".$row['date_start']." $start_time'::TIMESTAMP $cond
+						where id='$remid'";
+			$dbh->Query($query);
+			
+			$dbh->FreeResults($result);
+		}
+	}
+}
+
+function CalCreateHolidays($dbh, $calid)
+{
+	if (is_numeric($calid))
+	{
+		$result = $dbh->Query("select * from calendar_events_holidays");
+		$num = $dbh->GetNumberRows($result);
+		for($i=0; $i<$num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			$query = "insert into calendar_events_recurring(interval, day, relative_type, relative_section, date_start, date_end, sharing,
+															calendar, start_block, end_block, name, all_day, type, month, system_type)
+						values(".db_CheckNumber($row['interval']).", ".db_CheckNumber($row['day']).", 
+						".db_CheckNumber($row['relative_type']).", ".db_CheckNumber($row['relative_section']).", 
+						".db_UploadDate($row['date_start']).", ".db_UploadDate($row['date_end']).", '1',
+						'$calid', ".db_CheckNumber($row['start_block']).", ".db_CheckNumber($row['end_block']).", 
+						'".$dbh->Escape($row['name'])."', '".(($row['all_day'] == 't') ? 't' : 'f')."', 
+						".db_CheckNumber($row['type']).", ".db_CheckNumber($row['month']).", '1');";
+			$dbh->Query($query);
+		}
+		$dbh->FreeResults($result);
+	}
+}
+
+function CalGetStatusName($dbh, $staid)
+{
+	switch($staid)
+	{
+	case 1:
+		return 'Open';
+	case 2:
+		return 'Skipped/Missed';
+	case 3:
+		return 'Completed';
+	default:
+		return 'Open';
+	}
+}
+
+function CalGetWeekdayName($week_day)
+{
+	switch ($week_day)
+	{
+	case 1:
+		return 'Sunday';
+		break;
+	case 2:
+		return 'Monday';
+		break;
+	case 3:
+		return 'Tuesday';
+		break;
+	case 4:
+		return 'Wednesday';
+		break;
+	case 5:
+		return 'Thursday';
+		break;
+	case 6:
+		return 'Friday';
+		break;
+	case 7:
+		return 'Saturday';
+		break;
+	}
+}
+
+function CalCheckForBlockStatus($dbh, $USERID, $date_start, $date_end, $bock_start, $bock_end)
+{
+	$CALID = GetDefaultCalendar($dbh, $USERID);
+	$tev = "calendar_events";
+	$query = "select calendar_events.user_status
+				  from calendar_events
+				  where $tev.date_start ='$date_start' and $tev.date_end='$date_start'
+				  and ($tev.start_block <='".($bock_start+59)."') 
+				  and $tev.end_block >'".($bock_end-59)."'
+				  and $tev.all_day = 'f'
+				  and $tev.calendar='$CALID'";
+
+	$res = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($res);
+	for ($j=0; $j<$num; $j++)
+	{
+		$row = $dbh->GetNextRow($res, $j);
+		$status = $row['user_status'];
+	}
+	$dbh->FreeResults($res);
+	
+	if (!$status)
+		$status = 1;
+		
+	return $status;
+}
+
+function CalGetAdditionalVal($dbh, $feild_id, $EID)
+{
+	if (is_numeric($feild_id) && is_numeric($EID))
+	{
+			$result = $dbh->Query("select varval from calendar_events_field_vals 
+									where field_id='$feild_id' and event_id='$EID'");
+			if ($dbh->GetNumberRows($result))
+			{
+					$row = $dbh->GetNextRow($result, 0);
+					$dbh->FreeResults($result);
+					$res = $row['varval'];
+			}
+	}
+	return $res;
+}
+
+function CalGetViewArray($dbh, $USERID, $calid=null)
+{
+    $cals = array();
+    $cal = array();
+    
+	$cond = ($calid) ? "id='$calid'" : "user_id='$USERID' and f_view='t'";
+	$result = $dbh->Query("select id, user_id, color from calendars where $cond");
+	$num = $dbh->GetNumberRows($result);
+    for ($i=0; $i<$num; $i++)
+    {
+	    $row = $dbh->GetNextRow($result, $i);
+        $cal['id'] = $row['id'];
+        $cal['user_id'] = $row['user_id'];
+        $cal['color'] = $row['color'];
+        $cals[] = $cal;
+    }
+    $dbh->FreeResults($result);
+    
+	if (!$calid)
+	{
+		$result = $dbh->Query("select calendars.id, calendars.color, calendars.user_id from 
+								calendar_sharing, calendars left outer join users on (calendars.user_id = users.id)
+								where calendar_sharing.user_id='$USERID' and calendar_sharing.accepted = 't'
+								and calendars.id=calendar_sharing.calendar and  calendar_sharing.f_view='t'");
+		$num = $dbh->GetNumberRows($result);
+		for ($i=0; $i<$num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			$cal['id'] = $row['id'];
+			$cal['user_id'] = $row['user_id'];
+			$cal['color'] = $row['color'];
+			$cals[] = $cal;
+		}
+		$dbh->FreeResults($result);
+	}
+    
+    return $cals;
+}
+
+function CalIsOwner($dbh, $USERID, $CALID)
+{
+	$result = $dbh->Query("select id from calendars where user_id='$USERID' and id='$CALID'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$dbh->FreeResults($result);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+function CalGetEventIdFromInv($dbh, $inv_id)
+{
+	$result = $dbh->Query("select event_id from calendar_events_attendees where id='$inv_id'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		$dbh->FreeResults($result);
+		return $row['event_id'];
+	}
+	else
+	{
+		return null;
+	}
+}
+
+function CalGetCoordIdFromInv($dbh, $inv_id)
+{
+	$result = $dbh->Query("select cec_id from calendar_events_attendees where id='$inv_id'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		$dbh->FreeResults($result);
+		return $row['cec_id'];
+	}
+	else
+	{
+		return null;
+	}
+}
+
+function CalGetCoordTimeResp($dbh, $inv_id, $time_id)
+{
+	$result = $dbh->Query("select response from calendar_event_coord_att_times where att_id='$inv_id' and time_id='$time_id'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		$dbh->FreeResults($result);
+		return $row['response'];
+	}
+	else
+	{
+		return null;
+	}
+}
+
+function CalGetEventAttrib($dbh, $evid, $attrib)
+{
+	$result = $dbh->Query("select $attrib from calendar_events where id='$evid'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		$dbh->FreeResults($result);
+		return $row[$attrib];
+	}
+	else
+	{
+		return null;
+	}
+}
+
+function CalGetAgenda($dbh, $USERID, $date_start, $date_end)
+{
+	$events = array();
+	
+	$MONTH_START = ($date_start) ? date("m", strtotime($date_start)) : date("m");
+	$DAY_START = ($date_start) ? date("d", strtotime($date_start)) : date("d");
+	$YEAR_START = ($date_start) ? date("Y", strtotime($date_start)) : date("Y");
+	$MONTH_END = ($date_end) ? date("m", strtotime($date_end)) : date("m");
+	$DAY_END = ($date_end) ? date("d", strtotime($date_end)) : date("d");
+	$YEAR_END = ($date_end) ? date("Y", strtotime($date_end)) : date("Y");
+
+	$VIEW_CALS = CalGetViewArray($dbh, $USERID);
+	
+	// Get calendars to view
+	$cals_cond = "";
+	foreach ($VIEW_CALS as $cal)
+	{
+		$cals_cond .= ($cals_cond) ? " or " : '';
+		if ($cal[1] == $USERID) // Check for owner
+			$cals_cond .= "calendars.id='".$cal[0]."'";
+		else // Shared Calendar
+			$cals_cond .= "(calendars.id='".$cal[0]."' and calendar_events.sharing = '2')";
+	}
+		
+	$curDate = strtotime(date("$YEAR_START-$MONTH_START-$DAY_START"));
+	$endDate = strtotime(date("$YEAR_END-$MONTH_END-$DAY_END"));
+
+	while ($curDate <= $endDate)
+	{
+		// Check for recurring events
+		foreach ($VIEW_CALS as $cal)
+			RecurringCreateLinks($dbh, $cal[0], date("m", $curDate), date("d", $curDate), date("Y", $curDate));
+
+		$tev = "calendar_events"; // main events table
+		if ($FILTER)
+		{
+			if ($FILTER == "contact")
+				$filter_cond = " and $tev.contact_id is not null";
+		}
+		$query = "select $tev.id, $tev.date_start, $tev.date_end, $tev.start_block, $tev.end_block, $tev.location, $tev.name,
+				  calendar_events_labels.color, calendar_events_labels.name as label, $tev.all_day, $tev.recur_id, $tev.status, 
+				  $tev.contact_id, $tev.calendar, $tev.user_id
+				  from calendars, $tev left outer join calendar_events_labels on ($tev.label = calendar_events_labels.id)
+				  where (
+				  ($tev.date_start ='".date("Y-m-d", $curDate)."' and $tev.date_start=$tev.date_end)
+				  or
+				  ($tev.date_start <='".date("Y-m-d", $curDate)."' and 
+				   $tev.date_end>='".date("Y-m-d", $curDate)."' and $tev.date_start!=$tev.date_end))
+				  and $tev.calendar=calendars.id and ($cals_cond) $filter_cond
+				  order by $tev.all_day DESC, $tev.date_start, $tev.date_end DESC, $tev.start_block, $tev.end_block";
+		
+		$res = $dbh->Query($query);
+		$num = $dbh->GetNumberRows($res);
+		for ($i=0; $i<$num; $i++)
+		{
+			$row = $dbh->GetNextRow($res, $i);
+			$stname = CalGetStatusName($dbh, $row['status']);
+
+			//if (CalIsOwner($dbh, $USERID, $row['calendar']))
+			if ($USERID == $row['user_id'])
+				$lblcolor = ($row['color']) ? $row['color'] : 'EEEEEE';
+			else
+				$lblcolor = 'EEEEEE';
+			
+			if ($stname && $stname != "Open") 
+				$stname = "(".$stname.")";
+			else
+				$stname = "";
+				
+			if ($row['contact_id'])
+				$cname = ContactGetName($dbh, $row['contact_id']).": ";
+			else
+				$cname = "";
+					
+			// Check for new date header
+			if (date("Y-m-d", $curDate) != $last_date)
+			{
+				$last_date = date("Y-m-d", $curDate);
+				$display = ($last_date == date("Y-m-d")) ? "Today" : date("l", strtotime($last_date));
+
+				$ind = count($events);
+				$events[$ind] = array();
+				$events[$ind]['type'] = "header";
+				$events[$ind]['name'] = $display;
+				$events[$ind]['date'] = date("F, jS", strtotime($last_date));
+			}
+
+			$event = array();
+			$event['type'] = "event";
+
+			// Check if event is a one day event
+			if ($row['date_start'] == $row['date_end'])
+			{
+				// Check for all day event
+				if ($row['all_day'] == 't')
+				{
+					$event['time_start'] = "All Day";
+					$event['type'] = "event";
+				}
+				else
+				{
+					$event['time_start'] = GetBlockName($row['start_block']);
+					$event['time_end'] = GetBlockName($row['end_block']);
+				}
+			}
+			else
+			{
+				$event['time_start'] = "Multi-day Event";
+			}
+				
+			$event['rid'] = $row['recur_id'];
+			$event['eid'] = $row['id'];
+			$event['calendar_id'] = $row['calendar'];
+			$event['name'] = $cname.$row['name']." ".$stname;
+			$event['color'] = $lblcolor;
+		
+			$events[] = $event;
+		}
+
+		$dbh->FreeResults($res);
+		$curDate = strtotime("+1 day", $curDate);
+	}
+
+	return $events;
+}
+
+function CalSaveEvent($dbh, $USERID, $EID, $VALS)
+{
+	if ($VALS['eid'])
+		$EID = $VALS['eid'];
+	$VALS['recur_id'];
+
+	if (!$VALS['all_day'])
+		$VALS['all_day']='f';
+
+	if ($VALS['all_day']=='t')
+	{
+		$start_block = 1;
+		$end_block = 1440;
+	}
+	else
+	{
+		$start_block = CalGetTimeBlock($VALS['time_start']);
+		$end_block = CalGetTimeBlock($VALS['time_end']);
+		if ($start_block && $end_block<1)
+			$end_block = $start_block + 30;
+
+	}
+
+	if ($EID)		// Update specific event
+	{
+		$orig_start_date = CalGetEventAttrib($dbh, $EID, "date_start"); // used to file exceptions
+
+		// saveAttendees(dlg, close) is called after the event is saved so this will only send to exisiting invitations - new added later
+		if ($VALS['send_invitations'] == 't')
+			CalSendAttendeeUpdates($dbh, $USERID, $EID);
+
+		$query = "update calendar_events set ";
+		if ($VALS['only_defined']) // Only update fields that are defined
+		{
+			$update = "";
+			if ($VALS['time_start'])
+			{
+				if ($update) $update .= ", ";
+				$update .= "start_block='".$start_block."' ";
+			}
+			if ($VALS['time_end'])
+			{
+				if ($update) $update .= ", ";
+				$update .= "end_block='".$end_block."' ";
+			}
+			if ($VALS['date_start'])
+			{
+				if ($update) $update .= ", ";
+				$update .= "date_start=".db_UploadDate($VALS['date_start'])." ";
+			}
+			if ($VALS['date_end'])
+			{
+				if ($update) $update .= ", ";
+				$update .= "date_end=".db_UploadDate($VALS['date_end'])." ";
+			}
+			$query .= $update;
+		}
+		else
+		{
+			$query .= "start_block='".$start_block."', 
+						  end_block='".$end_block."', 
+						  location='".$dbh->Escape(stripslashes($VALS['location']))."', 
+						  name='".$dbh->Escape(stripslashes($VALS['title']))."', 
+						  sharing='".$VALS['sharing']."', 
+						  notes='".$dbh->Escape(stripslashes($VALS['notes']))."', 
+						  calendar='".$VALS['calendar_id']."', 
+						  date_start=".db_UploadDate($VALS['date_start']).", 
+						  date_end=".db_UploadDate($VALS['date_end']).",
+						  ts_start=".db_UploadDate($VALS['date_start']." ".$VALS['time_start']).", 
+						  ts_end=".db_UploadDate($VALS['date_end']." ".$VALS['time_end']).",
+						  user_status=".db_CheckNumber($VALS['user_status']).",
+						  all_day='".$VALS['all_day']."'";
+		}
+		$query .= ", ts_updated='now' where id='".$EID."';";
+		$res = $dbh->Query($query);
+
+		// File an exception to this event only
+		if ($RID && $VALS['save_type'] == "this_event")								
+		{
+			$dbh->Query("delete from calendar_events_recurring_ex where event_id='".$EID."';
+						 insert into calendar_events_recurring_ex(recurring_id, exception_date, event_id)
+						 values('".$RID."', ".db_UploadDate($orig_start_date).", '".$EID."')");
+		}
+		// Update recurrind id
+		else if ($RID && $VALS['save_type'] != "this_event" && $VALS['recur_type'])	
+		{
+			$query = "update calendar_events_recurring set
+						type='".$VALS['recur_type']."',
+						start_block='".$start_block."', 
+						end_block='".$end_block."', 
+						location='".$dbh->Escape(stripslashes($VALS['location']))."', 
+						name='".$dbh->Escape($VALS['title'])."', 
+						sharing='".$VALS['sharing']."',
+						notes='".$dbh->Escape($VALS['notes'])."', 
+						calendar='".$VALS['calendar_id']."', 
+						date_start=".db_UploadDate($VALS['recur_date_start']).", 
+						date_end=".db_UploadDate($VALS['recur_date_end']).",
+						all_day='".$VALS['all_day']."',
+						user_status=".db_CheckNumber($VALS['user_status']).",
+						interval=".db_CheckNumber($VALS['recur_interval']).",
+						day=".db_CheckNumber($VALS['recur_day']).",
+						month=".db_CheckNumber($VALS['recur_month']).",
+						relative_type=".db_CheckNumber($VALS['recur_relative_type']).",
+						relative_section=".db_CheckNumber($VALS['recur_relative_section']).",
+						week_days[1]='".(($VALS['recur_day1'] == 't') ? 't' : 'f')."',
+						week_days[2]='".(($VALS['recur_day2'] == 't') ? 't' : 'f')."',
+						week_days[3]='".(($VALS['recur_day3'] == 't') ? 't' : 'f')."',
+						week_days[4]='".(($VALS['recur_day4'] == 't') ? 't' : 'f')."',
+						week_days[5]='".(($VALS['recur_day5'] == 't') ? 't' : 'f')."',
+						week_days[6]='".(($VALS['recur_day6'] == 't') ? 't' : 'f')."',
+						week_days[7]='".(($VALS['recur_day7'] == 't') ? 't' : 'f')."'
+						where id='".$RID."'";	
+			$res = $dbh->Query($query);
+
+			$dbh->Query("delete from calendar_events where recur_id='$RID' and id!='".$EID."'");
+			$dbh->Query("delete from calendar_events_recurring_ex where recurring_id='$RID';");
+		}
+		// Delete Recurring ID
+		else if ($RID && !$VALS['recur_type'] && $VALS['save_type'] != "this_event") 
+		{
+			$dbh->Query("delete from calendar_events_recurring where id='".$RID."'");
+			$dbh->Query("update calendar_events set recur_id=null where id='".$EID."'");
+		}
+
+		$dbh->Query("delete from calendar_events_reminders where event_id='$EID';");
+		if ($RID)
+			$dbh->Query("delete from calendar_events_reminders where recur_id='".$RID."';");
+	}
+	else // Enter a new event
+	{
+		$query = "insert into calendar_events(start_block, end_block, location, name, sharing, notes, calendar, 
+												date_start, date_end, ts_start, ts_end, user_status, all_day, ts_updated)
+					values('".$start_block."', '".$end_block."', '".$dbh->Escape(stripslashes($VALS['location']))."', 
+							'".$dbh->Escape(stripslashes($VALS['title']))."', '".$VALS['sharing']."', '".$dbh->Escape(stripslashes($VALS['notes']))."',
+							'".$VALS['calendar_id']."', ".db_UploadDate($VALS['date_start']).", ".db_UploadDate($VALS['date_end']).", 
+							".db_UploadDate($VALS['date_start']." ".$VALS['time_start']).", ".db_UploadDate($VALS['date_end']." ".$VALS['time_end']).",
+							".db_CheckNumber($VALS['user_status']).", '".$VALS['all_day']."', 'now'); select currval('calendar_events_id_seq') as id;";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$EID = $row['id'];
+		}
+
+		// Check for lead association
+		if ($VALS['lead_id'] && $EID)
+		{
+			$dbh->Query("insert into calendar_event_associations(event_id, lead_id) values('$EID', '".$VALS['lead_id']."');");
+		}
+		// Check for opportunity association
+		if ($VALS['opportunity_id'] && $EID)
+		{
+			$dbh->Query("insert into calendar_event_associations(event_id, opportunity_id) values('$EID', '".$VALS['opportunity_id']."');");
+		}
+		// Check for conact association
+		if ($VALS['contact_id'] && $EID)
+		{
+			$dbh->Query("insert into calendar_event_associations(event_id, contact_id) values('$EID', '".$VALS['contact_id']."');");
+		}
+		// Check for customer
+		if ($VALS['customer_id'] && $EID)
+		{
+			$dbh->Query("insert into calendar_event_associations(event_id, customer_id) values('$EID', '".$VALS['customer_id']."');");
+		}
+	}
+
+	if ($VALS['ecid'] && $EID)
+	{
+		$dbh->Query("update calendar_event_coord set f_closed='t', event_id='$EID' where id='".$VALS['ecid']."'");
+		$dbh->Query("update calendar_event_comments set event_id='$EID' where cec_id='".$VALS['ecid']."'");
+	}
+
+	// Now add recurring
+	if (!$RID && $VALS['save_type'] != "this_event"  && $VALS['recur_type'] && $EID) 
+	{
+		$query = "insert into calendar_events_recurring(type, start_block, end_block, location, name, sharing, notes, calendar, date_start,
+						date_end, all_day, user_status, interval, day, month, relative_type, relative_section, week_days[1], week_days[2],
+						week_days[3], week_days[4], week_days[5], week_days[6], week_days[7])
+						values('".$VALS['recur_type']."', '".$start_block."', '".$end_block."', 
+						'".$dbh->Escape(stripslashes($VALS['location']))."',
+						'".$dbh->Escape($VALS['title'])."', '".$VALS['sharing']."', '".$dbh->Escape($VALS['notes'])."', 
+						'".$VALS['calendar_id']."', ".db_UploadDate($VALS['recur_date_start']).", ".db_UploadDate($VALS['recur_date_end']).",
+						'".$VALS['all_day']."', ".db_CheckNumber($VALS['user_status']).", 
+						".db_CheckNumber($VALS['recur_interval']).", ".db_CheckNumber($VALS['recur_day']).",
+						".db_CheckNumber($VALS['recur_month']).", ".db_CheckNumber($VALS['recur_relative_type']).",
+						".db_CheckNumber($VALS['recur_relative_section']).", '".(($VALS['recur_day1'] == 't') ? 't' : 'f')."',
+						'".(($VALS['recur_day2'] == 't') ? 't' : 'f')."', '".(($VALS['recur_day3'] == 't') ? 't' : 'f')."',
+						'".(($VALS['recur_day4'] == 't') ? 't' : 'f')."', '".(($VALS['recur_day5'] == 't') ? 't' : 'f')."',
+						'".(($VALS['recur_day6'] == 't') ? 't' : 'f')."','".(($VALS['recur_day7'] == 't') ? 't' : 'f')."');
+				  select currval('calendar_events_recurring_id_seq') as id;";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$RID = $row['id'];
+			if ($RID)
+				$dbh->Query("update calendar_events set recur_id='$RID' where id='$EID'");
+
+
+			// Check for lead association
+			if ($VALS['lead_id'] && $RID)
+			{
+				$dbh->Query("insert into calendar_event_associations(event_recur_id, lead_id) values('$RID', '".$VALS['lead_id']."');");
+			}
+			// Check for opportunity association
+			if ($VALS['opportunity_id'] && $RID)
+			{
+				$dbh->Query("insert into calendar_event_associations(event_recur_id, opportunity_id) values('$RID', '".$VALS['opportunity_id']."');");
+			}
+			// Check for conact association
+			if ($VALS['contact_id'] && $RID)
+			{
+				$dbh->Query("insert into calendar_event_associations(event_recur_id, contact_id) values('$RID', '".$VALS['contact_id']."');");
+			}
+			// Check for customer
+			if ($VALS['customer_id'] && $RID)
+			{
+				$dbh->Query("insert into calendar_event_associations(event_recur_id, customer_id) values('$RID', '".$VALS['customer_id']."');");
+			}
+		}
+	}
+
+	// Add reminders
+	// -------------------------------------------------------------------------
+	if (count($VALS['reminders']))
+	{
+		if ($EID)
+		{
+			// Deal with reminders
+			foreach ($VALS['reminders'] as $remid)
+			{
+				if (is_numeric($VALS['reminder_type_'.$remid]) && is_numeric($VALS["reminder_count_".$remid]) 
+					&& is_numeric($VALS["reminder_interval_".$remid]) && $VALS["reminder_send_to_".$remid])
+				{
+					$query = "insert into calendar_events_reminders(event_id, count, interval, type, send_to)
+								values(".db_CheckNumber($EID).", 
+										".db_CheckNumber($VALS["reminder_count_".$remid]).", 
+										".db_CheckNumber($VALS["reminder_interval_".$remid]).", 
+										".db_CheckNumber($VALS['reminder_type_'.$remid]).",
+										'".$VALS["reminder_send_to_".$remid]."');
+								select currval('calendar_events_reminders_id_seq') as id;";
+					$idres = $dbh->Query($query);
+					if ($dbh->GetNumberRows($idres))
+					{
+						$idrow = $dbh->GetNextRow($idres, 0);
+						if (is_numeric($VALS["reminder_count_".$remid]) && $VALS["reminder_interval_".$remid] && $idrow['id'])
+							CalReminderSetExeTime($dbh, $EID, $idrow['id'], $VALS["reminder_count_".$remid], $VALS["reminder_interval_".$remid]);
+						$dbh->FreeResults($idres);
+					}
+				}
+			}
+		}
+
+		if ($RID && $VALS['save_type'] != "this_event")
+		{
+			// Deal with reminders
+			foreach ($VALS['reminders'] as $remid)
+			{
+				if (is_numeric($VALS['reminder_type_'.$remid]) && is_numeric($VALS["reminder_count_".$remid]) 
+					&& is_numeric($VALS["reminder_interval_".$remid]) && $VALS["reminder_send_to_".$remid])
+				{
+					$query = "insert into calendar_events_reminders(recur_id, count, interval, type, send_to)
+								values(".db_CheckNumber($RID).", 
+										".db_CheckNumber($VALS["reminder_count_".$remid]).", 
+										".db_CheckNumber($VALS["reminder_interval_".$remid]).", 
+										".db_CheckNumber($VALS['reminder_type_'.$remid]).",
+										'".$VALS["reminder_send_to_".$remid]."');
+								select currval('calendar_events_reminders_id_seq') as id;";
+					$idres = $dbh->Query($query);
+				}
+			}
+		}
+	}	
+
+	// Get last_updated
+	$result = $dbh->Query("select date_start, to_char(ts_updated, 'MM/DD/YYYY HH12:MI:SS AM') as time_updated from calendar_events where id='$EID'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$last_updated = $dbh->GetValue($result, 0, "time_updated");
+		if (!$last_updated)
+			$last_updated = date("m/d/Y g:i:s a", strtotime($row['date_start']));
+	}
+
+	$retval = array();
+	$retval["eid"] = $EID;
+	$retval["rid"] = $RID;
+	$retval["ts_updated"] = $last_updated;
+
+	return $retval;
+}
+
+function CalDeleteEvent($dbh, $USERID, $EID, $purgerecur=false)
+{
+	if ($purgerecur)
+		$dbh->Query("delete from calendar_events_recurring where id in (select recur_id from calendar_events where id='".$EID."') ");
+
+	$dbh->Query("delete from calendar_events where id='".$EID."'");
+}
+
+function CalAddEventAttendee($dbh, $USERID, $EID=null, $RID=null, $attendee_obj, $send_invitation=false, $position_title='', $message='')
+{
+	$email_address = "";
+
+	if ($attendee_obj && $attendee_obj!=' ' && ($EID || $RID))
+	{
+		if (strpos($attendee_obj, ":") === false) // plain
+		{
+			if (strpos($attendee_obj, "@") !== false) // email
+			{
+				$email_address = $attendee_obj;
+			}
+		}
+		else
+		{
+			$obj_parts = objSplitValue($attendee_obj);
+			if ($obj_parts)
+			{
+				switch ($obj_parts[0])
+				{
+				case 'user':
+					$email_address = UserGetEmail($dbh, $obj_parts[1]);
+					break;
+				case 'customer':
+					$email_address = CustGetDefaultEmail($dbh, $obj_parts[1]);
+					break;
+				case 'contact':
+					$email_address = GetDefaultEmail($dbh, $obj_parts[1]);
+					break;
+				}
+			}
+		}
+		// Make sure that that the attendee is new
+		$query = "select id, shared_secret from calendar_events_attendees where attendee_obj='".$dbh->Escape($attendee_obj)."' 
+						and event_id=".db_CheckNumber($EID);
+		if ($RID)
+			$query .= " and recur_id=".db_CheckNumber($RID);
+		$res = $dbh->Query($query);
+		if ($dbh->GetNumberRows($res))
+		{
+			$row = $dbh->GetNextRow($res, 0);
+			$curinv = $row['id'];
+			$ssecret = $row['shared_secret'];
+		}
+		else
+		{
+			$ssecret = substr(md5(microtime()), 0, 16);
+			$query = "insert into calendar_events_attendees(event_id, recur_id, attendee_obj, position, notes, 
+						shared_secret, req_user_id, email_queue)
+						values(".db_CheckNumber($EID).", ".db_CheckNumber($RID).", 
+								'".$dbh->Escape($attendee_obj)."', '".$dbh->Escape($position_title)."',
+								'".$dbh->Escape($message)."', '$ssecret', '$USERID',
+								'".(($send_invitation) ? 't' : 'f')."');
+					  select currval('calendar_events_attendees_id_seq') as id;";
+			$res = $dbh->Query($query);
+			if ($dbh->GetNumberRows($res))
+			{
+				$row = $dbh->GetNextRow($res, 0);
+				$curinv = $row['id'];
+				$dbh->FreeResults($res);
+			}
+		}
+
+		if ($send_invitation && $email_address)
+		{
+			$res = $dbh->Query("select id, name, start_block, end_block, all_day, date_start, date_end, location from calendar_events where id='$EID'");
+			if ($dbh->GetNumberRows($res))
+			{
+				$row = $dbh->GetNextRow($res, 0);
+				$evname = $row['name'];
+				$dates = $row['date_start']." - ".(($row['date_end']) ? $row['date_end'] : "No End");
+				$times = ($row['all_day'] == 't') ? "All Day" : GetBlockName($row['start_block'])." - ".GetBlockName($row['end_block']);
+				$location = $row['location'];
+				$dbh->FreeResults($res);
+			}
+			$dbh->Query("update calendar_events_attendees set email_sent='t' where id='$curinv'");
+			
+			$evname = EventGetName($dbh, $EID, $RID);
+			$subject = "Event Invitation ($evname)";
+			$headers['From']  = EmailGetUserName($dbh, $USERID, 'reply_to');
+			$headers['To']  = $email_address;
+			$headers['Subject']  = $subject;
+			$headers['Content-Type'] = "multipart/alternative; boundary=\"----AntMeetingBooking----\"";
+			$headers['X-ANT-ACCOUNT-NAME'] = settingsGetAccountName();
+			$headers['X-ANT-CAL-INVID'] = $curinv;
+			$headers['X-ANT-CAL-INVSS'] = $ssecret;
+
+			/*
+			$message = "You have been invited to join $evname by ".UserGetFullName($dbh, $USERID)."\r\n";
+			$message .= "Location: $location\r\n";
+			$message .= "Dates: $dates\r\n";
+			$message .= "Times: $times\r\n";
+
+			$message .= "\r\n\r\nClick the link below to respond.\r\n
+						http://$settings_localhost/calendar/event_invitation_response.awp?ss=$ssecret&invid=$curinv";
+			if ($_POST['event_notes'])
+			{
+				$message .= "\r\n\r\n-------------------- NOTES --------------------\r\n";
+				$message .= $message."\r\n";
+			}
+			 */
+			$message = CalGetIcalEmailBody($dbh, $headers, $USERID, $row, $ssecret, $curinv, $email_address);
+
+
+			// Create new email object
+			$email = new Email();
+			$status = $email->send($email_address, $headers, $message);
+			unset($email);
+		}
+	}
+
+	return $curinv;
+}
+
+// For adding event coordination attendees
+function CalAddCEventAttendee($dbh, $USERID, $ECID, $attendee_obj, $send_invitation=false, $position_title='')
+{
+	$email_address = "";
+
+	if ($attendee_obj && $attendee_obj!=' ' && $ECID)
+	{
+		if (strpos($attendee_obj, ":") === false) // plain
+		{
+			if (strpos($attendee_obj, "@") !== false) // email
+			{
+				$email_address = $attendee_obj;
+			}
+		}
+		else
+		{
+			$obj_parts = objSplitValue($attendee_obj);
+			if ($obj_parts)
+			{
+				switch ($obj_parts[0])
+				{
+				case 'user':
+					$email_address = UserGetEmail($dbh, $obj_parts[1]);
+					break;
+				case 'customer':
+					$email_address = CustGetDefaultEmail($dbh, $obj_parts[1]);
+					break;
+				case 'contact':
+					$email_address = GetDefaultEmail($dbh, $obj_parts[1]);
+					break;
+				}
+			}
+		}
+
+
+		// Make sure that that the attendee is new
+		$query = "select id, shared_secret from calendar_events_attendees where attendee_obj='".$dbh->Escape($attendee_obj)."' 
+						and cec_id=".db_CheckNumber($ECID);
+		$res = $dbh->Query($query);
+		if ($dbh->GetNumberRows($res))
+		{
+			$row = $dbh->GetNextRow($res, 0);
+			$ssecret = $row['shared_secret'];
+			$curinv = $row['id'];
+		}
+		else
+		{
+			$ssecret = substr(md5(microtime()), 0, 16);
+			$query = "insert into calendar_events_attendees(cec_id, recur_id, attendee_obj, position, notes, 
+						shared_secret, req_user_id, email_queue)
+						values(".db_CheckNumber($ECID).", ".db_CheckNumber($RID).", 
+								'".$dbh->Escape($attendee_obj)."', '".$dbh->Escape($position_title)."',
+								'".$dbh->Escape($message)."', '$ssecret', '$USERID',
+								'".(($send_invitation) ? 't' : 'f')."');
+					  select currval('calendar_events_attendees_id_seq') as id;";
+			$res = $dbh->Query($query);
+			if ($dbh->GetNumberRows($res))
+			{
+				$row = $dbh->GetNextRow($res, 0);
+				$curinv = $row['id'];
+				$dbh->FreeResults($res);
+			}
+		}
+
+		if ($send_invitation && $email_address)
+		{
+			$res = $dbh->Query("select name, notes, location from calendar_event_coord where id='$ECID'");
+			if ($dbh->GetNumberRows($res))
+			{
+				$row = $dbh->GetNextRow($res, 0);
+				$evname = $row['name'];
+				$location = $row['location'];
+				$notes = $row['notes'];
+				$dbh->FreeResults($res);
+			}
+			$dbh->Query("update calendar_events_attendees set email_sent='t' where id='$curinv'");
+			
+			$headers['From']  = EmailGetUserName($dbh, $USERID, 'reply_to');
+			$headers['To']  = $email_address;
+			$headers['Subject']  = "Event Proposal ($evname)";
+			$headers['X-ANT-ACCOUNT-NAME'] = settingsGetAccountName();
+			$headers['X-ANT-CAL-INVID'] = $curinv;
+			$headers['X-ANT-CAL-INVSS'] = $ssecret;
+			$headers['X-ANT-CAL-ECID'] = $ECID;
+
+			$message = "You have been invited to join $evname by ".UserGetFullName($dbh, $USERID)."\r\n";
+			$message .= "Location: $location\r\n";
+
+			$message .= "\r\n\r\nClick the link below to respond.\r\n";
+			$message .= "http://".AntConfig::getInstance()->localhost."/calendar/event_coord_response.php?ss=$ssecret&invid=$curinv";
+			if ($_POST['event_notes'])
+			{
+				$message .= "\r\n\r\n-------------------- NOTES --------------------\r\n";
+				$message .= $notes."\r\n";
+			}
+
+			// Create new email object
+			$email = new Email();
+			$status = $email->send($email_address, $headers, $message);
+			unset($email);
+		}
+	}
+
+	return $curinv;
+}
+
+
+function CalSendAttendeeUpdates($dbh, $USERID, $EID, $RID=null)
+{
+	$result = $dbh->Query("select id, shared_secret, attendee_obj from calendar_events_attendees where event_id='$EID'");
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$attrow = $dbh->GetRow($result, $i);
+
+		$email_address = "";
+		// Send to all accepted attendees
+		if (strpos($attrow['attendee_obj'], ":") === false) // plain
+		{
+			if (strpos($attrow['attendee_obj'], "@") !== false) // email
+			{
+				$email_address = $attrow['attendee_obj'];
+			}
+		}
+		else
+		{
+			$obj_parts = objSplitValue($attrow['attendee_obj']);
+			if ($obj_parts)
+			{
+				switch ($obj_parts[0])
+				{
+				case 'user':
+					$email_address = UserGetEmail($dbh, $obj_parts[1]);
+					break;
+				case 'customer':
+					$email_address = CustGetDefaultEmail($dbh, $obj_parts[1]);
+					break;
+				case 'contact':
+					$email_address = GetDefaultEmail($dbh, $obj_parts[1]);
+					break;
+				}
+			}
+		}
+
+		if ($email_address)
+		{
+			$res = $dbh->Query("select id, name, start_block, end_block, all_day, date_start, date_end, location from calendar_events where id='$EID'");
+			if ($dbh->GetNumberRows($res))
+			{
+				$row = $dbh->GetNextRow($res, 0);
+				$dates = $row['date_start']." - ".(($row['date_end']) ? $row['date_end'] : "No End");
+				$times = ($row['all_day'] == 't') ? "All Day" : GetBlockName($row['start_block'])." - ".GetBlockName($row['end_block']);
+				$location = $row['location'];
+				$dbh->FreeResults($res);
+			}
+			$dbh->Query("update calendar_events_attendees set email_sent='t' where id='".$attrow['id']."'");
+
+			$evname = EventGetName($dbh, $EID, $RID);
+			$subject = "Event Update ($evname)";
+			$headers['From']  = EmailGetUserName($dbh, $USERID, 'reply_to');
+			$headers['To']  = $email_address;
+			$headers['Subject']  = $subject;
+			$headers['Content-Type'] = "multipart/alternative; boundary=\"----AntMeetingBooking----\"";
+			$headers['X-ANT-ACCOUNT-NAME'] = settingsGetAccountName();
+			$headers['X-ANT-CAL-INVID'] = $attrow['id'];
+			$headers['X-ANT-CAL-INVSS'] = $attrow['shared_secret'];
+
+			$message = CalGetIcalEmailBody($dbh, $headers, $USERID, $row, $attrow['shared_secret'], $attrow['id'], $email_address);
+
+			// Create new email object
+			$email = new Email();
+			$status = $email->send($email_address, $headers, $message);
+			unset($email);
+		}
+	}
+}
+
+function CalSendCevAttendeeUpdates($dbh, $USERID, $ECID)
+{
+	$result = $dbh->Query("select id, shared_secret, attendee_obj from calendar_events_attendees where cec_id='$ECID'");
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$attrow = $dbh->GetRow($result, $i);
+		$email_address = "";
+
+		// Send to all accepted attendees
+		if (strpos($attrow['attendee_obj'], ":") === false) // plain
+		{
+			if (strpos($attrow['attendee_obj'], "@") !== false) // email
+			{
+				$email_address = $attrow['attendee_obj'];
+			}
+		}
+		else
+		{
+			$obj_parts = objSplitValue($attrow['attendee_obj']);
+			if ($obj_parts)
+			{
+				switch ($obj_parts[0])
+				{
+				case 'user':
+					$email_address = UserGetEmail($dbh, $obj_parts[1]);
+					break;
+				case 'customer':
+					$email_address = CustGetDefaultEmail($dbh, $obj_parts[1]);
+					break;
+				case 'contact':
+					$email_address = GetDefaultEmail($dbh, $obj_parts[1]);
+					break;
+				}
+			}
+		}
+
+		if ($email_address)
+		{
+			$res = $dbh->Query("select name, notes, location from calendar_event_coord where id='$ECID'");
+			if ($dbh->GetNumberRows($res))
+			{
+				$row = $dbh->GetNextRow($res, 0);
+				$evname = $row['name'];
+				$notes = $row['notes'];
+				$dbh->FreeResults($res);
+			}
+			$dbh->Query("update calendar_events_attendees set email_sent='t' where id='".$attrow['id']."'");
+			
+			$subject = "Proposed Event Update ($evname)- ".date("m/d/Y");
+			$message = " $evname by ".UserGetFullName($dbh, $USERID)."\r\n";
+			$message .= "Location: $location\r\n";
+			$message .= "\r\n$notes\r\n";
+
+			$message .= "\r\n\r\nClick the link below for more info:\r\n
+						http://".AntConfig::getInstance()->localhost."/calendar/event_coord_response.php?ss=".$attrow['shared_secret']."&invid=".$attrow['id']."";
+			if ($_POST['event_notes'])
+			{
+				$message .= "\r\n\r\n-------------------- NOTES --------------------\r\n";
+				$message .= $row['notes']."\r\n";
+			}
+
+			$headers['From']  = EmailGetUserName($dbh, $USERID, 'reply_to');
+			$headers['To']  = $email_address;
+			$headers['Subject']  = $subject;
+			$headers['X-ANT-ACCOUNT-NAME'] = settingsGetAccountName();
+			$headers['X-ANT-CAL-ECID'] = $ECID;
+			$headers['X-ANT-CAL-INVID'] = $attrow['id'];
+			$headers['X-ANT-CAL-INVSS'] = $attrow['shared_secret'];
+
+			// Create new email object
+			$email = new Email();
+			$status = $email->send($email_address, $headers, $message);
+			unset($email);
+		}
+	}
+}
+
+function CalGetIcalEmailBody($dbh, $headers, $USERID, $evrow, $ssec, $invid, $to='') 
+{
+
+	$dates = $row['date_start']." - ".(($evrow['date_end']) ? $evrow['date_end'] : "No End");
+	$times = ($row['all_day'] == 't') ? "All Day" : GetBlockName($evrow['start_block'])." - ".GetBlockName($evrow['end_block']);
+
+	//Create Mime Boundry
+	//$mime_boundary = "----AntMeetingBooking----".md5(time());
+	$mime_boundary = "----AntMeetingBooking----";
+	
+	//Create Email Body (HTML)
+	$message = "--$mime_boundary\n";
+	$message .= "Content-Type: text/plain; charset=UTF-8\n";
+	$message .= "Content-Transfer-Encoding: 8bit\n\n";
+	
+	$message .= "You have been invited to join ".$evrow['name']." by ".UserGetFullName($dbh, $USERID)."\r\n";
+	$message .= "Location: ".$evrow['location']."\r\n";
+	$message .= "Dates: $dates\r\n";
+	$message .= "Times: $times\r\n";
+
+	$message .= "\r\n\r\nClick the link below to respond.\r\n
+				http://".AntConfig::getInstance()->localhost."/calendar/event_invitation_response.awp?ss=".$ssec."&invid=".$invid;
+	if ($evrow['notes'])
+	{
+		$message .= "\r\n\r\n-------------------- NOTES --------------------\r\n";
+		$message .= $evrow['notes']."\r\n";
+	}
+	$message .= "\r\n--$mime_boundary\r\n";
+	
+	// Get timezone offset
+	$diff_second = date('Z', strtotime("4/1/2010")); // after change to
+	$sign = ($diff_second > 0) ? '+' : '-';
+	$diff_second = abs($diff_second);
+	$diff_hour = floor ($diff_second / 3600);
+	$diff_minute = floor (($diff_second-3600*$diff_hour) / 60);
+	$daylight_offset = sprintf("%s%02d%02d", $sign, $diff_hour, $diff_minute);
+	$diff_second = date('Z', strtotime("12/1/2010")); // after change back
+	$sign = ($diff_second > 0) ? '+' : '-';
+	$diff_second = abs($diff_second);
+	$diff_hour = floor ($diff_second / 3600);
+	$diff_minute = floor (($diff_second-3600*$diff_hour) / 60);
+	$standard_offset = sprintf("%s%02d%02d", $sign, $diff_hour, $diff_minute);
+
+	$message .= 'Content-Type: text/calendar; name="meeting.ics"; method=REQUEST'."\r\n";
+	$message .= "Content-Transfer-Encoding: 8bit\n\n";
+	//Create ICAL Content (Google rfc 2445 for details and examples of usage) 
+	// date_default_timezone_get
+	$message .= 'BEGIN:VCALENDAR
+METHOD:REQUEST
+PRODID:Aereus Network Tools
+VERSION:2.0
+BEGIN:VTIMEZONE
+TZID:'.date_default_timezone_get().'
+BEGIN:DAYLIGHT
+TZOFFSETFROM:'.$standard_offset.'
+TZOFFSETTO:'.$daylight_offset.'
+TZNAME:PDT
+DTSTART:19700308T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:'.$daylight_offset.'
+TZOFFSETTO:'.$standard_offset.'
+DTSTART:19701101T020000
+RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU
+END:STANDARD
+END:VTIMEZONE
+'.CalEventGetIcal($dbh, $evrow['id'], UserGetEmail($dbh, $USERID), $to, $ssec, $invid).'
+END:VCALENDAR';   
+	$message .= "\r\n--$mime_boundary--";
+
+		// RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=1SU;BYMONTH=11
+		// RRULE:FREQ=YEARLY;INTERVAL=1;BYDAY=2SU;BYMONTH=3
+
+	return $message;
+}
+
+function CalEventGetIcal($dbh, $EID, $from='', $to='', $ssec='', $invid='')
+{
+	$ical = "";
+
+	$res = $dbh->Query("select name, start_block, end_block, date_start, date_end, location, notes, recur_id from calendar_events where id='$EID'");
+	if ($dbh->GetNumberRows($res))
+	{
+		$row = $dbh->GetNextRow($res, 0);
+
+		$time_start = ($row['time_start']) ? $row['time_start'] : GetBlockName($row['start_block']);
+		$time_end = ($row['time_end']) ? $row['time_end'] : GetBlockName($row['end_block']);
+		$location = $row['location'];
+		$name = $row['name'];
+
+		/*
+		$dtstart= gmdate("Ymd\THis\Z", strtotime($row['date_start']." ".GetBlockName($row['start_block'])));
+		$dtend= gmdate("Ymd\THis\Z",strtotime($row['date_end']." ".GetBlockName($row['end_block'])));
+		$todaystamp = gmdate("Ymd\THis\Z");
+		 */
+
+		$dtstart= date("Ymd\THis", strtotime($row['date_start']." ".GetBlockName($row['start_block'])));
+		$dtend= date("Ymd\THis",strtotime($row['date_end']." ".GetBlockName($row['end_block'])));
+		$todaystamp = date("Ymd\THis");
+
+		$dbh->FreeResults($res);
+
+		$ical = "BEGIN:VEVENT\n";
+		$ical .= "ORGANIZER:MAILTO:".$from."\n";
+		$ical .= "ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN="."'$to'".":MAILTO:'".$to."'\n";
+		$ical .= "DTSTART;TZID=".date_default_timezone_get().":".$dtstart."\n";
+		$ical .= "DTEND;TZID=".date_default_timezone_get().":".$dtend."\n";
+		if ($row['recur_id'])
+		{
+			$res2 = $dbh->Query("select interval, day, month, relative_type, relative_section, week_days[1] as day1,
+								  week_days[2] as day2, week_days[3] as day3, week_days[4] as day4, week_days[5] as day5,
+								  week_days[6] as day6, week_days[7] as day7, type, 
+								  start_block, end_block, location, name, 
+								  notes, sharing, status, 
+								  to_char(ts_start, 'HH12:MI:SS AM') as time_start, 
+								  to_char(ts_end, 'HH12:MI:SS AM') as time_end, 
+								  extract('month' from date_start) as start_month, 
+								  extract('day' from date_start) as start_day,
+								  extract('year' from date_start) as start_year,
+								  extract('month' from date_end) as end_month, 
+								  extract('day' from date_end) as end_day,
+								  extract('year' from date_end) as end_year,
+								  date_end, date_start, all_day, calendar
+								  from calendar_events_recurring where id='".$row['recur_id']."'");
+			if ($dbh->GetNumberRows($res2))
+			{
+				$row2 = $dbh->GetNextRow($res2, 0);
+
+				$type_name = "";
+				switch ($row2['type'])
+				{
+				case 1:
+					$type_name = "DAILY";
+					break;
+				case 2:
+					$type_name = "WEEKLY";
+					break;
+				case 3:
+					$type_name = "MONTHLY";
+					break;
+				case 4:
+					$type_name = "YEARLY";
+					break;
+				}
+
+				if ($type_name)
+				{
+					$ical .= "RRULE:FREQ=$type_name;WKST=SU";
+
+					if ($row2['date_end'])
+						$ical .= ";UNTIL=".date("Ymd\THis",strtotime($row2['date_end']." ".GetBlockName($row2['end_block'])));
+
+					if ($row2['interval'])
+						$ical .= ";INTERVAL=".$row2['interval'];
+
+					$weekdays = array("SU","MO","TU","WE","TH","FR","SA");
+
+					if ($row2['relative_type'] && $row2['relative_section'])
+					{
+						$ical .= ";BYDAY=";
+						$ical .= ($row2['relative_type'] == 5) ? "-1" : $row2['relative_type'];
+						$ical .= $weekdays[$row2['relative_section']];
+					}
+
+					if ($row['month'])
+						$ical .= ";BYMONTH=".$row['month'];
+
+					if ($type_name == "WEEKLY" && !$row2['relative_type'])
+					{
+						$byday = "";
+						for ($d = 1; $d <= 7; $d++)
+						{
+							if ($row2['day'.$d] == 't')
+							{
+								if ($byday) $byday .= ",";
+								$byday .= $weekdays[$d-1];
+							}
+						}
+						if ($byday)
+							$ical .= ";BYDAY=$byday";
+					}				
+
+					$ical .= "\n";
+				}
+			}
+			$dbh->FreeResults($res2);
+		}
+
+		if ($ssec && $invid)
+		{
+			$row['notes'] .= "\r\n\r\nClick the link below to respond.\r\n
+				http://".AntConfig::getInstance()->localhost."/calendar/event_invitation_response.awp?ss=".$ssec."&invid=".$invid;
+		}
+
+		$row['notes'] = str_replace("\r\n", "\\n", $row['notes']);
+		$row['notes'] = str_replace("\n", "\\n", $row['notes']);
+		$row['notes'] = str_replace("\r", "\\n", $row['notes']);
+
+		$ical .= "LOCATION:".$location."\n";
+		$ical .= "TRANSP:OPAQUE\n";
+		$ical .= "SEQUENCE:1\n";
+		$ical .= "UID:ANT".settingsGetAccountName().$EID."\n";
+		$ical .= "DTSTAMP:".$todaystamp."\n";
+		$ical .= "DESCRIPTION:". $row['notes']."\n";
+		$ical .= "SUMMARY;LANGUAGE=en-US:$name\n";
+		$ical .= "PRIORITY:5\n";
+		$ical .= "CLASS:PUBLIC\n";
+		$ical .= "END:VEVENT"; 
+
+/*
+BEGIN:VEVENT
+ORGANIZER;CN=joe:MAILTO:sky.stebnicki@guaranty.com
+ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN='sky@stebn
+ icki.net':MAILTO:sky@stebnicki.net
+DESCRIPTION;LANGUAGE=en-US:When: Thursday\, August 13\, 2009 2:30 PM-3:00 P
+ M (UTC-08:00) Pacific Time (US & Canada).\n\nNote: The GMT offset above do
+ es not reflect daylight saving time adjustments.\n\n*~*~*~*~*~*~*~*~*~*\n\
+ n\n\n
+SUMMARY;LANGUAGE=en-US:Test
+DTSTART;TZID=Pacific Standard Time:20090813T143000
+DTEND;TZID=Pacific Standard Time:20090813T150000
+UID:040000008200E00074C5B7101A82E00800000000B0BA2156211CCA01000000000000000
+ 01000000017CE8EFFBB801E44B5DAF1994230D4FE
+CLASS:PUBLIC
+PRIORITY:5
+DTSTAMP:20090813T212203Z
+TRANSP:OPAQUE
+STATUS:CONFIRMED
+SEQUENCE:2
+LOCATION;LANGUAGE=en-US:
+X-MICROSOFT-CDO-APPT-SEQUENCE:2
+X-MICROSOFT-CDO-OWNERAPPTID:-408057895
+X-MICROSOFT-CDO-BUSYSTATUS:TENTATIVE
+X-MICROSOFT-CDO-INTENDEDSTATUS:BUSY
+X-MICROSOFT-CDO-ALLDAYEVENT:FALSE
+X-MICROSOFT-CDO-IMPORTANCE:1
+X-MICROSOFT-CDO-INSTTYPE:0
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:REMINDER
+TRIGGER;RELATED=START:-PT15M
+END:VALARM
+END:VEVENT
+ */
+	}
+
+	return $ical;
+}
+
+function CalGetDaysBetweenDates($start, $end)
+{
+	$start_ts = strtotime($start);
+
+	$end_ts = strtotime($end);
+
+	$diff = $end_ts - $start_ts;
+
+	return round($diff / 86400);
+}
+?>

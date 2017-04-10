@@ -1,0 +1,813 @@
+<?php
+/***********************************************************************************************************
+*    
+*	File: customer_functions
+*
+*	Purpose: All customer related functions. Slowly this will be moved to classes.
+*
+*	Author: joe, sky.stebnicki@aereus.com, 2008
+*
+************************************************************************************************************/
+require_once("lib/CAntObject.php");
+require_once("lib/CAntObjectList.php");
+require_once("customer/CCustomer.php");
+
+$CUST_LEAD_QUEUE_ACLS =	array("Create New Lead", "Delete Leads", "View Leads", "Edit Leads", 
+							  "Assign Leads", "Take Ownership", "View Activities", "Delete Activities", "Edit Activities");
+
+$CUST_LEAD_ACLS = array("Edit Settings", "Import Leads");
+
+$CUST_OPP_ACLS = array("Edit Settings");
+
+$CUST_INVOICE_ACLS = array("Edit Settings", "View Invoices");
+
+$CUST_ACLS = array("Edit Settings", "View Activities", "Delete Activities", "Edit Activities", "Import Customers");
+
+//====================================================================================
+//	
+//    Default Data sets
+//
+//====================================================================================
+
+function CustSetDefStatus(&$dbh, $account, &$result=null)
+{
+	$def_vals = array(
+					array("Active", 1, 'f'),
+					array("Inactive", 2, 't')
+				);
+	if (!$dbh->GetNumberRows($dbh->Query("select * from customer_status")))
+	{
+		foreach ($def_vals as $set)
+		{
+			$dbh->Query("insert into customer_status(name, sort_order, f_closed) values('".$set[0]."', '".$set[1]."', '".$set[2]."');");
+		}
+	}
+
+	$result = $dbh->Query("select * from customer_status");
+
+	return true;
+}
+
+function CustSetDefStage(&$dbh, $account, &$result=null)
+{
+	$def_vals = array(
+					array("Prospect", 1),
+					array("Customer", 2),
+					array("Competitor", 3),
+					array("Consultant", 4),
+					array("Investor", 5),
+					array("Partner", 6),
+					array("Vendor", 7),
+					array("Other", 8)
+				);
+	if (!$dbh->GetNumberRows($dbh->Query("select * from customer_stages")))
+	{
+		foreach ($def_vals as $set)
+		{
+			$dbh->Query("insert into customer_stages(name,  sort_order) values('".$set[0]."', '".$set[1]."');");
+		}
+	}
+
+	$result = $dbh->Query("select * from customer_stages");
+
+	return true;
+}
+
+function CustSetDefObjections(&$dbh, $account, &$result=null)
+{
+	$def_vals = array(
+					array("None", 1),
+					array("Price - Too High", 2),
+					array("Already Happy With Current Solution", 3),
+					array("Security Concerns", 4),
+					array("Limited Resources - Time/Effort", 5),
+					array("Fails To See Enough Benefit", 6),
+					array("Other", 7)
+				);
+	if (!$dbh->GetNumberRows($dbh->Query("select * from customer_objections")))
+	{
+		foreach ($def_vals as $set)
+		{
+			$dbh->Query("insert into customer_objections(name,  sort_order) values('".$set[0]."', '".$set[1]."');");
+		}
+	}
+
+	$result = $dbh->Query("select * from customer_objections");
+
+	return true;
+}
+
+function CustSetDefRelTypes(&$dbh, &$result=null)
+{
+	$def_vals = array(
+					array("Employee", 't'),
+					array("Friend", 'f'),
+					array("Family", 'f'),
+					array("Referral Source", 'f')
+				);
+	if (!$dbh->GetNumberRows($dbh->Query("select * from customer_association_types")))
+	{
+		foreach ($def_vals as $set)
+		{
+			$dbh->Query("insert into customer_association_types(name, f_child) values('".$set[0]."', '".$set[1]."');");
+		}
+	}
+
+	$result = $dbh->Query("select * from customer_association_types order by name");
+
+	return true;
+}
+
+function CustOptSetDefStages(&$dbh, $account, &$result=null)
+{
+	$def_vals = array(
+					array("Prospecting", 1, 'f', 'f'),
+					array("Qualification", 2, 'f', 'f'),
+					array("Proposal/Price Quote", 3, 'f', 'f'),
+					array("Closed: Won", 4, 't', 't'),
+					array("Closed: Lost", 5, 't', 'f')
+				);
+	if (!$dbh->GetNumberRows($dbh->Query("select * from customer_opportunity_stages")))
+	{
+		foreach ($def_vals as $set)
+		{
+			$dbh->Query("insert into customer_opportunity_stages(name,  sort_order, f_closed, f_won) 
+							values('".$set[0]."', '".$set[1]."', '".$set[2]."', '".$set[3]."');");
+		}
+	}
+
+	$result = $dbh->Query("select * from customer_status");
+
+	return true;
+}
+
+function CustOptSetDefTypes(&$dbh, $account, &$result=null)
+{
+	$def_vals = array(
+					array("Sales", 1),
+					array("Service", 2)
+				);
+	if (!$dbh->GetNumberRows($dbh->Query("select * from customer_opportunity_types")))
+	{
+		foreach ($def_vals as $set)
+		{
+			$dbh->Query("insert into customer_opportunity_types(name, sort_order) 
+							values('".$set[0]."', '".$set[1]."');");
+		}
+	}
+
+	$result = $dbh->Query("select * from customer_opportunity_types");
+
+	return true;
+}
+function CustInvSetDefStatus(&$dbh, $account, &$result=null)
+{
+	$def_vals = array(
+					array("New", 1),
+					array("In-Progress/Sent", 2),
+					array("Outstanding", 3),
+					array("Unpaid/Carryover", 4),
+					array("Paid", 5)
+				);
+	if (!$dbh->GetNumberRows($dbh->Query("select * from customer_invoice_status")))
+	{
+		foreach ($def_vals as $set)
+		{
+			$dbh->Query("insert into customer_invoice_status(name, sort_order) 
+							values('".$set[0]."', '".$set[1]."');");
+		}
+	}
+
+	$result = $dbh->Query("select * from customer_invoice_status");
+
+	return true;
+}
+
+function CustLeadSetDefStatus(&$dbh, $account, &$result=null)
+{
+	$def_vals = array(
+					array("New", 1, 'f', 'f'),
+					array("In-Progress", 2, 'f', 'f'),
+					array("Closed: Coverted", 3, 't', 't'),
+					array("Closed: Disqualified", 4, 't', 'f'),
+					array("Closed: Not Interested", 5, 't', 'f')
+				);
+	if (!$dbh->GetNumberRows($dbh->Query("select * from customer_lead_status")))
+	{
+		foreach ($def_vals as $set)
+		{
+			$dbh->Query("insert into customer_lead_status(name, sort_order, f_closed, f_converted) 
+							values('".$set[0]."', '".$set[1]."', '".$set[2]."', '".$set[3]."');");
+		}
+	}
+
+	$result = $dbh->Query("select * from customer_lead_status");
+
+	return true;
+}
+function CustLeadSetDefRating(&$dbh, $account, &$result=null)
+{
+	$def_vals = array(
+					array("Cold", 1),
+					array("Medium", 2),
+					array("Hot", 3)
+				);
+	if (!$dbh->GetNumberRows($dbh->Query("select * from customer_lead_rating")))
+	{
+		foreach ($def_vals as $set)
+		{
+			$dbh->Query("insert into customer_lead_rating(name, sort_order) 
+							values('".$set[0]."', '".$set[1]."');");
+		}
+	}
+
+	$result = $dbh->Query("select * from customer_lead_rating");
+
+	return true;
+}
+
+//====================================================================================
+//
+//    Functions
+//
+//====================================================================================
+
+function CustGetLabelsString(&$dbh, $cid)
+{
+	if (is_numeric($cid))
+	{
+		$query = "select customer_labels.id, customer_labels.name from
+					customer_labels, customer_label_mem
+					where customer_label_mem.customer_id='$cid' and
+					customer_label_mem.label_id=customer_labels.id";
+		$result = $dbh->Query($query);
+		$num = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			if ($labels)
+				$labels .= ",".$row['name'];
+			else
+				$labels = $row['name'];
+		}
+		$dbh->FreeResults($result);
+	}
+	
+	return $labels;
+}
+
+function CustGetName(&$dbh, $CID, $format = NULL)
+{
+	if (!is_numeric($CID))
+		return;
+
+	$obj = new CAntObject($dbh, "customer", $CID);
+	$varval = $obj->getName();
+		
+	return $varval;
+}
+
+function CustGetContactId(&$dbh, $USERID, $CUSTID)
+{
+	$retval = NULL;
+	
+	if ($USERID && $CUSTID)
+	{
+		$olist = new CAntObjectList($dbh, "contact_personal");
+		$olist->addCondition("and", "user_id", "is_equal", $USERID);
+		$olist->addCondition("and", "customer_id", "is_equal", $CUSTID);
+		$olist->getObjects();
+		if ($num = $olist->getNumObjects())
+		{
+			$omin = $olist->getObjectMin(0);
+			$retval = $omin['id'];
+		}
+	}
+	
+	return $retval;
+}
+
+function CustSyncContact(&$dbh, $USERID, $CUSTID, $CID, $action, $account = NULL)
+{
+	$USER = new AntUser($dbh, $USERID);
+	$CALID = GetDefaultCalendar($dbh, $USERID);
+	
+	switch ($action)
+	{
+	case 'cust_to_contact':
+		if ($CUSTID)
+		{
+			$custObj = new CAntObject($dbh, "customer", $CUSTID, $USER);
+
+			$olist = new CAntObjectList($dbh, "contact_personal");
+			$olist->addCondition("and", "customer_id", "is_equal", $CUSTID);
+			$olist->getObjects();
+			$num = $olist->getNumObjects();
+			
+			//echo $num; exit();
+			$num = 1;
+			for ($i = 0; $i < $num; $i++)
+			{
+				$obj = $olist->getObject($i);
+				$CID = $obj->id;
+				$uid = $obj->getValue("user_id");
+
+				$userContact = new AntUser($dbh, $uid);
+				$CALID = GetDefaultCalendar($dbh, $uid);
+
+				$obj->nosync = true; // prevent sync loops
+
+				if ($CID)
+				{
+					if ($custObj->getValue('birthday'))	
+					{
+						$reid = ContactAddCalDate($dbh, $uid, "Birthday", 'birthday', $CID, $CALID);
+						$obj->setValue("birthday_evnt", $reid);
+					}
+					else if (!$custObj->getValue('birthday')) // Make sure there are no stray events
+					{
+						ContactDelCalDate($dbh, NULL, 'birthday', $CID);
+						$obj->setValue("birthday_evnt", '');
+					}
+
+					if ($custObj->getValue('anniversary'))
+					{
+						$reid = ContactAddCalDate($dbh, $uid, "Anniversary", 'anniversary', $CID, $CALID);
+						$obj->setValue("anniversary_evnt", $reid);
+					}
+					else if (!$custObj->getValue('anniversary')) // Make sure there are no stray events
+					{
+						ContactDelCalDate($dbh, NULL, 'anniversary', $CID);
+						$obj->setValue("anniversary_evnt", '');
+					}
+				}
+
+				$obj->setValue("first_name", $custObj->getValue('first_name'));
+				$obj->setValue("last_name", $custObj->getValue('last_name'));
+				$obj->setValue("middle_name", $custObj->getValue('middle_name'));
+				$obj->setValue("nick_name", $custObj->getValue('nick_name'));
+				$obj->setValue("phone_home", $custObj->getValue('phone_home'));
+				$obj->setValue("phone_work", $custObj->getValue('phone_work'));
+				$obj->setValue("phone_cell", $custObj->getValue('phone_cell'));
+				$obj->setValue("spouse_name", $custObj->getValue('spouse_name'));
+				$obj->setValue("anniversary", $custObj->getValue('anniversary'));
+				$obj->setValue("birthday_spouse", $custObj->getValue('anniversary'));
+				$obj->setValue("last_contacted", $custObj->getValue('birthday_spouse'));
+				$obj->setValue("birthday", $custObj->getValue('birthday'));
+				$obj->setValue("ext", $custObj->getValue('phone_ext'));
+				$obj->setValue("phone_fax", $custObj->getValue('phone_fax'));
+				$obj->setValue("phone_pager", $custObj->getValue('phone_pager'));
+				$obj->setValue("street", $custObj->getValue('street'));
+				$obj->setValue("city", $custObj->getValue('city'));
+				$obj->setValue("state", $custObj->getValue('state'));
+				$obj->setValue("zip", $custObj->getValue('zip'));
+				$obj->setValue("business_street", $custObj->getValue('business_street'));
+				$obj->setValue("business_city", $custObj->getValue('business_city'));
+				$obj->setValue("business_state", $custObj->getValue('business_state'));
+				$obj->setValue("business_zip", $custObj->getValue('business_zip'));
+				$obj->setValue("email", $custObj->getValue('email'));
+				$obj->setValue("email2", $custObj->getValue('email2'));
+				$obj->setValue("job_title", $custObj->getValue('job_title'));
+				$obj->setValue("email_spouse", $custObj->getValue('email_spouse'));
+				$obj->setValue("email_default", $custObj->getValue('email_default'));
+				$obj->setValue("company", $custObj->getValue('company'));
+				$obj->setValue("notes", $custObj->getValue('notes'));
+				$obj->setValue("website", $custObj->getValue('website'));
+				$obj->save();
+			}
+		}
+		break;
+	case 'contact_to_cust':
+		if ($CUSTID && $CID)
+		{
+			// NOTE: we update directly and don't use CAntObject to bypass onCustomerSave which would
+			// cause a circular loop of customer updating conctat, then contact to customer, etc...
+			$objSrc = new CAntObject($dbh, "contact_personal", $CID);
+
+			$obj = new CAntObject($dbh, "customer", $CUSTID, $USER);
+			$obj->nosync = true; // prevent sync loops
+			$obj->setValue("first_name", $objSrc->getValue('first_name'));
+			$obj->setValue("last_name", $objSrc->getValue('last_name'));
+			$obj->setValue("middle_name", $objSrc->getValue('middle_name'));
+			$obj->setValue("phone_home", $objSrc->getValue('phone_home'));
+			$obj->setValue("phone_work", $objSrc->getValue('phone_work'));
+			$obj->setValue("phone_cell", $objSrc->getValue('phone_cell'));
+			$obj->setValue("spouse_name", $objSrc->getValue('spouse_name'));
+			$obj->setValue("anniversary", $objSrc->getValue('anniversary'));
+			$obj->setValue("birthday_spouse", $objSrc->getValue('birthday_spouse'));
+			$obj->setValue("last_contacted", $objSrc->getValue('last_contacted'));
+			$obj->setValue("birthday", $objSrc->getValue('birthday'));
+			$obj->setValue("phone_ext", $objSrc->getValue('ext'));
+			$obj->setValue("phone_fax", $objSrc->getValue('phone_fax'));
+			$obj->setValue("phone_pager", $objSrc->getValue('phone_pager'));
+			$obj->setValue("street", $objSrc->getValue('street'));
+			$obj->setValue("city", $objSrc->getValue('city'));
+			$obj->setValue("state", $objSrc->getValue('state'));
+			$obj->setValue("zip", $objSrc->getValue('zip'));
+			$obj->setValue("business_street", $objSrc->getValue('business_street'));
+			$obj->setValue("business_city", $objSrc->getValue('business_city'));
+			$obj->setValue("business_state", $objSrc->getValue('business_state'));
+			$obj->setValue("business_zip", $objSrc->getValue('business_zip'));
+			$obj->setValue("email", $objSrc->getValue('email'));
+			$obj->setValue("email2", $objSrc->getValue('email2'));
+			$obj->setValue("job_title", $objSrc->getValue('job_title'));
+			$obj->setValue("email_spouse", $objSrc->getValue('email_spouse'));
+			$obj->setValue("email_default", $objSrc->getValue('email_default'));
+			$obj->setValue("company", $objSrc->getValue('company'));
+			$obj->setValue("notes", $objSrc->getValue('notes'));
+			$obj->setValue("website", $objSrc->getValue('website'));
+			if (!$obj->getValue("image_id") && $objSrc->getValue('image_id'))
+				$obj->setValue("image_id", $objSrc->getValue('image_id'));
+
+			$obj->save();
+
+			/*
+			$obj = new CAntObject($dbh, "customer", $CUSTID, $user);
+			$obj->clearCache();
+			 */
+			
+			// Sync changes will all other contacts by pushing update from customer to conacts
+			CustSyncContact($dbh, $USERID, $CUSTID, $CID, 'cust_to_contact');
+		}
+		break;
+	case 'create':
+		if ($CUSTID)
+		{
+			// Make sure contact does not already exist for this user
+			$olist = new CAntObjectList($dbh, "contact_personal", $USER);
+			$olist->addCondition('and', "user_id", "is_equal", $USERID);
+			$olist->addCondition('and', "customer_id", "is_equal", $CUSTID);
+			$olist->getObjects();
+			if ($olist->getNumObjects())
+				return 0;
+			
+			// Copy data
+			$custObj = new CAntObject($dbh, "customer", $CUSTID, $USER);
+
+			$contact = new CAntObject($dbh, "contact_personal", null, $USER);
+			$contact->setValue("user_id", $USER->id);
+			$contact->setValue("first_name", $custObj->getValue('first_name'));
+			$contact->setValue("last_name", $custObj->getValue('last_name'));
+			$contact->setValue("middle_name", $custObj->getValue('middle_name'));
+			$contact->setValue("nick_name", $custObj->getValue('nick_name'));
+			$contact->setValue("phone_home", $custObj->getValue('phone_home'));
+			$contact->setValue("phone_work", $custObj->getValue('phone_work'));
+			$contact->setValue("phone_cell", $custObj->getValue('phone_cell'));
+			$contact->setValue("email",$custObj->getValue('email'));
+			$contact->setValue("email2",$custObj->getValue('email2'));
+			$contact->setValue("email_default",$custObj->getValue('email_default'));
+			$contact->setValue("email_spouse",$custObj->getValue('email_spouse'));
+			$contact->setValue("street",$custObj->getValue('street'));
+			$contact->setValue("city",$custObj->getValue('city'));
+			$contact->setValue("state",$custObj->getValue('state'));
+			$contact->setValue("zip", $custObj->getValue('zip'));
+			$contact->setValue("notes", $custObj->getValue('notes'));
+			$contact->setValue("company", $custObj->getValue('company'));
+			$contact->setValue("job_title", $custObj->getValue('job_title'));
+			$contact->setValue("zip", $custObj->getValue('zip'));
+			$contact->setValue("ext", $custObj->getValue('ext'));
+			$contact->setValue("phone_fax", $custObj->getValue('phone_fax'));
+			$contact->setValue("phone_pager", $custObj->getValue('phone_pager'));
+			$contact->setValue("website", $custObj->getValue('website'));
+			$contact->setValue("spouse_name", $custObj->getValue('spouse_name'));
+			$contact->setValue("birthday", $custObj->getValue('birthday'));
+			$contact->setValue("anniversary", $custObj->getValue('anniversary'));
+			$contact->setValue("last_contacted", $custObj->getValue('last_contacted'));
+			$contact->setValue("business_street", $custObj->getValue('business_street'));
+			$contact->setValue("business_street2", $custObj->getValue('business_street2'));
+			$contact->setValue("business_city", $custObj->getValue('business_city'));
+			$contact->setValue("business_state", $custObj->getValue('business_state'));
+			$contact->setValue("business_zip", $custObj->getValue('business_zip'));
+			$contact->setValue("customer_id", $CUSTID);
+			$cid = $contact->save();
+		}
+		break;
+	case 'create_customer':
+		if ($CID)
+		{
+			$contact = new CAntObject($dbh, "contact_personal", $CID);
+			if (is_numeric($contact->getValue("customer_id")))
+				return 0;
+
+			$customer = new CAntObject($dbh, "customer", null, $USER);
+			$customer->setValue("first_name", $contact->getValue("first_name"));
+			$customer->setValue("last_name", $contact->getValue("last_name"));
+			$customer->setValue("phone_home", $contact->getValue("phone_home"));
+			$customer->setValue("phone_work", $contact->getValue("phone_work"));
+			$customer->setValue("phone_cell", $contact->getValue("phone_cell"));
+			$customer->setValue("email", $contact->getValue("email"));
+			$customer->setValue("email2", $contact->getValue("email2"));
+			$customer->setValue("email_spouse", $contact->getValue("email_spouse"));
+			$customer->setValue("street", $contact->getValue("street"));
+			$customer->setValue("state", $contact->getValue("state"));
+			$customer->setValue("city", $contact->getValue("city"));
+			$customer->setValue("zip", $contact->getValue("zip"));
+			$customer->setValue("notes", $contact->getValue("notes"));
+			$customer->setValue("company", $contact->getValue("company"));
+			$customer->setValue("job_title", $contact->getValue("job_title"));
+			$customer->setValue("email_default", $contact->getValue("email_default"));
+			$customer->setValue("middle_name", $contact->getValue("middle_name"));
+			$customer->setValue("nick_name", $contact->getValue("nick_name"));
+			$customer->setValue("ext", $contact->getValue("ext"));
+			$customer->setValue("phone_fax", $contact->getValue("phone_fax"));
+			$customer->setValue("phone_pager", $contact->getValue("phone_pager"));
+			$customer->setValue("website", $contact->getValue("website"));
+			$customer->setValue("spouse_name", $contact->getValue("spouse_name"));
+			$customer->setValue("birthday", $contact->getValue("birthday"));
+			$customer->setValue("birthday_spouse", $contact->getValue("birthday_spouse"));
+			$customer->setValue("anniversary", $contact->getValue("anniversary"));
+			$customer->setValue("last_contacted", $contact->getValue("last_contacted"));
+			$customer->setValue("business_street", $contact->getValue("business_street"));
+			$customer->setValue("business_street2", $contact->getValue("business_street2"));
+			$customer->setValue("business_city", $contact->getValue("business_city"));
+			$customer->setValue("business_state", $contact->getValue("business_state"));
+			$customer->setValue("business_zip", $contact->getValue("business_zip"));
+			$custid = $customer->save();
+
+			$contact->setValue("customer_id", $custid);
+			$contact->save();
+		}
+		break;
+	}
+}
+
+function CustGetDefaultEmail(&$dbh, $cid)
+{
+	$obj = new CAntObject($dbh, "customer", $cid);
+	$emladdr = $obj->getValue("email_default", true);
+	return $emladdr;
+}
+
+function CustGetEmail(&$dbh, $cid, $toget="default")
+{
+	if (is_numeric($cid))
+	{
+		$obj = new CAntObject($dbh, "customer", $cid);
+
+		if ($toget == "default")
+		{
+			$emladdr = $obj->getValue("email_default", true);
+		}
+		else
+		{
+			$emladdr = $obj->getValue($toget);
+		}
+	}
+	return $emladdr;
+}
+
+function CustGetPhone(&$dbh, $cid, $toget="phone_home")
+{
+	// TODO: Update to account for default phone
+    $phone = null;
+    
+	if (is_numeric($cid))
+	{
+		if ($toget == "default")
+		{
+			//$emladdr = CustGetDefaultPhone($dbh, $cid);
+		}
+		else
+		{
+			$obj = new CAntObject($dbh, "customer", $cid);
+			if ($obj->id)
+			{
+				if ($obj->getValue("phone_cell"))
+					$phone = $obj->getValue("phone_cell");
+				else if ($obj->getValue("phone_home"))
+					$phone = $obj->getValue("phone_home");
+				else if ($obj->getValue("phone_work"))
+				{
+					$phone = $obj->getValue("phone_work");
+					if ($obj->getValue("phone_ext"))
+						$phone .= " x".$obj->getValue("phone_ext");
+				}
+				else if ($obj->getValue("phone_other"))
+					$phone = $obj->getValue("phone_other");
+			}
+		}
+	}
+	return $phone;
+}
+
+function CustGetClosedStatus($dbh, $account)
+{
+	$ret = array();
+
+	$st_res = $dbh->Query("select id from customer_status where f_closed is true");
+	$st_num = $dbh->GetNumberRows($st_res);
+	for ($s = 0; $s < $st_num; $s++)
+	{
+		$st_row = $dbh->GetRow($st_res, $s);
+		$ret[] = $st_row['id'];
+	}
+
+	return $ret;
+}
+
+function CustGetColVal(&$dbh, $CUSTID, $field)
+{
+	$retval = 0;
+	$obj = new CAntObject($dbh, "customer", $CUSTID);
+	$retval = $obj->getValue($field);
+	return $retval;
+}
+
+function CustIsDoNotContact(&$dbh, $cid, $type)
+{
+	$ret = false;
+
+	if ($cid)
+	{
+		$obj = new CAntObject($dbh, "customer", $cid);
+		switch ($type)
+		{
+		case 'nocall':
+			if ($obj->getValue("f_nocall")=='t')
+				$ret = true;
+			break;
+		case 'noemail':
+			if ($obj->getValue("f_noemailspam")=='t')
+				$ret = true;
+			break;
+		case 'nocontact':
+		default:
+			if ($obj->getValue("f_nocontact")=='t')
+				$ret = true;
+		}
+	}
+	return $ret;
+}
+
+// TODO: this functionality needs to be moved to the new activity types
+function CustGetActTypeConFlag(&$dbh, $type)
+{
+	$flag = "";
+	if (is_numeric($type))
+	{
+		$result = $dbh->Query("select contacted_flag from customer_activity_types where id='$type'");
+		if ($dbh->GetNumberRows($result))
+			$flag = $dbh->GetValue($result, 0, "contacted_flag");
+	}
+
+	return $flag;
+}
+
+function CustGetOwner(&$dbh, $id, $entity="customer")
+{
+	$owner = null;
+	if (is_numeric($id))
+	{
+		$obj = new CAntObject($dbh, $entity, $id);
+		$owner = $obj->getValue("owner_id");
+		unset($obj);
+	}
+
+	return $owner;
+}
+
+function CustAssoc($dbh, $parent_id, $child_id, $name='')
+{
+	$ret = null;
+
+	if ($parent_id && $child_id)
+	{
+		if (!$dbh->GetNumberRows($dbh->Query("select id from customer_associations where parent_id='$parent_id' and customer_id='$child_id'")))
+		{
+			$result = $dbh->Query("insert into customer_associations(customer_id, parent_id, relationship_name)
+									values('$child_id', '$parent_id', '".$dbh->Escape($name)."');
+									select currval('customer_associations_id_seq') as id;");
+			if ($dbh->GetNumberRows($result))
+				$ret = $dbh->GetValue($result, 0, "id");
+		}
+	}
+
+	return $ret;
+}
+
+function CustActLog($dbh, $userid, $name, $notes, $cid, $oid, $lid, $direction='', $email_id=null)
+{
+	if ($name && ($cid || $oid || $lid))
+	{
+
+		$obja = new CAntObject($dbh, "activity", null);
+		$obja->setValue("name", $name);
+		$obja->setValue("notes", $notes);
+		$obja->setValue("direction", $direction);
+		$obja->setValue("f_readonly", 't');
+		$obja->setValue("user_id", $userid);
+
+		// Add associations
+		if ($cid)
+		{
+			$obja->addAssociation("customer", $cid, "associations");
+			$obja->setValue("obj_reference", "customer:".$cid);
+			$type_obj = "customer";
+		}
+		if ($oid)
+		{
+			$obja->addAssociation("opportunity", $oid, "associations");
+			$obja->setValue("obj_reference", "opportunity:".$oid);
+			$type_obj = "opportunity";
+		}
+		if ($row['lead_id'])
+		{
+			$obja->addAssociation("lead", $lid, "associations");
+			$obja->setValue("obj_reference", "lead:".$lid);
+			$type_obj = "lead";
+		}
+		if ($email_id)
+		{
+			$obja->addAssociation("email_message", $email_id, "associations");
+			$obja->setValue("obj_reference", "email_message:".$email_id);
+			$type_obj = "email_message";
+		}
+
+		if ($type_obj)
+		{
+			$obj = new CAntObject($dbh, $type_obj);
+			$obja->setValue("type_id", $obj->getActivityTypeFromObj());
+		}
+		$obja->save();
+	}
+}
+
+//============================================================================
+//    Opportunity functions
+//============================================================================
+
+function CustOptStageIsClosed($dbh, $sid)
+{
+	$ret = false;
+
+	if (is_numeric($sid))
+	{
+		$result = $dbh->Query("select name from customer_opportunity_stages where id='$sid' and f_closed='t'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$ret = true;
+		}
+	}
+	return $ret;
+}
+
+
+
+function CustOptGetName(&$dbh, $OID)
+{
+	$retval = null;
+	
+	if ($OID)
+	{
+		$obj = new CAntObject($dbh, "opportunity", $OID);
+		$retval = $obj->getName();
+		unset($obj);
+	}
+	
+	return $retval;
+}
+
+function CustOptGetCust(&$dbh, $OID)
+{
+	$retval = null;
+	
+	if ($OID)
+	{
+		$obj = new CAntObject($dbh, "opportunity", $OID);
+		$retval = $obj->getValue("customer_id");
+		unset($obj);
+	}
+	
+	return $retval;
+}
+
+//============================================================================
+//	Lead Functions
+//============================================================================
+function CustLeadGetName(&$dbh, $LID)
+{
+	$retval = null;
+	
+	if ($LID)
+	{
+		$obj = new CAntObject($dbh, "lead", $LID);
+		$retval = $obj->getName();
+	}
+	
+	return $retval;
+}
+
+function CustCreate(&$dbh, $account, $result, $values)
+{
+	
+	if( !is_array($values) && count($values)<=0) return false;
+	
+	$sql = "insert into customers(name, email, email2) values('".$values['name']."','".$values['email']."','".$values['email2']."');  select currval('customers_id_seq') as id;";
+	$result = $dbh->Query($sql);
+	if ($dbh->GetNumberRows($result))
+	return $dbh->GetValue($result, 0, "id");
+	
+	
+}
+
+?>

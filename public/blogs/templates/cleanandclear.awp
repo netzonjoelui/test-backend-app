@@ -1,0 +1,333 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title><%PAGETITLE%></title>
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=iso-8859-1" />
+<style type="text/css">
+/* CSS Document */
+html, body 
+{ 
+	margin: 0px;
+	padding: 0px;
+	font-family: Arial, Helvetica, sans-serif;
+	background-color: #FFF;
+}
+
+img { border: 0px; }
+
+.myablogTitle 
+{ 
+	font-size: 25px;
+	font-weight: bold;
+	font-family: Arial, Helvetica, sans-serif;
+	text-align: left;
+	color: #000;
+	position: absolute;
+	padding: 0px;
+	width: 90%;
+	left: 4px;
+	top: 5px;
+	z-index: 1;
+}
+
+.myablogMenu 
+{
+	position: absolute;
+	margin-left: 1px;
+	left:0px;
+	top:60px;
+	width:200px;
+	background-color: #FFF;
+	border:1px solid #222;
+}
+
+.outside 
+{
+	position: absolute;
+	top: 60px;
+	left: 210px;
+	z-index: 2;
+}
+
+h4 
+{ 
+	font-size: 16px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #000;
+	
+	padding-left:0px;
+	padding-top:0px;
+	padding-bottom:8px;
+	margin:0px;
+	z-index: 6;
+}
+
+h5 
+{ 
+	font-size: 12px;
+	font-family: Arial, Helvetica, sans-serif;
+	letter-spacing: 3px;
+	color: #000;
+	z-index: 6;
+	margin: 0px;
+}
+
+h6 
+{ 
+	font-size: 11px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight:normal;	
+	color: #000;
+	z-index: 6;
+	margin: 0px;
+}
+
+blockquote 
+{
+	align: center; 
+	line-height: 16px;
+	text-align: justify;
+	padding: 10px;
+	color: #000;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-style:italic;
+	border:1px solid #000;	 
+	background-color: #ffffcc;
+}
+
+input,textarea,select 
+{ 
+	background-color: #FFF;
+	border: 1px solid #222;
+	color: #000;
+	padding:5px; 
+}
+
+/* unvisited link */
+a:link 
+{ 
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #3333ff; 
+	text-decoration: none; 
+	font-weight:normal;
+}
+/* visited link */
+a:visited 
+{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #3333ff; 
+	text-decoration: none; 
+	font-weight:normal;
+}
+/* mouse over link */
+a:hover 
+{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #3333ff;
+	text-decoration: underline;
+	font-weight:normal;
+}
+/* selected link */
+a:active 
+{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #3333ff; 
+	text-decoration: none; 
+	font-weight:normal;
+}
+
+/***********************************************************************
+*	Classes that handle sidebar boxes
+*
+*	Layout:
+*	
+*	sidebox
+*	{
+*		sidebox2 -- used for rounded corners (optional)
+*		{
+*			sidebar_title
+*			ul (no class - subclass ".sidebox ul" to style)
+*			{
+*				li ((no class - subclass ".sidebox li" to style))
+*			}
+*		}
+*	}
+*
+*	Available subclasses: profile archive links (use ".sidebox profile")
+*
+************************************************************************/
+.sidebox 
+{ 
+	color: #000;
+	font-size: 11px;
+	font-family: Arial, Helvetica, sans-serif;	
+	line-height: 20px; 
+	text-align: left;
+	margin-left:10px;
+	margin-top:5px;
+}
+
+.sidebar_title 
+{ 
+	font-size: 12px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: #000;
+	z-index: 6;
+	margin: 0px;
+}
+
+.sidebox li
+{
+	list-style-type:square; 
+	color: #000;
+	padding: 0px;
+	margin: 0px 0px 0px 15px;
+}
+
+.sidebox ul
+{ 
+	margin: 0px;
+	padding: 0px;
+	font-size: 11px;
+	font-weight: normal;
+	font-family: Arial, Helvetica, sans-serif;	
+	margin-bottom: 20px;
+	margin-top:10px;
+}
+
+/************************************************************
+*	Classes that handle day, post, and comments for the body
+*
+*	Layout:
+*	
+*	post_day_container
+*	{
+*		post_date_header
+*		post_container
+*		{
+*			post_header
+*			post_body
+*			post_footer
+*			post_comment_container
+*			{
+*				post_comment
+*				post_comment_add
+*			}
+*		}
+*	}
+*
+*
+*************************************************************/
+
+/* Each post is printed inside a div container for each day*/
+.post_day_container
+{
+	border:1px solid #000;
+	margin-bottom:10px;
+	width:98%;
+}
+/* Date Header Div */
+.post_date_header 
+{ 
+	color: #000; 
+	font-weight: normal;
+	padding-left:10px;
+	padding-top:10px;
+	font-size: 12px;
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+}
+/* A container for each post (inside post_day_container) */
+.post_container 
+{
+	background-color: #FFF;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+/* The title of each article */
+.post_header
+{
+	font-size: 16px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight:bold;
+	color: #000;	
+	padding-left:0px;
+	padding-top:0px;
+	padding-bottom:8px;
+	margin:0px;
+	z-index: 6;
+}
+/* Where the body of the post article/post is printed */
+.post_body
+{
+	color: #000;
+	font-size: 12px;
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	letter-spacing: normal;
+	word-spacing: normal;
+	line-height: 20px;
+	text-align: left;
+}
+/* Comes after post_body inside post_container */
+.post_footer
+{
+	text-align: left;
+	padding-top:5px;
+	padding-bottom:5px;
+	font-size: 10px;
+	font-family:arial,verdana,sans-serif; 
+}
+/* This div resides in the day container and is printed directly after the footer */
+.post_comment_container
+{
+	border:1px dotted #B8B8B8;
+	text-align:left;
+}
+
+/* Contains each and ever comment */
+.post_comment
+{
+	text-align:left;
+	padding:10px;
+}
+/* Contains the add new comment form */
+.post_comment_add
+{
+	padding-top:10px;
+	text-align:left;
+	padding:10px;
+}
+</style>
+<script language="javascript" type="text/javascript">
+<!--
+function ToggleComments(id)
+{
+	var dv = document.getElementById('cmts_' + id);
+	if (dv && dv.style.display == 'block')
+		dv.style.display = 'none';
+	else
+		dv.style.display = 'block';
+}
+-->
+</script>
+</head>
+
+<body>
+
+<div class="myablogTitle"><%PAGETITLE%></div>
+
+<div class="outside">
+	<%BLOG_BODY%>
+	<br />
+</div>
+
+<div class="myablogMenu"> 
+	<%SIDE_BAR%>
+</div>
+
+</body>
+</html>

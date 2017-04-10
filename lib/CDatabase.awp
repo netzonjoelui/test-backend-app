@@ -1,0 +1,846 @@
+<?php	
+if (!class_exists("AntConfig"))
+	throw new Exception("lib/AntConfig.php required before including CDatabase.awp");
+require_once("settings/settings_functions.php");
+require_once("lib/AntSystem.php");
+
+class CDatabase
+{
+	/**
+	 * Number of queries run insternal counter
+	 *
+	 * @var int
+	 */
+	public $statNumQueries = 0;
+
+	/**
+	 * Debug flag used to testing
+	 *
+	 * @var bool
+	 */
+	public $debug = false;
+
+	/**
+	 * Actual database handle
+	 *
+	 * @var pg_handle
+	 */
+	private $dbHandle = null;
+
+	/**
+	 * Cache results from last query
+	 *
+	 * @var int(resource) $results
+	 */
+	private $results = null;
+
+	/**
+	 * Account namespace / id
+	 *
+	 * @var int
+	 */
+	public $accountId = false;
+
+	/**
+	 * Schema name
+	 *
+	 * @var string
+	 */
+	public $schema = "";
+
+	var $cache_query;
+	var $dbname;
+	var $timezoneName;
+	var $fDateStyleSet = false;
+	var $fByteaOuputSet = false;
+
+	// Database connection params
+	var $server;
+	var $database;
+	var $user;
+	var $password;
+	var $encoding;
+	var $port;
+	
+	/**
+	 * Class constructor
+	 *
+	 * @param string $server The server or host where the database is hosted
+	 * @param string $dbname The name of the database to connect to
+	 */
+	public function __construct($server, $dbname, $user=null, $password=null, $dbtype=null, $enc=null) 
+	{
+		$this->port = AntConfig::getInstance()->db['port'];
+
+		/* No longer needed because we required server and database name when creating the database class
+		if (!$dbname)
+		{
+			$this->GetAccountDatabase();
+
+			// Make sure that accountId is set
+			if (!$this->accountId)
+				$this->getAccountParams(null, $this->dbname);
+		}
+		else
+		{
+		 */
+			$this->server = $server;
+			$this->dbname = $dbname;
+			$this->user = ($user) ? $user : AntConfig::getInstance()->db['user'];
+			$this->password = ($password) ? $password : AntConfig::getInstance()->db['password'];
+			$dbtype = ($dbtype) ? $dbtype : AntConfig::getInstance()->db['type'];
+		//}
+
+		$this->dbHandle = false;
+		//$this->connect();
+	}
+	
+	function __destruct() 
+	{
+		//@pg_close($this->dbHandle);
+		//$this->dbHandle = false;
+	}
+
+	function close() 
+	{
+		@pg_close($this->dbHandle);
+		$this->dbHandle = false;
+	}
+
+	function isActive()
+	{
+		if (!$this->dbHandle)
+			return false;
+		else
+			return true;
+	}
+
+	function dicconnect()
+	{
+		if ($this->dbHandle)
+			@pg_close($this->dbHandle);
+
+		$this->dbHandle = false;
+	}
+
+	/**
+	 * Connect to database backend
+	 */
+	public function connect()
+	{
+		if ($this->dbname)
+		{
+			$this->dbHandle = pg_connect("host=".$this->server."
+										  dbname=".$this->dbname."
+										  user=".$this->user." 
+										  port=".$this->port." 
+										  password=".$this->password);
+
+			if ($this->dbHandle === false)
+			{
+				AntLog::getInstance()->error("Unable to connect to database ".$this->server." ".$this->dbname);
+				$this->lastError = "Could not connect to database";
+				return false;
+			}
+
+			pg_set_client_encoding($this->dbHandle, "UNICODE");
+			$this->cache_query = false;
+			$this->encoding = "UNICODE";
+
+			// Set date format
+			$this->Query("SET datestyle = 'SQL, MDY';");
+
+			// Set timezone
+			if ($this->timezoneName)
+				$this->Query("SET TIME ZONE '".$this->timezoneName."';");
+		}
+		else
+		{
+			$this->dbHandle = false;
+		}
+
+		return $this->dbHandle;
+	}
+
+	/**
+	 * Set schema search path
+	 *
+	 * @param string $namespace The schema namespace to use as the default
+	 * @return bool true on success, false if schema does not exist
+	 */
+	public function setSchema($namespace)
+	{
+		$this->schema = $namespace;
+
+		//if ($dbh->GetNumberRows($dbh->Query("SELECT schema_name FROM information_schema.schemata WHERE schema_name = '".$namespace."';")))
+		return $this->Query("SET search_path TO $namespace;", false);
+	}
+
+	/**
+	 * Get account id / namespace
+	 *
+	 * @return int | string
+	 */
+	public function getAccountNamespace()
+	{
+		// Best option is to return the account id
+		if ($this->accountId)
+			return $this->accountId;
+
+		// Default to returning the dbname if no accountId has been set
+		// This is commonly used when working with antsystem
+		return $this->dbname;
+	}
+
+	function GetAccountDatabase()
+	{
+		global $_SESSION, $_SERVER, $_GET, $settings_db_server, 
+				$settings_db_user, $settings_db_password, $settings_db_type, $settings_db_app;
+
+		$this->user = $settings_db_user;
+		$this->password = $settings_db_password;
+
+		if ($_SESSION['DATABASE'])
+		{
+			$this->server = ($_SESSION['DATABASE_SERVER']) ? $_SESSION['DATABASE_SERVER'] : $settings_db_server;
+			$this->dbname = $_SESSION['DATABASE'];
+			$this->accountId = $_SESSION['ACCOUNT_ID'];
+		}
+		else
+		{
+			$ret = $this->getAccountParams();
+
+			if ($ret)
+			{
+				return $true;
+			}
+			else
+			{
+				//return $settings_db_app;
+				$this->server = $settings_db_server;
+				$this->dbname = $settings_db_app;
+				return true;
+			}
+		}
+	}
+
+	/**
+	 * Get parameters by account name
+	 *
+	 * @param string $account_name The unique account name to pull
+	 * @param string $account_dbh The name of the database of this account
+	 * @return bool true on success, false on failure
+	 */
+	private function getAccountParams($account_name=null, $account_db=null)
+	{
+		global $settings_db_server, $settings_db_type;
+
+		if (!$account_name && !$account_db)
+			$account_db = $this->dbname;
+
+		if ($account_name || $account_db)
+		{
+			$antsys = new AntSystem();
+			$acctinf = $antsys->getAccountInfo($account_name, $account_db);
+			if ($acctinf['id'] > 0)
+			{
+				$this->dbname = $acctinf['database'];
+				$this->accountId = $acctinf['id'];
+				$svr = $acctinf['server'];
+				$this->server = ($svr) ? $svr : $settings_db_server;
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+
+	function EncodingSet($enc)
+	{
+		pg_set_client_encoding($this->dbHandle, $enc);
+	}
+	
+	function GetHandle()
+	{
+		return $this->dbHandle;
+	}
+	
+	function GetColumnComment($table, $column)
+	{
+		if (!$this->isActive())
+			$this->connect();
+
+		if (!$this->dbHandle)
+			return false;
+
+		$query = "select col_description(
+					(select oid from pg_class where relname='$table'), 
+					(select attnum from pg_attribute where attname = '$column' 
+					and attrelid=(select oid from pg_class where relname='$table')))";
+		$result = pg_query($this->dbHandle, $query);
+		if (pg_num_rows($result))
+		{
+			$row = pg_fetch_array($result);
+			$comment = $row["col_description"];
+		}
+		pg_free_result($result);
+		
+		return $comment;
+	}
+	
+	function GetTableColumns($table, $col = NULL, $schema = NULL)
+	{
+		if (!$this->isActive())
+			$this->connect();
+
+		if (!$this->dbHandle)
+			return false;
+		/*
+		$query = "SELECT a.attname as colname, t.typname as coltype,
+				(SELECT adsrc FROM pg_attrdef adef WHERE a.attrelid=adef.adrelid AND a.attnum=adef.adnum) AS coldefault
+				FROM pg_attribute a, pg_class c, pg_type t WHERE
+				c.relname = '$table' AND a.attnum > 0 AND a.attrelid = c.oid AND a.atttypid = t.oid";
+		if ($col)
+			$query .= " and a.attname = '$col' ";
+		
+		$query .= " ORDER BY a.attname";*/
+		$query = "SELECT column_name, data_type, column_default, is_nullable, 
+					table_schema FROM information_schema.columns WHERE table_name='$table'";
+		if ($schema)
+			$query .= " and table_schema='$schema'";
+		if ($col)
+			$query .= " and column_name='$col'";
+		
+		$result = pg_query($this->dbHandle, $query);
+
+		if ($col)
+		{
+			if (pg_num_rows($result))
+			{
+				$row = pg_fetch_array($result, 0);
+				return $row;
+			}
+		}
+		
+		return $result;
+	}
+	
+	function Query($query, $logerror = true)
+	{
+		if (!$this->isActive())
+			$this->connect();
+
+		if (!$this->dbHandle)
+			return false;
+
+		if (isset($this->result))
+			$this->FreeResults();
+
+		if (!$this->fDateStyleSet)
+		{
+			$query = "SET datestyle='SQL';".$query;
+			$this->fDateStyleSet = true;
+		}
+
+		//print($query);
+		$result = @pg_query($this->dbHandle, $query);
+		if ($result === FALSE && $logerror)
+			$this->logError($query, $result);
+
+		$this->statNumQueries++;
+		//AntLog::getInstance()->debug($query);
+
+		return $result;
+	}
+
+	function getLastError()
+	{
+		return pg_last_error($this->dbHandle);
+	}
+
+	function logError($query, $result)
+	{
+		global $USERNAME, $_SERVER;
+
+		$error = pg_last_error($this->dbHandle);
+
+		if (!$error)
+			return;
+
+		$body = "User: $USERNAME\r\n";
+		$body .= "Type: Database\r\n";
+		$body .= "Database: ".$this->dbname."\r\n";
+        $body .= "Schema: ".$this->schema."\r\n";
+		$body .= "When: ".date('Y-m-d H:i:s')."\r\n";
+		$body .= "Host: ". (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '' ) ."\r\n";
+		$body .= "Page: ". (isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '' ) ."\r\n";
+		$body .= "Error\n";
+		$body .= "----------------------------------------------\n";
+		$body .= $error . "\n";
+		$body .= "----------------------------------------------\n";
+		$body .= "Query\n";
+		$body .= "----------------------------------------------\n";
+		$body .= $query . "\n";
+		$body .= "----------------------------------------------\n";
+
+		if (class_exists("AntLog") && !function_exists("phpunit_autoload")) // only log if not a unit test
+		{
+			AntLog::getInstance()->error($body);
+		}
+		else
+		{
+			throw new Exception('Query ERROR: ' . $error . "\n--------------------------------\n" . $query);
+			/*
+			file_put_contents(AntConfig::getInstance()->data_path."/error.log", $body, FILE_APPEND);
+			chmod(AntConfig::getInstance()->data_path."/error.log", 0777);
+			*/
+		}
+	}
+	function GetNumberRows($result)
+	{
+		if ($result)
+			return pg_num_rows($result);
+		else
+			return 0;
+	}
+	function GetRow($result, $num = 0, $argument = NULL)
+	{
+		return $this->GetNextRow($result, $num, $argument);
+	}
+	function GetNextRow($result, $num = 0, $argument = NULL)
+	{
+        if ($result == null)
+            throw new \Exception("Results cannot be null");
+        
+		/*
+		if ($argument)
+			$retval = pg_fetch_array($result, $num, $argument);
+		else
+			$retval = pg_fetch_array($result, $num);
+		 */
+
+		$retval = pg_fetch_assoc($result, $num);
+
+		return $retval;
+	}
+
+	/**
+	 * Retrieve all results in an array
+	 *
+	 * @return array(array(rowdata))
+	 */
+	public function fetchAll($result)
+	{
+		if (!$result)
+			return null;
+
+		return pg_fetch_all($result);
+	}
+
+	function AddColumnComment($table, $column, $comment)
+	{
+		$this->Query("COMMENT ON COLUMN $table.$column IS '$comment';");
+	}
+	function FreeResults($result)
+	{
+		if ($result !== false && $result !== null)
+			pg_free_result($result);
+	}
+
+	/**
+	 * Check if an index exists by name
+	 *
+	 * @param string $idxname The name of the index to look for
+	 * @return bool true if the index was found, false if it was not
+	 */
+	public function indexExists($idxname) {
+		$query = "select * from pg_indexes where indexname='".$this->Escape($idxname)."'";
+		if ($this->schema)
+			$query .= " and schemaname='" . $this->schema . "'";
+		if ($this->GetNumberRows($this->Query($query)))
+			return true;
+		else
+			return false;
+	}
+
+	function constraintExists($tbl, $conname)
+	{
+		$query = "select table_name from information_schema.table_constraints 
+					where table_name='$tbl' and constraint_name='$conname';";
+
+		if ($this->GetNumberRows($this->Query($query)))
+			return true;
+		else
+			return false;
+	}
+
+	function TableExists($tbl, $schema=null)
+	{
+		$query = "SELECT tablename FROM pg_tables where tablename='$tbl'";
+		if ($schema) 
+			$query .= " and schemaname='$schema'";
+		else if ($this->schema)
+			$query .= " and schemaname='" . $this->schema . "'";
+
+		if ($this->GetNumberRows($this->Query($query)))
+			return true;
+		else
+			return false;
+	}
+	function ColumnExists($table, $col)
+	{
+		if (strpos($table, '.'))
+		{
+			$parts = explode(".", $table);
+			$schema = $parts[0];
+			$table = $parts[1];
+		}
+		else
+		{
+			$schema = "";
+		}
+
+		$query = "SELECT column_name FROM information_schema.columns WHERE table_name='$table'
+					and column_name='$col'";
+		if ($schema)
+			$query .= " and table_schema='$schema' ";
+		else if ($this->schema)
+			$query .= " and table_schema='" . $this->schema . "'";
+
+		if ($this->GetNumberRows($this->Query($query)))
+			return true;
+		else
+			return false;
+	}
+	function SchemaExists($sch)
+	{
+		$query = "SELECT nspname from pg_namespace where nspname='$sch'";
+
+		if ($this->GetNumberRows($this->Query($query)))
+			return true;
+		else
+			return false;
+	}
+	function IsPrimaryKey($tbl, $col=null, $schema=null)
+	{
+		if (!$this->isActive())
+			$this->connect();
+
+		if (!$this->dbHandle)
+			return false;
+
+		$query = "select pg_class.relname, pg_attribute.attname 
+					from 
+					pg_class, pg_attribute, pg_namespace, pg_index
+					where 
+					pg_class.oid = pg_attribute.attrelid
+					and pg_class.oid = pg_index.indrelid
+					and pg_index.indkey[0] = pg_attribute.attnum
+					and pg_index.indisprimary = 't'
+					and pg_namespace.oid = pg_constraint.connamespace
+					and relname = '$tbl' ";
+		if ($schema)
+			$query .= "and pg_namespace.nspname='$schema'";
+		if ($col)
+			$query .= "and attname='$col'";
+
+		/*
+		$query = "select pg_class.relname, pg_constraint.conname, contype from 
+					pg_class, pg_constraint, pg_namespace
+					where 
+					pg_class.oid = pg_constraint.conrelid
+					and pg_namespace.oid = pg_constraint.connamespace
+					and contype='p' and relname = '$tbl' ";
+		if ($schema)
+			$query .= "and pg_namespace.nspname='$schema'";
+		if ($col)
+			$query .= "and conname='$col'";
+		*/
+		$result = pg_query($this->dbHandle, $query);
+		if (pg_num_rows($result))
+		{
+			$row = pg_fetch_array($result);
+			return $row['attname'];
+		}
+		else
+		{
+			return false;
+		}
+		/*
+		SELECT  pg_class.relname, pg_attribute.attname
+		FROM pg_class, pg_attribute, pg_index
+		WHERE 
+		pg_class.oid = pg_attribute.attrelid AND
+		pg_class.oid = pg_index.indrelid AND
+		pg_index.indkey[0] = pg_attribute.attnum AND
+		pg_index.indisprimary = 't';
+		*/
+	}
+
+	function loCreate()
+	{
+		$this->Query("begin");
+		$ret = pg_lo_create($this->dbHandle);
+		$this->Query("commit");
+		$return;
+	}
+
+	function loSize($lo)
+	{
+		$pos = pg_lo_tell ($lo);
+		pg_lo_seek ($lo, 0, PGSQL_SEEK_END);
+		$size = pg_lo_tell ($lo);
+		pg_lo_seek ($lo, $pos, PGSQL_SEEK_SET);
+		return $size; 
+	}
+
+	function loOpen($oid, $mode='rw')
+	{
+		if (!$this->isActive())
+			$this->connect();
+
+		if (!$this->dbHandle)
+			return false;
+
+		pg_query($this->dbHandle, "begin");
+		return pg_lo_open($this->dbHandle, $oid, $mode);
+	}
+
+	function loWrite($handle, $data="")
+	{
+		if (!$this->isActive())
+			$this->connect();
+
+		if (!$this->dbHandle)
+			return false;
+
+		pg_lo_write($handle, $data);
+	}
+
+	function loRead($handle, $len=8192)
+	{
+		if (!$this->isActive())
+			$this->connect();
+
+		if (!$this->dbHandle)
+			return false;
+
+		return pg_lo_read($handle, $len);
+	}
+
+	function loExport($oid, $path)
+	{
+		$this->Query("begin");
+		$ret = pg_lo_export($this->dbHandle, $oid, $path);
+		$this->Query("commit");
+		return $ret;
+	}
+
+	function loImport($path)
+	{
+		$this->Query("begin");
+		$oid = pg_lo_import($this->dbHandle, $path);
+		$this->Query("commit");
+		return $oid;
+	}
+
+	function loClose($handle)
+	{
+		if (!$this->isActive())
+			$this->connect();
+
+		if (!$this->dbHandle)
+			return false;
+
+		pg_query($this->dbHandle, "commit");
+		pg_lo_close($handle);
+	}
+	
+	function loUnlink($oid)
+	{
+		if (!$this->isActive())
+			$this->connect();
+
+		if (!$this->dbHandle)
+			return false;
+
+		return pg_lo_unlink($this->dbHandle, $oid);
+	}
+
+	function Escape($text)
+	{
+		if ($this->encoding == "UNICODE")
+		{
+			// iconv did not appear to be stripping some non-utf chars so we are doing it manuallly below
+			//$text = iconv('utf-8',"utf-8//IGNORE", $text);
+
+			//reject overly long 2 byte sequences, as well as characters above U+10000 and replace with ?
+			$text = preg_replace('/[\x00-\x08\x10\x0B\x0C\x0E-\x19\x7F]'.
+										'|[\x00-\x7F][\x80-\xBF]+'.
+										'|([\xC0\xC1]|[\xF0-\xFF])[\x80-\xBF]*'.
+										'|[\xC2-\xDF]((?![\x80-\xBF])|[\x80-\xBF]{2,})'.
+										'|[\xE0-\xEF](([\x80-\xBF](?![\x80-\xBF]))|(?![\x80-\xBF]{2})|[\x80-\xBF]{3,})/S', '?', $text );
+
+			//reject overly long 3 byte sequences and UTF-16 surrogates and replace with ?
+			$text = preg_replace('/\xE0[\x80-\x9F][\x80-\xBF]|\xED[\xA0-\xBF][\x80-\xBF]/S','?', $text );
+		}
+
+		return pg_escape_string($text);
+	}
+
+	function EscapeBytea($text)
+	{
+		return pg_escape_bytea($text);
+	}
+
+	function UnEscapeBytea($text)
+	{
+		return pg_unescape_bytea($text);
+	}
+
+    function EscapeBool($text)
+    {
+        if(empty($text))
+            return "f";
+        else
+            return pg_escape_string($text);
+    }
+    
+	function EscapeNumber($numbervalue)
+	{
+		if (is_numeric($numbervalue))
+			return "'$numbervalue'";
+		else
+			return 'NULL';
+	}
+
+	function EscapeNull($val)
+	{
+		if ($val)
+		{
+			return "'".$this->Escape($val)."'";
+		}
+		else
+			return 'NULL';
+	}
+
+	function EscapeDate($date)
+	{
+		$date = trim($date);
+		$time = strtotime($date);
+		if ($date && $date != "0/0/00" && strtolower($date) != "never" && $time !==false)
+		{
+			return "'".$date."'";
+		}
+		else
+			return 'NULL';
+	}
+
+	function EscapeTimestamp($date)
+	{
+		$date = trim($date);
+		$time = strtotime($date);
+		if ($date && $date != "0/0/00" && strtolower($date) != "never" && $time !==false)
+		{
+			return "'".date("m/d/Y h:i:s A", $time)."'";
+		}
+		else
+			return 'NULL';
+	}
+
+	function GetFieldName($result, $id)
+	{
+		return pg_field_name($result, $id);
+	}
+
+	function GetFieldType($result, $id)
+	{
+		return pg_field_type($result, $id);
+	}
+
+	function GetNumFields($result)
+	{
+		return pg_num_fields($result);
+	}
+
+	function GetValue($result, $num = 0, $name=0)
+	{
+		if ($this->GetNumberRows($result))
+		{
+			$row = pg_fetch_array($result, $num);
+
+			return $row[$name];
+		}
+		else
+			return null;
+	}
+
+	function SetTimezone($tz)
+	{
+		$this->timezoneName = $tz;
+
+		if ($this->isActive())
+			$this->Query("SET TIME ZONE '$tz';");
+	}
+
+	/**
+	 * Get the type of a column
+	 *
+	 * @param string $table The name of the table containing the column
+	 * @param string $column The name of the column to get type for
+	 * @return string Column type name
+	 */
+	public function getColumnType($table, $column)
+	{
+		$result = $this->Query("select data_type, udt_name from information_schema.columns 
+								where table_name='$table' and column_name='$column';");
+		if ($this->GetNumberRows($result))
+			return $this->GetValue($result, 0, "data_type");
+		
+		return "";
+	}
+}
+
+/******************************************************************************************
+*	Function:		CheckNumber
+*
+*	Purpose:		Prepare a number for database entry
+*
+*	Arguments:		1. Number to validata
+*******************************************************************************************/
+function db_CheckNumber($numbervalue)
+{
+	if ($numbervalue && is_numeric($numbervalue))
+		return "'$numbervalue'";
+	else
+		return 'NULL';
+}
+
+/******************************************************************************************
+*	Function:		UploadDate
+*
+*	Purpose:		Prepare date for database entry
+*
+*	Arguments:		1. date to check
+*******************************************************************************************/
+function db_UploadDate($date)
+{
+	if ($date && $date != "0/0/00" && strtolower($date) != "never")
+		return "'".addslashes($date)."'";
+	else
+		return 'NULL';
+}
+function db_CheckDate($date)
+{
+	if ($date && $date != "0/0/00" && strtolower($date) != "never")
+		return "'".addslashes($date)."'";
+	else
+		return 'NULL';
+}

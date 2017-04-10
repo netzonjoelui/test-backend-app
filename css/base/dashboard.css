@@ -1,0 +1,50 @@
+/**
+ * Dashboard widget classes
+ */
+.dbWidget
+{
+	border: 1px solid #dddddd;
+	margin: 0 4px 8px 4px;
+}
+
+.dbWidgetHeader
+{
+	background-color: none;
+	border-bottom: 1px solid #00b2d9;
+}
+
+.dbWidgetHeader:hover
+{
+	background-color: #EEE;
+	/*
+	background-image: -webkit-gradient(linear,0 0,0 100%,from(#FAFAFA),to(#D6D6D6));
+	background-image: -moz-linear-gradient(top,#FAFAFA,#D6D6D6);
+	*/
+	/*
+	border-left: 1px solid #BBB;
+	border-top: 1px solid #BBB;
+	*/
+}
+
+.dbWidgetTitle
+{
+	padding: 5px 0 0 5px;
+	font-size: 15px;
+	color: #666;
+	height: 25px;
+	cursor: move;
+	text-overflow: ellipsis;
+	/*text-shadow: white 0 1px;*/
+	white-space: nowrap;
+}
+
+.dbWidgetOpt
+{
+	margin: 7px 5px;
+	float: right;
+}
+
+.dbWidgetBody
+{
+	padding: 5px;
+}

@@ -1,0 +1,64 @@
+<?php
+require_once("../lib/AntConfig.php");
+
+header("Content-type: text/xml");			// Returns XML document
+
+echo '<?xml version="1.0" encoding="UTF-8"
+  standalone="yes"?>'; 
+
+$name = $_GET['q'];
+if (strpos($name, "@") !== false)
+	$name = substr($name, 0, strpos($name, "@"));
+
+$name = strtolower($name);
+
+// main loop
+$url = "http://".$settings_blog_gateway."/xml_check_name.awp?q=$name";
+$PATH = "";
+$RES = 0;
+
+function startElement($parser, $name, $attrs)
+{
+	global $depth, $PATH;
+	$PATH .= ($PATH) ?  ":".$name : $name;
+	
+	$depth[$parser]++;
+}
+
+function endElement($parser, $name)
+{
+	global $depth, $PATH;
+	$PATH = substr($PATH, 0, strrpos($PATH, ":"));
+	$depth[$parser]--;
+}
+
+function characterData($parser, $data)
+{
+	global $depth, $PATH, $RES;
+	
+	switch ($PATH)
+	{
+	case 'RESPONSE:RESULT':
+		$RES = $data;
+		break;
+	}
+}
+$xml_parser = xml_parser_create();
+xml_set_element_handler($xml_parser, "startElement", "endElement");
+xml_set_character_data_handler($xml_parser, "characterData");
+if (!($fp = fopen($url,"r"))) 
+{
+	die ("could not open RSS for input");
+}
+while ($data = fread($fp, 4096)) 
+{
+	if (!xml_parse($xml_parser, $data, feof($fp)))
+		die(sprintf("XML error: %s at line %d", xml_error_string(xml_get_error_code($xml_parser)), xml_get_current_line_number($xml_parser)));
+}
+xml_parser_free($xml_parser);
+		
+?>
+<response>
+  <method>checkName</method>
+  <result><?php print($RES); ?></result>
+</response>

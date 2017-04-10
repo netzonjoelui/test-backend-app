@@ -1,0 +1,117 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("../lib/content_table.awp");
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/CToolTabs.awp");
+	require_once("../lib/WindowFrame.awp");
+	require_once("../users/user_functions.php");
+	require_once("../lib/CToolTable.awp");
+	require_once("../lib/Button.awp");
+	require_once("../lib/CDropdownMenu.awp");
+	require_once("../email/email_functions.awp");
+	require_once("../contacts/contact_functions.awp");
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+	$tname = UserGetTheme($dbh, $USERID, 'name');
+	$FID = $_GET['fid'];
+	
+	$setme = false;
+	
+	if ($_POST['save'])
+	{
+		if (is_numeric($_POST['topmargin']) && is_numeric($_POST['bottommargin'])
+			&& is_numeric($_POST['leftmargin']) && is_numeric($_POST['rightmargin']))
+		{
+			$dbh->Query("update user_files_documents set margins[1] = '".$_POST['leftmargin']."', 
+							margins[2] = '".$_POST['rightmargin']."', margins[3] = '".$_POST['topmargin']."', 
+							margins[4] = '".$_POST['bottommargin']."' where file_id='$FID'");
+			$setme = true;
+		}
+	}
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme($dbh, $USERID, 'css'); ?>" />
+<title>Page Setup</title>
+<style type='text/css'>
+body
+{
+	height: 100%;
+	margin:0px;
+}
+</style>
+<script type="text/javascript" language="javascript">
+function setMe()
+{
+	if (opener)
+	{
+		opener.document.printform.leftmargin.value = '<?php print($_POST['leftmargin']); ?>';
+		opener.document.printform.rightmargin.value = '<?php print($_POST['rightmargin']); ?>';
+		opener.document.printform.topmargin.value = '<?php print($_POST['topmargin']); ?>';
+		opener.document.printform.bottommargin.value = '<?php print($_POST['bottommargin']); ?>';
+		
+		
+		opener.RteUpdateMargins('editorbody', '<?php print($_POST['leftmargin']); ?>', '<?php print($_POST['rightmargin']); ?>', 
+								'<?php print($_POST['topmargin']); ?>', '<?php print($_POST['bottommargin']); ?>');
+		
+		window.close();
+	}
+}
+</script>
+</head>
+
+<body <?php if ($setme) echo "onload='setMe()'"; ?>>
+<form name="setup" method='post' action="setup_page.awp?fid=<?php print($FID); ?>">
+<?php
+	// Get Margins
+	if ($FID)
+	{
+		$result = $dbh->Query("select margins[1] as leftmargin, margins[2] as rightmargin,
+								margins[3] as topmargin, margins[4] as bottommargin 
+								from user_files_documents where file_id='$FID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$leftmargin = $row['leftmargin'];
+			$rightmargin = $row['rightmargin'];
+			$topmargin = $row['topmargin'];
+			$bottommargin = $row['bottommargin'];
+		}
+		$dbh->FreeResults($result);
+	}
+	
+	//TableContentOpen("100%", "Page Setup", "100%");
+	
+	WindowFrameToolbarStart('100%');
+	echo ButtonCreate("Save &amp; Close", "SUBMIT:setup:save");
+	echo ButtonCreate("Cancel", "window.close();", "b2");
+	WindowFrameToolbarEnd();
+	
+	echo "<br />&nbsp;Margins <hr />";
+	echo "<table>
+			<tr>
+				<td>Top:</td>
+				<td><input type='text' name='topmargin' value='$topmargin' size='2' /></td>
+				<td>Bottom:</td>
+				<td><input type='text' name='bottommargin' value='$bottommargin' size='2' /></td>
+			</tr>
+			<tr>
+				<td>Left:</td>
+				<td><input type='text' name='leftmargin' value='$leftmargin' size='2' /></td>
+				<td>Right:</td>
+				<td><input type='text' name='rightmargin' value='$rightmargin' size='2' /></td>
+			</tr>
+		  </table>";
+	//TableContentClose();
+?>
+</form>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("lib/CToolMenu.awp");
+	require_once("lib/WindowFrame.awp");
+	require_once('lib/CDropdownMenu.awp');
+	require_once("email_functions.awp");
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+	
+	$BOX = ($_GET['box']) ? $_GET['box'] : EmailGetSpecialBoxId($dbh, $USERID, "Inbox");
+	$BOXNAME = EmailGetBoxName($dbh, $BOX);
+	
+	$ATTID = $_GET['attid'];
+	
+	if (is_numeric($ATTID))
+	{
+		$query = "select content_type, encoding, disposition, filename, attached_data, 
+				  file_id from email_message_attachments where id = '$ATTID'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+
+			if ($row['file_id'])
+			{
+				header("Location: /userfiles/file_download.awp?view=1&fid=".$row['file_id']);
+			}
+			else
+			{
+				header("Content-Type: ".$row['content_type']);
+				echo base64_decode(trim($row['attached_data']));
+			}
+		}
+		$dbh->FreeResults($result);
+	}
+?>

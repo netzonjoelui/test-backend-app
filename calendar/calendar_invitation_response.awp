@@ -1,0 +1,167 @@
+<?php 
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");
+	require_once("../lib/CDatabase.awp");
+	require_once("calendar_functions.awp");
+	require_once("../contacts/contact_functions.awp");
+	require_once("../users/user_functions.php");
+	require_once("../lib/Email.php");
+	require_once("../email/email_functions.awp");
+	
+	function CheckSecret(&$dbh, $invid, $sSecret)
+	{
+		/*
+		if (is_numeric($invid))
+		{
+			$result = $dbh->Query("select id from calendar_events_attendees where id='$invid' and shared_secret='$sSecret'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$dbh->FreeResults($result);
+				return true;
+			}
+			return false;
+		}
+		*/
+		return true;
+	}
+	
+	function CheckForOpen(&$dbh, $invid)
+	{
+		if (is_numeric($tid))
+		{
+			$result = $dbh->Query("select id from calendar_sharing where id='$invid' and accepted != 't'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$dbh->FreeResults($result);
+				return true;
+			}
+			return false;
+		}
+	}
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+        "http://www.w3.org/TR/REC-html40/loose.dtd">
+		
+<html>
+<head>
+<script language="javascript" type="text/javascript">
+function ResizeWindow()
+{
+	window.resizeTo(400,475);
+}
+</script>
+</head>
+<body onLoad="ResizeWindow();">
+<?php
+	$dbh = new CDatabase();
+									  
+	$invid = $HTTP_GET_VARS['invid']; // Unique id of transaction request
+	$sSecret = $HTTP_GET_VARS['ss']; // Password created for security
+	
+	if ($invid && $sSecret && CheckSecret(&$dbh, $invid, $sSecret))
+	{
+		$res = $dbh->Query("select calendar, user_id, share_type, edit_rights, date_invited, req_user_id
+								from calendar_sharing where id='$invid'");
+		if ($dbh->GetNumberRows($res))
+		{
+			$row = $dbh->GetNextRow($res, 0);
+			print("Invitation Response: ".CalGetName(&$dbh, $row['calendar'])."<br>");
+			$dbh->FreeResults($res);
+		}
+		
+		if (isset($_POST['approve']) || isset($_POST['disapprove']))
+		{
+			if (isset($_POST['approve']))
+			{
+				// Set accept boolean
+				$dbh->Query("update calendar_sharing set accepted='t' where id='$invid'");
+				
+				// Print confirmation
+				print("<center><strong>Thank you for accepting the invitation!</strong><br>");
+				
+				// Send email to origial usr
+				if (is_numeric($row['req_user_id']))
+				{
+					$to 	 = UserGetEmail(&$dbh, $row['req_user_id']);
+					$from    = (is_numeric($row['user_id'])) ? UserGetEmail(&$dbh, $row['user_id']) : $settings_admin_contact;
+					$subject = "Invitation Accepted: ".CalGetName(&$dbh, $row['calendar'])." - ".date("m/d/Y");
+					$message = "This email has been sent to inform you that ";
+					// Populate name
+					if ($row['user_id'])
+						$message .= UserGetFullName(&$dbh, $row['user_id']);
+					else if ($row['contact_id'])
+						$message .= ContactGetName(&$dbh, $row['contact_id']);
+					else
+						$message .= $row['user_email'];
+					$message .= " has accepted your invitation to share calendar: ".CalGetName(&$dbh, $row['calendar']);
+					$message .= "\r\n\r\nComments:\r\n".$_POST['comments'];
+					$headers['From']  = $from;
+					$headers['To']  = $to;
+					$headers['Subject']  = $subject;
+					$headers["Date"] =  date('D, j M Y H:i:s ', mktime()) . EmailTimeZone();
+					// Create new email object
+					$email = new Email();
+					$status = $email->send($to, $headers, $message);
+					unset($email);
+				}
+				print("<input type='button' onClick='JavaScript:window.close();' value='Done'></center>");
+			}
+			else if(isset($_POST['disapprove']))
+			{
+							
+				// Set accept boolean
+				$dbh->Query("update calendar_sharing set accepted='f' where id='$invid'");
+				// Print confirmation
+				print("<center><strong>You have declined the invitation.</strong><br>
+							You will not be able to view or edit this calendar.<br><br>
+							<input type='button' onClick='JavaScript:window.close();' value='Done'></center>");
+				// Send email to origial usr
+				if (is_numeric($row['req_user_id']))
+				{
+					$to 	 = UserGetEmail(&$dbh, $row['req_user_id']);
+					$from    = (is_numeric($row['user_id'])) ? UserGetEmail(&$dbh, $row['user_id']) : $settings_admin_contact;
+					$subject = "Invitation Declined: ".CalGetName(&$dbh, $row['calendar'])." - ".date("m/d/Y");
+					$message = "This email has been sent to inform you that ";
+					// Populate name
+					if ($row['user_id'])
+						$message .= UserGetFullName(&$dbh, $row['user_id']);
+					else if ($row['contact_id'])
+						$message .= ContactGetName(&$dbh, $row['contact_id']);
+					else
+						$message .= $row['user_email'];
+					$message .= " has declined your invitation to share calendar: ".CalGetName(&$dbh, $row['calendar']);
+					$message .= "\r\n\r\nComments:\r\n".$_POST['comments'];
+					$headers['From']  = $from;
+					$headers['To']  = $to;
+					$headers['Subject']  = $subject;
+					$headers["Date"] =  date('D, j M Y H:i:s ', mktime()) . EmailTimeZone();
+					// Create new email object
+					$email = new Email();
+					$status = $email->send($to, $headers, $message);
+					unset($email);
+				}
+			}
+		}
+		else
+		{
+			print("<center><p><strong>Please accept or deny the invitation below.</strong></p></center><br>");
+					
+
+			print("<center><form name='invitation' method='post' action='calendar_invitation_response.awp?invid=$invid&ss=$sSecret'>
+					<i>Enter any comments:</i><br>
+					<textarea cols='30' rows='5' name='comments'></textarea><br>");
+			
+			print("<br><br>
+					<input type='submit' name='approve' value='Accept'>&nbsp;
+					<input type='submit' name='disapprove' value='Decline'>
+					</form></center>");
+		}
+	}
+	else
+	{
+		print("<strong>There was a problem accessing this invitation.</strong><br>
+				Please contact support at $settings_support_contact.<br>");
+	}
+?>
+</body>
+</html>

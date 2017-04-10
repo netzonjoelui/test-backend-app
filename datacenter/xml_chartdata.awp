@@ -1,0 +1,134 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/aereus.lib.php/CChart.php");
+	require_once("../users/user_functions.php");
+	require_once("datacenter_functions.awp");
+
+	
+	$dbh = new CDatabase();
+
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$GID = $_GET['gid'];
+
+	$graphName = dc_graphGetAttribute($dbh, $GID, "graph_name");
+
+	header("Content-type: text/xml");
+
+	// Get graph data
+	$result = $dbh->Query("select query, database_id, caption, subcaption, xaxisname, yaxisname, 
+						   number_prefix, decimal_precision from dc_database_report_graphs where id='$GID'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		$query = stripslashes($row['query']);
+		$name = $row['name'];
+		$caption = $row['caption'];
+		$subcaption = $row['subcaption'];
+		$xaxisname = $row['xaxisname'];
+		$yaxisname = $row['yaxisname'];
+		$numberPrefix = $row['number_prefix'];
+		$decimalPrecision = $row['decimal_precision'];
+		$DBID = $row['database_id'];
+	}
+
+	// Populate data
+	$cdata = new CChartData($xaxisname, $yaxisname, $caption, $subcaption, $numberPrefix, "$decimalPrecision");
+
+	// Populate options/attributes (additional)
+	$chart = new CChart();
+	$options = $chart->getGraphOptions($graphName);
+	if (is_array($options))
+	{
+		foreach ($options as $opt)
+		{
+			$val = dc_graphGetOption($dbh, $GID, $opt[0]);
+			
+			// Set option
+			if ($val !== null && $val != '')
+				$cdata->setAttribute($opt[0], $val);
+		}
+	}
+
+	$multi = false;
+	if (dc_graphIsMultiSeries($dbh, $GID))
+	{
+		$sets = array();
+		$multi = true;
+		$result = $dbh->Query("select name, color from dc_database_report_graph_cols where graph_id='$GID' and type='2'");
+		$num = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			
+			$sets[$row['name']] = $cdata->addSet($row['name'], $row['color']);
+		}
+		$dbh->FreeResults($result);
+	}
+
+	$result = $dbh->Query("SET search_path TO zudb_".$DBID.";".$query);
+	$dbh->Query("SET search_path TO public");
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$setname = "";
+		$setval = "";
+
+		foreach ($row as $name=>$val)
+		{
+			if (strpos($name, "col_") !== false)
+			{
+				$id = substr($name, 4);
+				$colname = dc_getColIdName($dbh, $id);
+				$relname = "col_".$id;
+			}
+			else
+			{
+				$id = $name;
+				$colname = $id;
+				$relname = $id;
+			}
+
+			// Set name cols type=1
+			if (dc_graphCheckColType($dbh, $GID, $colname, 1))
+			{
+				if ($setname)
+					$setname .= ", ";
+				$setname .= $row[$relname];
+			}
+			// Set data cols type=2
+			if (dc_graphCheckColType($dbh, $GID, $colname, 2))
+			{
+				if ($multi)
+					$sets[$colname]->addEntry($row[$relname]);
+				else
+				{
+					$setval = $row[$relname];
+				}
+			}
+		}
+
+		if ($setname && $multi)
+			$cdata->addCategory($setname);
+
+		if ($setval && !$multi)
+		{
+			$color = dc_graphGetSeriesIndexColor($dbh, $GID, $i);
+			if (!$color)
+			{
+				$color = dc_graphGetNextColor();
+				$dbh->Query("update dc_database_report_graphs set series_colors[$i]='$color' where id='$GID'");
+			}
+			$cdata->addEntry($setval, $setname, $color);
+		}
+	}
+
+	// Update series num cache
+	$dbh->Query("update dc_database_report_graphs set series_num='$num' where id='$GID'");
+
+	echo $cdata->getData();
+?>

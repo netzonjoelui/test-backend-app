@@ -1,0 +1,63 @@
+/**************************************************************************************
+*	LIB:		CWindowFrame
+*	Purpose:	aereus.lib.js class split sections of a page into tabs
+***************************************************************************************/
+.CTTabLeftOn
+{
+	width: 0px;
+}
+.CTTabLeftOff
+{
+	width: 0px;
+}
+.CTTabCenterOn
+{
+	font-weight: bold;
+	font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
+	background-color: #ccc;
+	font-size:11px;
+	color:#333;
+	padding:5px;
+	cursor: pointer;
+}
+
+.CTTabCenterOff
+{
+	font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
+	background-color: #fff;
+	font-size:11px;
+	font-weight: bold;
+	color:#666;
+	padding:5px;
+	text-decoration: underline;
+	cursor: pointer;
+	border-top: 1px solid #fff;
+	border-left: 1px solid #fff;
+	border-right: 1px solid #fff;
+}
+
+.CTTabCenterOff:hover
+{
+}
+
+.CTTabRightOn
+{
+	width: 2px;
+}
+
+.CTTabRightOff
+{
+	width: 2px;
+}
+
+.CTTabHr
+{
+	border-top: 1px solid #ccc;
+	padding-bottom: 10px;
+	background-color: #fff;
+}
+/* Where the content is placed */
+.CTTabBody
+{
+	padding: 0px;
+}

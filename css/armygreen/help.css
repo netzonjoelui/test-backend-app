@@ -1,0 +1,105 @@
+/**************************************************************************************
+*	Page:		helpdoc.awp
+*	Purpose:	Styles for all help doc pages
+***************************************************************************************/
+.HlpDocumentPath /* The span that will format the title name for each and every document */
+{
+	text-align:center;
+	padding-top:5px;
+	padding-bottom:2px;
+}
+
+.HlpDocumentPath a /* The span that will format the title name for each and every document */
+{
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:12px;
+	color:#FFFFFF;
+	text-decoration:none;
+}
+
+.HlpDocumentTitle /* The span that will format the title name for each and every document */
+{
+	text-align:left;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:20px;
+	color:#000000;
+	padding-top:3px;
+	padding-bottom:3px;
+	padding-left:3px;
+}
+
+.HlpBody /* A sub-header for each section */
+{
+	text-align:left;
+	font-family:Arial, Helvetica, sans-serif; 
+	font-size:14px;
+	color:#000000;
+	padding-left:3px;
+}
+
+.HlpBody h1 /* A sub-header for each section */
+{
+	text-align:left;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:14px;
+	font-weight:bold;
+	color:#000000;
+	padding-top:5px;
+	padding-bottom:2px;
+}
+
+.HlpBody h2 /* A sub-header for each section */
+{
+	text-align:left;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:15px;
+	font-weight:bold;
+	color:#000000;
+	padding-top:5px;
+	padding-bottom:2px;
+}
+
+.HlpBody h3 /* A sub-header for each section */
+{
+	text-align:left;
+	background-color:#83867A;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:16px;
+	font-weight:bold;
+	color:#FFFFFF;
+	border:1px solid #A9AC9C;
+}
+
+.HlpBodyBold
+{
+	color:#333366;
+	font-weight:bold;
+}
+
+/**************************************************************************************
+*	Page:		help_browse.awp
+*	Purpose:	Styles for all category help pages
+***************************************************************************************/
+.HlpCatHeader 
+{
+	text-align:left;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:14px;
+	font-weight:bold;
+	color:#405871;
+	background-color:#E5ECF3;
+	padding-top:5px;
+	padding-bottom:2px;
+}
+
+.HlpCatLinkDiv
+{
+	padding-top:3px;
+}
+
+.HlpCatLinkDiv a
+{
+	text-decoration:none;
+	color:#0073C7;
+	font-size:14px;
+}

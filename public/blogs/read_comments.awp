@@ -1,0 +1,221 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("../lib/CDatabase.awp");
+	require_once("../users/user_functions.php");
+	require_once("../community/blog_functions.php");
+	
+	$dbh = new CDatabase();
+	
+	if ($_GET['postid'])
+	{
+		$result = $dbh->Query("select id, title, data
+								to_char(time_entered, 'MONTH DD YYYY') as date,
+								to_char(time_entered, 'HH12:MI:SS am') as time, 
+								from blog_articles where id='".$_GET['postid']."'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$title = $row['title'];
+			$data = $row['data'];
+			$date = $row['date'];
+			$time = $row['time'];
+		}
+	}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Comments on <?php print($title); ?></title>
+<style type="text/css">
+body
+{
+	background:#FFF;
+}
+
+#header
+{
+	width:740px;
+	background:#456 url("/images/blogs/corners_bl_top.gif") no-repeat left top;
+	margin:0 0 0;
+	padding:8px 0 0;
+	color:#fff;
+}
+
+
+#header div 
+{
+	background:url("/images/blogs/corners_bl_bot.gif") no-repeat left bottom;
+	padding:0 15px 8px;
+}
+
+#blog_title 
+{
+	margin:0;
+	padding:10px 30px 5px;
+	font-size:200%;
+	line-height:1.2em;
+}
+
+#blog
+{
+	margin:15px 0 0;
+	width:485px;
+	float:left;
+	background:#fff url("/images/blogs/corners_blog_bot.gif") no-repeat left bottom;
+	padding:0 0 10px;
+	color:#000;
+	font-size:14px;
+	line-height:1.5em;
+}
+
+#blog2 
+{
+	float:left;
+	width:100%;
+	background:url("/images/blogs/corners_blog_top.gif") no-repeat left top;
+	padding:10px 0 0;
+}
+#blog3 
+{
+	background:url("/images/blogs/rails_blog.gif") repeat-y;
+	padding:0;
+}
+
+/* Sidebar Classes */
+#sidebar 
+{
+	width:240px;
+	float:right;
+	margin:15px 0 0;
+	font-size:97%;
+	line-height:1.5em;
+}
+
+.sidebox
+{
+	background:#cdc url("/images/blogs/corners_side_top.gif") no-repeat left top;
+	margin:0 0 15px;
+	padding:10px 0 0;
+	color:#666;
+}
+
+.sidebox2
+{
+	background:url("/images/blogs/corners_side_bot.gif") no-repeat left bottom;
+	padding:0 13px 8px;
+}
+
+.sidebar_title 
+{
+	margin:0;
+	padding:0 0 .2em;
+	border-bottom:1px dotted #9b9;
+	font-size:115%;
+	line-height:1.5em;
+	color:#333;
+}
+  
+/* Now set post styles */
+.post_date_header 
+{
+	margin:0 28px 0 18px;
+	font-size:14px;
+	line-height:2em;
+	text-transform:uppercase;
+	letter-spacing:.2em;
+	color:#357;
+}
+.post_container
+{
+	margin:.3em 0 25px;
+	padding:0 13px;
+}
+.post_header
+{
+	margin:0;
+	font-size:22px;
+	line-height:1.5em;
+	display:block;
+	padding:2px 14px 2px 3px;
+	color:#333333;
+}
+.post_body
+{
+	padding:10px 14px 1px 3px;
+}
+.post_footer
+{
+	background:#EEEEEE;
+	margin:0;
+	padding:2px 14px 2px 3px;
+	line-height:1.5em;
+	color:#666666;
+	text-align:right;
+	border:1px dotted #BBBBBB;
+}
+</style>
+</head>
+
+<body>
+
+<div id='container' style="width:740px;">
+	<div id='header'>
+		<div>
+		<h1 id='blog_title'>Comments on <?php print($title);?></h1>
+		</div>
+	</div>
+	
+	<div id='blog'><div id='blog2'><div id='blog3'>
+	<?php
+		if ($BLGID)
+		{
+			$last_date = "";
+			
+			$result = $dbh->Query("select id, title, 
+									to_char(time_entered, 'MONTH DD YYYY') as date,
+									to_char(time_entered, 'HH12:MI:SS am') as time, 
+									data from blog_articles where blog_id='$BLGID'
+									and extract('month' from time_entered) = '$MONTH'
+									and extract('year' from time_entered) = '$YEAR'
+									and publish = 't'
+									order by time_entered DESC");
+			$num = $dbh->GetNumberRows($result);
+			for ($i = 0; $i < $num; $i++)
+			{
+				$row = $dbh->GetNextRow($result, $i);
+				if ($last_date != $row['date'])
+				{
+					$last_date = $row['date'];
+					echo "<h2 class='post_date_header'>".$row['date']."</h2>";
+				}
+				echo "<div class='post_container'>
+						  <div class='post_header'>".$row['title']."</div>
+						  <div class='post_body'>".$row['data']."</div>
+						  <div class='post_footer'>";
+				if ($bShowAuthor)
+					echo UserGetFullName(&$dbh, $user_id)." ";
+				if ($bShowTime)
+					echo $row['time'];
+				if ($bShowComments)
+					echo " <a href='read_comments.awp?postid=".$row['id']."'>0 Comments</a>";
+				echo "	  </div>
+					  </div>";
+			}
+			$dbh->FreeResults($result);
+		}
+	?>
+	</div></div></div>
+	
+	<div id='sidebar'>
+	
+	<div class="sidebox"><div class="sidebox2">
+	<h2 class="sidebar_title">Archive</h2>
+	None Listed
+	</div></div>
+	
+	</div>
+</div>
+</body>
+</html>

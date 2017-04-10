@@ -1,0 +1,806 @@
+<?php 
+	/**************************************************************************************
+	*	THEME:		nova
+	*				Copyright (c) 2006 Aereus Corporation. All rights reserved.	
+	***************************************************************************************/
+
+	header("Content-type: text/css"); 
+?>
+/**************************************************************************************
+*	 Global body classes
+***************************************************************************************/
+body 
+{
+	background:#6a6a6a; 
+	font-family:Arial, Helvetica, sans-serif; 
+	font-size: 12px;
+	color:#FFFFFF;
+	background-image:url(/images/themes/nova/mainBg.jpg);
+	background-repeat:no-repeat;
+	background-size:100% 100%;
+
+}
+/* used for all popups */
+body.popup
+{
+	background-color:#ABABAB;
+	font-family:Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	font-size:11px;
+	color:#000000;
+	margin: 0px 10px 0 10px;
+	padding: 0px;
+}
+body.bgimage
+{
+	background-color:#000000;
+	background-image:url(/images/themes/nova/tempBG4.png);
+	background-position:0 0;
+	background-repeat:no-repeat;
+}
+body.whitepage
+{ 
+	background-color : #FFFFFF; 
+}
+body.iframe
+{ 
+	background-color:transparent; 
+}
+body.toolIframe
+{ 
+	background-color:#797979; 
+}
+
+body.leftnav
+{ 	
+	margin-top:5px;  
+	overflow-x: hidden;
+	overflow-y: auto; 
+}
+/* Add appropriate margin to applications. Sometimes 0px is used for dashboards */
+.appTopSpacer
+{
+	margin-top: 5px;
+}
+
+/* application name/title container */
+#appname
+{
+	background-color:#ababab; 
+	border-bottom: 1px solid #cecbc7;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 2px;
+	color:#000;
+	font-size:16px; 
+	font:Verdana, Arial, Helvetica, sans-serif;
+	font-weight:bold; 
+}
+
+/* application title container */
+.apptitle
+{
+	background-color:#ababab; 
+	border-bottom: 1px solid #cecbc7;
+	color:#000;
+	font:Verdana, Arial, Helvetica, sans-serif;
+}
+
+/* Application name text */
+.apptitle h1
+{
+	color: #FFFF00;
+}
+
+/* application body frame/container */
+#appbody
+{
+}
+
+.appInstBody
+{
+	margin-right: 20px;
+
+	background-image:url(/images/themes/nova/bg1.png);
+	background-repeat: repeat;
+}
+
+/**************************************************************************************
+*	 Global container
+***************************************************************************************/
+/* Table classes */
+table 
+{ 
+	font-size: 11px; 
+}
+.horizontalline
+{
+	height:1px;
+	background-color:#CCCCCC;
+	padding:0px;
+}
+.table_stop /* used to show warnings in tables */
+{
+	color: white;
+	font-weight: bold;
+}
+.table_go /* used to show good news in tables */
+{
+	color: green;
+}
+/* loading div or span */
+.loading
+{
+	background-image: url(/images/themes/nova/loading.gif);	
+	background-repeat: no-repeat;
+	width: 16px;
+	height: 16px;
+	margin: 10px;
+}
+/* notice & notification containers */
+.error, .notice, .success, .info {padding:.8em;margin-top:10px;margin-bottom:10px;border:2px solid #ddd;}
+.error {background:white;color:#8a1f11;border-color:#FBC2C4;}
+.notice {background:white;color:#514721;border-color:#FFD324;}
+.success {background:white;color:#264409;border-color:#C6D880;}
+.info { color: white; border-color:#7eabcd;}
+.error a {color:#8a1f11; background:none; padding:0; margin:0; text-decoration: underline; }
+.notice a {color:#514721; background:none; padding:0; margin:0; text-decoration: underline; }
+.success a {color:#264409; background:none; padding:0; margin:0; text-decoration: underline; }
+.info a {background:none; padding:0; margin:0; text-decoration: underline; }
+
+/**************************************************************************************
+*	ANT Header
+***************************************************************************************/
+.header
+{
+	background: none;
+	color:#FFFFFF;
+	vertical-align: middle;
+}
+
+.header a
+{
+	color:#FFFFFF;
+	font-weight:bold; 
+	font-size:12px; 
+	text-decoration:none;
+}
+
+#headerSearch input
+{
+	border: 0;
+	background-color: #fff;
+}
+
+#headerSearch button
+{
+	background-color: #333;
+	color: white;
+}
+
+
+/**************************************************************************************
+*	Topnav
+***************************************************************************************/
+.topNavbarBG 
+{
+	background: none;
+	border: 0;
+	-moz-box-shadow: none;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	border-top: 1px solid #e3e3e3;
+	border-bottom: 1px solid #e3e3e3;
+}
+.topNavbarShadow 
+{
+	height:0px;
+}
+
+.topNavbarHr
+{
+	background: none;
+	height:0px;
+}
+.topNavTabOut
+{
+	cursor:pointer;
+	font-size: 14px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+	color:#fff;
+	background: none;
+	height:32px;
+	border: 0;
+	border-right: 1px solid #e3e3e3;
+	border-bottom: none;
+}
+
+.topNavTabOut div 
+{ 
+	padding-left:10px; padding-right:10px; padding-top:5px;
+	border: 0;
+}
+
+.topNavTabOver
+{
+	cursor:pointer;
+	font-size: 14px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+	color:#FFFFFF;
+	background-color: #828282;
+	height:32px;
+	border: 0;
+	border-right: 1px solid #e3e3e3;
+	border-bottom: none;
+}
+.topNavTabOver div 
+{ 
+	border: 0;
+	padding-left:10px; padding-right:10px; padding-top:5px;
+}
+
+.topNavTabOn
+{
+	cursor:pointer;
+	font-size: 14px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+	color:#FFFF00;
+	/*background-color: #ababab;*/
+	background: none;
+	height:32px;
+	border: 0;
+	border-right: 1px solid #e3e3e3;
+}
+.topNavTabOn div { 
+	border: 0;
+	padding-left:10px; padding-right:10px; padding-top:5px;
+}
+
+/**************************************************************************************
+*	 Forms:	Global form classes
+***************************************************************************************/
+.formTitle
+{
+	font-size: 16px;
+	font-weight: bold;
+	text-align:left;
+	padding:5px 5px 5px 0px;
+	margin:0px;
+}
+
+/**
+ * Object Loader Classes 
+ */
+.objectLoader
+{
+}
+
+/* Used as headers for object loaders and browsers */
+.objectLoaderHeader
+{
+	font-size: 18px;
+	font-weight: bold;
+	text-align:left;
+	padding:5px 5px 0 5px;
+	margin:0px;
+	color: #fff;
+}
+
+/* Header Breadcrumbs Container */
+.objectLoaderHeader .breadCrumbs
+{
+	margin-left: 1px;
+	margin-bottom: 3px;
+}
+.objectLoaderHeader .breadCrumbs, .objectLoaderHeader .breadCrumbs a
+{
+	font-size: 11px;
+	font-weight: bold;
+	color: #FFFF66;
+	text-decoration: none;
+}
+
+.objectLoaderBody
+{
+	margin: 0 5px 0 5px;
+}
+
+/**************************************************************************************
+*	alib.js:		global styles
+***************************************************************************************/
+
+/* Popup alerts used through page for status updates. This si the container */
+.statusAlert
+{
+	border: 1px solid #130B40;
+	padding: 8px;
+	background-color: #93B4C7;
+	color: white;
+	font-weight: bold;
+}
+
+/**
+ * alib.ui.Toolbar - is replacing CTOolBart
+ * ==================================================================
+ */
+
+/* toolbar container */
+.alibToolbar
+{
+	background: none;
+}
+
+/* toolbar button class */
+.alibToolbarButton
+{
+	color: black;
+}
+
+.alibToolbarButton button
+{
+	background-color: white;
+	border: none;
+}
+
+/**************************************************************************************
+*	 Popup containers
+***************************************************************************************/
+/* Container for toolbar */
+.popup_toobar
+{
+}
+/* Container for body */
+.popup_body
+{
+	margin: 3px;
+}
+
+/**************************************************************************************
+*	Links and buttons
+***************************************************************************************/
+/* Global Link classes */
+a { text-decoration: underline; color: #FFFF66; }
+a:link { text-decoration: underline; color: #FFFF66; }
+a:active { text-decoration: underline; color: #FFFF66; }
+a:visited { text-decoration: underline; color: #FFFF66; }
+a:hover { text-decoration: underline; color: #FFCC33; }
+.link { text-decoration: underline; color: #FFFF66; } /* Used for span and text acting like a link */
+
+/**************************************************************************************
+*	 Headers:	Global header and label classes
+***************************************************************************************/
+.headerTable
+{
+	font-weight: bold;
+}
+.headerOne, h1
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-weight:bold; 
+	font-size:16px;
+}
+.headerTwo, h2
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-weight:bold; 
+	font-size:14px;
+}
+.headerThree, h3
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-weight:bold; 
+	font-size:12px;
+}
+/* Form or toolbar labels */
+.label
+{
+	font-family: Arial, Helvetica, sans-serif; 
+	font-weight: bold;
+	font-size: 12px;
+	color: #fff;
+	vertical-align: middle;
+	min-height: 20px;
+	padding: 5px 10px 5px 3px;
+}
+.formLabel
+{
+	color: #eee;
+	font-weight: bold;
+}
+.formValue
+{
+	color: white;
+	font-weight: bold;
+}
+.formHtmlBody
+{
+	padding: 10px;
+	background-image:url(/images/themes/nova/bg3.png);
+	-webkit-border-radius:3px;
+	-moz-border-radius:3px;
+	border-radius:3px;
+}
+.formHtmlBody, .formHtmlBody td, .formHtmlBody a, .formHtmlBody td a
+{
+	color: black;
+}
+.headerBar
+{
+	border-bottom: 1px solid #CCCCCC;
+}
+
+label { color: #e3e3e3; }
+
+/**************************************************************************************
+*	Reader:		For Reader Classes
+***************************************************************************************/
+.readerBody
+{
+	font-family:  Arial, Verdana, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+	line-height: 18px;
+	text-align:left;
+	background-color: #FFFFFF;	
+	padding:5px;
+	margin:10px 0 0 0;
+}
+
+.readerBody h1
+{
+	font-size: 18px;
+}
+.readerBody h2
+{
+	font-size: 16px;
+}
+.readerBody h3
+{
+	font-size: 14px;
+}
+.readerBody h4
+{
+	font-size: 12px;
+	font-weight: bold;
+}
+.readerBody h5
+{
+	font-size: 10px;
+	font-weight: bold;
+}
+
+.readerRibbon
+{
+
+}
+
+/**
+ * CTabs = this will be replaced with alib.ui.tabs soon
+ * ==================================================================
+ */
+.CTTabLeftOn
+{
+	width: 5px;
+}
+.CTTabLeftOff
+{
+	width: 5px;
+}
+.CTTabCenterOn
+{
+	font-weight: bold;
+	font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
+	background-color: #ccc;
+	font-size:11px;
+	color:#333;
+	padding:5px;
+	cursor: pointer;
+}
+
+.CTTabCenterOff
+{
+	font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
+	background-color: non;
+	font-size:11px;
+	font-weight: bold;
+	color:#fff;
+	padding:5px;
+	text-decoration: underline;
+	cursor: pointer;
+	border-top: 1px solid transparent;
+	border-left: 1px solid transparent;
+	border-right: 1px solid transparent;
+}
+
+.CTTabCenterOff:hover
+{
+}
+
+.CTTabRightOn
+{
+	width: 0px;
+}
+
+.CTTabRightOff
+{
+	width: 0px;
+}
+
+.CTTabHr
+{
+	border-top: 1px solid #ccc;
+	padding-bottom: 10px;
+	background-color: none;
+}
+/* Where the content is placed */
+.CTTabBody
+{
+	padding: 5px;
+}
+
+/**
+ * Window frame library
+ */
+.CWindowFrameLabel
+{
+	color: #bed73b; 
+	font-weight:bold;
+	padding:2px;
+}
+.CWindowFrameContext
+{
+	font-weight: normal;
+	float: right;
+	margin-right: 3px;
+}
+.CWindowFrameContent
+{
+	/*border: 1px solid #ABABAB;*/
+}
+
+.CWindowFrameOuter > tr, .CWindowFrameOuter > th, .CWindowFrameOuter > tr > td
+{
+	padding: 0px;
+	margin: 0px;
+}
+
+
+/**
+ * Styles used in the AntObjectList class
+ */
+/* Header with title */
+.aobListHeader
+{
+	font-size: 18px;
+	font-weight: bold;
+	text-align:left;
+	padding:5px 5px 0px 5px;
+	margin:0px;
+	color: #fff;
+}
+
+.aobListRow, .aobListRowAct, .aobListRowAlert, .aobListRowOver
+{
+	cursor:pointer;
+	color:#fff;
+	background-color:transparent;
+	font-size: 13px;
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+
+.aobListRow > td, .aobListRowAct > td, .aobListRowAlert > td, .aobListRowOver > td
+{
+	border-bottom-color:#cccccc; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+/* Inactive / Normal state */
+.aobListRow
+{
+	background-color: none;
+	background-image:url(/images/themes/nova/bg1.png);
+	background-repeat: repeat;
+}
+
+
+/* Active - selected */
+.aobListRowAct
+{
+	background-color:#00b2d9;
+	color: #fff;
+}
+
+.aobListRowAct td
+{
+	color:#ffffff;
+}
+
+
+/* Alert - usually means unread */
+.aobListRowAlert
+{
+	background-color:#000000;
+	color:#ffffff;
+}
+
+.aobListRowAlert td
+{
+	color: #fff;
+}
+
+/* Comment row */
+.aobListRowActivity
+{
+	cursor:default;
+	color: white;
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: auto;
+	-khtml-user-select: auto;
+	-moz-user-select: auto;
+	-o-user-select: auto;
+	user-select: auto;
+}
+
+/* Over - on mouse over */
+.aobListRowOver
+{
+	background-color: #333;
+	background-color: #6a6a6a;
+}
+
+/* General table styles */
+
+.aobListTable th
+{
+	text-align: left;
+	color:#FFFFFF;
+	border: none;
+	padding: 2px 0px 2px 0px;
+	background: none;
+	background-image:url(/images/themes/nova/bg1.png);
+	background-repeat: repeat;
+}
+
+.aobjListBold
+{
+	font-weight:bold;
+	color: #FFFF66;
+}
+
+.aobListItal
+{
+	color:#FFFF66;
+}
+
+.aobListRowComment
+{
+	background-color: transparent;
+	color: white;
+}
+
+/**
+ * Dashboard widget classes
+ */
+.dbWidget
+{
+	border: 1px solid #dddddd;
+	margin: 0 4px 8px 4px;
+}
+
+.dbWidgetHeader
+{
+	background-color: #666;
+	border-bottom: 1px solid #dddddd;
+}
+
+.dbWidgetHeader:hover
+{
+	background-color: #333;
+	background-image: none;
+}
+
+.dbWidgetTitle
+{
+	padding: 5px 0 0 5px;
+	font-size: 15px;
+	color: white;
+	height: 25px;
+	cursor: move;
+	text-overflow: ellipsis;
+	text-shadow: none;
+	white-space: nowrap;
+}
+
+.dbWidgetOpt
+{
+	margin: 7px 5px;
+	float: right;
+}
+
+.dbWidgetBody
+{
+	padding: 5px;
+}
+
+/**
+ * Custom email classes
+ */
+.emailThreadMessageCol
+{
+	border-top-width:1px;
+	border-top-style:solid;
+	border-top-color:#666;
+
+	cursor:pointer;
+	padding: 5px;
+	margin-left: 3px;
+	margin-right: 3px;
+}
+
+.emailThreadMessageExp
+{
+	margin-bottom: 10px;
+	border-top: 1px solid #ccc;
+}
+
+.emailMessageBody
+{
+	margin-left: 0;
+}
+
+
+/**************************************************************************************
+*	Global includes
+***************************************************************************************/
+<?php
+	include("progressbar.css");
+	include("wizard.css");
+	include("CTextBoxList.css");
+?>
+
+/**************************************************************************************
+*	Theme Includes
+***************************************************************************************/
+<?php
+	$folder = "nova";
+	include("$folder/contacts.css");
+	include("$folder/notes.css");
+	include("$folder/calendar.css");
+	include("$folder/files.css");
+	include("$folder/homewidgets.css");
+	//include("$folder/email.css");
+	include("$folder/chat.css");
+	include("$folder/help.css");
+	include("$folder/statusPages.css");
+	
+	/********************************************************************
+	*	List of styles that control the look of aereuslib classes
+	********************************************************************/
+	include("$folder/CToolbar.css");
+	//include("$folder/CWindowFrame.css");
+	include("$folder/CSplitContainer.css");
+	include("$folder/CContentTable.css");
+	include("$folder/CMenuBar.css");
+	include("$folder/CDropdownMenu.css");
+	include("$folder/CToolTable.css");
+	include("$folder/CNavBar.css");
+	include("$folder/CDatasheet.css");
+	include("$folder/CTreeView.css");
+	include("$folder/CDialog.css");
+	include("$folder/CRte.css");
+	include("$folder/CAutoComplete.css");
+	include("$folder/ui_button.css");
+?>
+

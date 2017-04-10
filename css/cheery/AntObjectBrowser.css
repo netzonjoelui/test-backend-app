@@ -1,0 +1,128 @@
+/**
+ * Styles used in the AntObjectList class
+ */
+.aobListRow, .aobListRowAct, .aobListRowAlert
+{
+	cursor:pointer;
+	color:#000000;
+	background-color:#FFFFFF;
+	font-size: 13px;
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+
+.aobListRow > td, .aobListRowAct > td, .aobListRowAlert > td
+{
+	border-bottom-color:#cccccc; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+/* Inactive / Normal state */
+.aobListRow
+{
+}
+
+/* Over - on mouse over */
+.aobListRow:hover
+{
+	background-color: #e3e3e3;
+}
+
+/* Active - selected */
+.aobListRowAct
+{
+	background-color:#0194BE;
+	color:#ffffff;
+}
+
+.aobListRowAct td, .aobListRowAct td span
+{
+	color:#ffffff;
+}
+
+/* Alert - usually means unread */
+.aobListRowAlert
+{
+	background-color:#E2D397;
+	color: #481800;
+}
+
+.aobListRowAlert td
+{
+	color:#481800;
+}
+
+/* No select option - no hover */
+.aobListRowNoSelect, .aobListRowNoSelect:hover
+{
+	background-color: none;
+	cursor:auto;
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: auto;
+	-khtml-user-select: auto;
+	-moz-user-select: auto;
+	-o-user-select: auto;
+	user-select: auto;
+}
+
+/* The container where the title of the list view goes */
+.aobListTitle
+{
+	padding: 3px 0 3px 0;
+}
+
+/* General table styles */
+
+.aobListTable
+{
+	width: 100%;
+}
+
+.aobListTable th
+{
+	text-align: left;
+	/*
+	background-color:#0084aa; 
+	color:#FFFFFF;
+	border-right:1px solid #FFFFFF;
+	*/
+	background-color: #fff;
+	color:#0084aa;
+	padding: 2px 0px 2px 0px;
+	border-bottom:1px solid #0084aa;
+	font-size: 13px;
+}
+
+.aobjListBold
+{
+	font-weight:bold;
+}
+
+.aobListItal
+{
+	color:#336699;
+}
+
+/* Browser toolbar container */
+.aobToolbar { }
+
+/* Search container */
+.aobSearch
+{
+	margin-left: 0px;
+}
+
+/* Breadcrumbs - used for file browsing */
+.aobListBreadCrumbs
+{
+	padding: 3px 0 3px 0;
+}

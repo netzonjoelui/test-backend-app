@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MyaBlog - Autumn</title>
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=iso-8859-1" />
+<style type="text/css">
+/* CSS Document */
+html, body { 
+margin: 0px;
+padding: 0px;
+font-family: arial,verdana,sans-serif;
+background-color: #FFF;
+}
+
+img {border: 0px;}
+
+.header { 
+position: absolute;
+margin:0px;
+top:0px;
+left:0px;
+padding: 0px;
+width: 100%;
+background-color:#000000;
+z-index: 1;
+}
+
+.headerBody {
+font-size: 20px;
+font-weight: bold;
+font-family: arial, times new roman, serif;
+text-align: center;
+letter-spacing:3px;
+text-transform:uppercase;
+color: #FFF;
+padding:10px;
+}
+
+.myablogMenu {
+position:relative;
+top:0px;
+left:0px;
+padding-right: 10px;
+float:left;
+width:200px;
+background-color: #EEEEEE;
+border:1px solid #B8B8B8;
+}
+
+.myablogBody {
+position:relative;
+top:0px;
+left:0px;
+padding-right: 10px;
+float:right;
+width:200px;
+background-color: #EEEEEE;
+border:1px solid #B8B8B8;
+}
+
+.myablogPost {
+color: #777;
+font-size: 12px;
+font-family: Arial, Verdana, Helvetica, sans-serif;
+letter-spacing: 1px;
+line-height: 20px;
+text-align: justify;
+border:1px solid #B8B8B8;
+background-color: #FFF;
+padding: 10px;
+}
+
+.container {
+position: absolute;
+top: 50px;
+width: 50%; margin-left: auto; margin-right: auto;
+display:table;
+z-index: 2;
+}
+
+.myablogGutter { 
+color: #666;
+font-size: 11px;
+font-family: times new roman, serif;
+letter-spacing: 2px;
+line-height: 20px; 
+text-align: left;
+margin-left:10px;
+margin-top:5px;
+}
+
+h4 { 
+font-size: 16px;
+font-family: arial,verdana,sans-serif;
+color: #444;
+letter-spacing: 1px;
+padding-left:0px;
+padding-top:0px;
+padding-bottom:8px;
+margin:0px;
+z-index: 6;}
+
+h5 { 
+font-size: 12px;
+font-family: arial,verdana,sans-serif;
+letter-spacing: 3px;
+color: #222;
+z-index: 6;
+margin: 0px;}
+
+h6 { 
+font-size: 11px;
+font-family: arial,verdana,sans-serif;
+font-weight:normal;
+letter-spacing: 2px;
+color: #333;
+z-index: 6;
+margin: 0px;}
+
+i { color: #222; 
+font-weight: bold;}
+
+.divider{
+text-align: left;
+padding-top:5px;
+padding-bottom:5px;
+font-size: 10px;
+font-family:arial,verdana,sans-serif; }
+
+blockquote {
+align: center; 
+line-height: 16px;
+text-align: justify;
+padding: 15px;
+color: #AAA;
+font-family: arial,verdana,sans-serif;
+font-size: 10px;
+letter-spacing: 1px; 
+background-color: #EEEEEE;
+}
+
+li{
+list-style-type:square; 
+color: #1E1F23;
+padding: 0px;
+margin: 0px 0px 0px 15px;}
+
+ul{ 
+margin: 0px;
+padding: 0px;
+font-size: 11px;
+font-weight: normal;
+font-family: Arial, Helvetica, sans-serif;
+letter-spacing: 1px;
+margin-bottom: 20px;
+margin-top:10px;
+}
+
+input,textarea,select { 
+background-color: #FFF;
+border: 1px solid #B8B8B8;
+color: #B8B8B8;
+padding:5px; }
+
+a:link { 
+color:#777;
+font-family: arial,verdana,sans-serif;
+font-size: 11px;
+letter-spacing: 1px;
+text-decoration: none; }
+
+a:visited { 
+color:#777;
+font-family: arial,verdana,sans-serif;
+font-size: 11px;
+letter-spacing: 1px;
+text-decoration: none; }
+
+a:hover { 
+color:#777;
+font-family: arial,verdana,sans-serif;
+font-size: 11px;
+letter-spacing: 1px;
+text-decoration: underline; }
+
+.post_comment_container
+{
+border-bottom:1px dotted #B8B8B8;
+border-right:1px dotted #B8B8B8;
+border-left:1px dotted #B8B8B8;
+}
+
+.post_comment
+{
+border-top:1px dotted #B8B8B8;
+text-align:left;
+padding:10px;
+}
+
+.post_comment_add
+{
+border-top:1px dotted #B8B8B8;
+padding-top:10px;
+text-align:left;
+padding:10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+	<div class="headerBody">
+		Aereus Anthology
+	</div>
+</div>
+
+<div class="container">
+	<div class="myablogPost"> 	
+		<div class="myablogMenu"> 
+			<div class="myablogGutter"> 
+				<h5>Kris Carter</h5>
+			</div>
+		</div>
+		<div class="myablogBody">
+			<i>October 13, 2005</i>
+			<h4>Welcome to my blog!</h4>
+			Lorem ipsum dolor sit amet, <a href="##">test link name here</a> adipiscing elit. Pellentesque elementum consectetuer ligula. Integer mauris. Duis nec nisi. Curabitur euismod tincidunt tellus. Suspendisse diam lectus, sagittis sit amet, pulvinar eu, commodo in, quam. Proin placerat, massa non vestibulum malesuada, nulla ipsum tempus nulla, ac convallis orci erat eu erat. Praesent vel dui eget sapien dapibus tristique. Donec turpis sem, mollis in, pulvinar ac, pretium quis, urna. Fusce ut ligula. Sed pellentesque quam. Ut lobortis sagittis odio. Pellentesque eleifend. Quisque augue. Ut fermentum euismod tellus. Quisque nisi ligula, fermentum in, sollicitudin in, auctor viverra, sem.
+		</div>
+	</div>
+</div>
+
+</body>
+</html>

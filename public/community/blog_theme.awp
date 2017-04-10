@@ -1,0 +1,55 @@
+<?php
+	if ($_POST['save_changes'] && $_POST['theme'])
+	{
+		$dbh->Query("update blogs set theme_id='".$_POST['theme']."' where id='$BID'");
+		$status_message = "Theme has been updated!";
+	}
+	
+	$result = $dbh->Query("select theme_id from blogs where id='$BID'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		$theme_id = ($row['theme_id']) ? $row['theme_id'] : 1;
+	}
+	$dbh->FreeResults($result);
+	
+	echo "<form name='editblog' method='post' action='blog_edit.awp?bid=$BID&tabnav=$TABNAV'>";
+					 
+	WindowFrameToolbarStart("100%");
+	echo ButtonCreate("Save Changes", "SUBMIT:editblog:save_changes", "b2");
+	echo ButtonCreate("Delete Blog", "DeleteBlog();", "b3");
+	echo ButtonCreate("View Blog", "window.open('http://".BlogGetURL(&$dbh, $BID)."')");
+	echo "<div style='float:right;padding-right:3px;font-weight:bold;font-size:14px;' id='div_status'>
+			$status_message
+			<script language='script' type='text/javascript'>
+				window.setTimeout(function ClearStatus() { document.getElementById('div_status').innerHTML=''; }, 10000);
+			</script>
+		  </div>";
+	WindowFrameToolbarEnd();
+	
+	$result = $dbh->Query("select id, name from blog_themes order by name");
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		echo "<div style='float:left;padding:10px;'>
+				<table border='0'>
+					<tr>
+						<td colspan='2'>
+							<a href='/blogs/read.awp?blg=".BlogGetName(&$dbh, $BID)."&prevtheme=".$row['name']."' target='_blank'>
+							<img src='/blogs/templates/".$row['name']."_thumb.gif' border='0'>
+							</a>
+						</td>
+					</tr>
+					<tr>
+						<td width='22px'><input type='radio' name='theme' value='".$row['id']."' ".(($theme_id == $row['id']) ? 'checked' : '')."></td>
+						<td>".$row['name']."</td>
+					</tr>
+				</table>
+			  </div>";
+	}
+	$dbh->FreeResults($result);
+	echo "<div style='clear:both;'></div>";
+	
+	echo "</form>";
+?>

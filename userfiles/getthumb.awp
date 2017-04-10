@@ -1,0 +1,111 @@
+<?php
+	include("../lib/AntConfig.php");
+	
+	function ResizeThumbImage($filename, $max_width, $max_height, $type, $stretch = NULL)
+	{
+		list($orig_width, $orig_height) = getimagesize($filename);
+		
+		$width = $orig_width;
+		$height = $orig_height;
+		
+		if ($max_height)
+		{
+			// taller
+			if (!$stretch)
+			{
+				if ($height > $max_height) 
+				{
+				   $width = ($max_height / $height) * $width;
+				   $height = $max_height;
+				}
+			}
+			else
+			{
+				 $width = ($max_height / $height) * $width;
+				 $height = $max_height;
+			}
+		}
+		if ($max_width)
+		{	
+			// wider
+			if (!$stretch)
+			{
+				if ($width > $max_width) 
+				{
+				   $height = ($max_width / $width) * $height;
+				   $width = $max_width;
+				}
+			}
+			else
+			{
+				$height = ($max_width / $width) * $height;
+				$width = $max_width;
+			}
+		}
+				
+		$image_p = imagecreatetruecolor($width, $height);
+		
+		switch($type)
+		{
+		case IMAGETYPE_JPEG:
+			$image = imagecreatefromjpeg($filename);
+			break;
+		case IMAGETYPE_GIF:
+			$image = imagecreatefromgif($filename);
+			break;
+		case IMAGETYPE_PNG:
+			imageAntiAlias($image_p,true);
+			imagealphablending($image_p, false);
+			imagesavealpha($image_p,true);
+			$transparent = imagecolorallocatealpha($image_p, 255, 255, 255, 0);
+			for($x=0;$x<$width;$x++) 
+			{
+				for($y=0;$y<$height;$y++)
+			 		imageSetPixel($image_p, $x, $y, $transparent);
+			}
+			$image = imagecreatefrompng($filename);
+			break;
+		case IMAGETYPE_BMP:
+			$image = imagecreatefromwbmp($filename);
+			break;
+		default:
+			break;
+		}
+		
+		imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $orig_width, $orig_height);
+		
+		return $image_p;
+	}
+	
+	$w = $_GET["iw"];
+    $h = $_GET["ih"];
+	$stretch = $_GET['stretch'];  
+	$filename = $_SERVER['DOCUMENT_ROOT'].base64_decode($_GET['path']);
+	
+	$info = getimagesize($filename);
+	$filetype = $info[2];
+	$image = ResizeThumbImage($filename, $w, $h, $filetype, $stretch);
+	switch (strtolower($filetype))
+	{
+	case IMAGETYPE_JPEG:
+		header("Content-type: image/jpeg");
+		imagejpeg($image);
+		break;
+	case IMAGETYPE_GIF:
+		header("Content-type: image/gif");
+		imagegif($image);
+		break;
+	case IMAGETYPE_PNG:
+		header("Content-type: image/png");
+		imagepng($image);
+		break;
+	case IMAGETYPE_BMP:
+		header("Content-type: image/bmp");
+		imagewbmp($image);
+		break;
+	default:
+		break;
+	}
+
+	 imagedestroy($image);
+?>

@@ -1,0 +1,136 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("users/user_functions.php");
+	require_once("stocks/stock_functions.php");
+	// ALIB
+	require_once("lib/aereus.lib.php/CCache.php");
+	//require_once("lib/aereus.lib.php/CSessions.php");
+
+	header("Content-type: text/xml");			// Returns XML document
+
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+
+	echo '<?xml version="1.0" encoding="iso-8859-1"?>';
+	
+	if ($_GET['function'])
+	{
+		switch ($_GET['function'])
+		{
+		case 'stock_delete':
+			if ($_GET['eid'])
+			{
+				$dbh->Query("delete from stocks_membership where id='".$_GET['eid']."' and user_id='$USERID'");
+				$retval = 1;
+			}
+			break;
+		case 'stock_add':
+			if ($_GET['sym'])
+			{
+				$stid = GetStock(&$dbh, strtoupper($_GET['sym']));
+				if (is_array($stid) && is_numeric($USERID))
+				{
+					if (!$dbh->GetNumberRows($dbh->Query("select id from stocks_membership where 
+														  stock_id='".$stid['id']."' and user_id='".$USERID."'")))
+					{
+						$dbh->Query("insert into stocks_membership(stock_id, user_id) values('".$stid['id']."', '$USERID')");
+						$retval = 1;
+					}
+				}
+			}
+			break;
+		}
+
+		echo "<response>";
+		echo "<retval>" . rawurlencode($retval) . "</retval>";
+		echo "<cb_function>".$_GET['cb_function']."</cb_function>";
+		echo "</response>";
+
+	}
+	else
+	{
+		echo "\n<stocklist>\n";
+
+		$row = GetStock(&$dbh, '^IXIC');
+		if (is_array($row))
+		{
+			// Set font color
+			$pre = substr($row["price_change"], 0, 1);
+			$price_class = ($pre == '-') ? 'HStocksNegNum' : 'HStocksPosNum';
+							
+			echo "<stock>
+					<stock_id>0</stock_id>
+					<stock_memid>$memeid</stock_memid>
+					<stock_sym>".rawurlencode("NASDAQ")."</stock_sym>
+					<stock_name>".rawurlencode("NASDAQ")."</stock_name>
+					<price>".rawurlencode($row["price"])."</price>
+					<price_change>".rawurlencode($row["price_change"])."</price_change>
+					<percent_change>".rawurlencode($row["percent_change"])."</percent_change>
+					<stock_class>".rawurlencode($price_class)."</stock_class>
+				</stock>";
+		}
+		$row = GetStock(&$dbh, 'INDU');
+		if (is_array($row))
+		{
+			// Set font color
+			$pre = substr($row["price_change"], 0, 1);
+			$price_class = ($pre == '-') ? 'HStocksNegNum' : 'HStocksPosNum';
+
+			echo "<stock>
+					<stock_id>0</stock_id>
+					<stock_memid>$memeid</stock_memid>
+					<stock_sym>".rawurlencode("DOW")."</stock_sym>
+					<stock_name>".rawurlencode("DOW")."</stock_name>
+					<price>".rawurlencode($row["price"])."</price>
+					<price_change>".rawurlencode($row["price_change"])."</price_change>
+					<percent_change>".rawurlencode($row["percent_change"])."</percent_change>
+					<stock_class>".rawurlencode($price_class)."</stock_class>
+				</stock>";
+		}
+		
+		$result = $dbh->Query("select id, stock_id from stocks_membership where user_id='$USERID'");
+		$num = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			$memeid = $row["id"];
+			// Select SYMBOL from the database
+			$stid = GetStock(&$dbh, $row["stock_id"]);
+			
+			if (is_array($stid))
+			{
+				$id = $stid["id"];
+				$symbol = $stid["symbol"];
+				$name = $stid["name"];
+				$price = $stid["price"];
+				$price_change = $stid["price_change"];
+				$percent_change = $stid["percent_change"];
+				
+				// Set font color
+				$pre = substr($price_change, 0, 1);
+				$price_class = ($pre == '-') ? 'HStocksNegNum' : 'HStocksPosNum';
+						
+				// Set the background color
+				$rowclass = ($i % 2) ? "HStocksRow1" : "HStocksRow2";								
+				
+				echo "<stock>
+						<stock_id>$id</stock_id>
+						<stock_memid>$memeid</stock_memid>
+						<stock_sym>".rawurlencode($symbol)."</stock_sym>
+						<stock_name>".rawurlencode($name)."</stock_name>
+						<price>".rawurlencode($price)."</price>
+						<price_change>".rawurlencode($price_change)."</price_change>
+						<percent_change>".rawurlencode($percent_change)."</percent_change>
+						<stock_class>".rawurlencode($price_class)."</stock_class>
+					</stock>";
+			}
+		}
+		$dbh->FreeResults($result);
+
+		echo "\n</stocklist>";
+	}
+?>

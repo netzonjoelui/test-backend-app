@@ -1,0 +1,187 @@
+<?php
+	// ANT
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");
+	require_once("../lib/CDatabase.awp");
+	require_once("project_functions.awp");
+	require_once("../lib/CDropdownMenu.awp");
+	require_once("../lib/CToolTable.awp");	
+	require_once("../lib/content_table.awp");
+	require_once("../users/user_functions.php");
+	
+	$USERNAME = $_SESSION["USER_NAME"];
+	
+	$dbh = new CDatabase();
+									  
+	$USERID = $_SESSION["USER_ID"];
+	$THEMENAME = UserGetTheme(&$dbh, $USERID, 'name');
+	
+	function PrintChildProjects(&$dbh, $pid, $userid, $condition, $level, &$bgcolor, &$tbl)
+	{
+	
+		global $THEMENAME;
+		/*
+		$query = "select projects.id, projects.name, parent, project_priorities.name as priority, 
+					date_deadline, date_started, date_completed 
+					from projects, project_priorities 
+					where projects.priority=project_priorities.id 
+					and parent='$pid'
+					$condition
+					order by date_started";
+		
+		$result = $dbh->Query($query);
+		$numrows = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $numrows; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+			$id = $row["id"];
+			$pri = $row["priority"];
+			$deadline = date("m/d/Y", strtotime($row['date_deadline']));
+			$started = date("m/d/Y", strtotime($row['date_started']));
+			$parent = $row['parent'];
+			// Create name
+			$prename = "";
+			for ($j = 0; $j < $level; $j++)
+				$prename .= "&nbsp;&nbsp;&nbsp;";
+			$prename .= "<img src='/images/tilde.gif'> ";
+			
+			$name = $row["name"];
+			$completed = ($row["date_completed"]) ? date("m/d/Y", strtotime($row['date_completed'])) : "OPEN";
+			
+			$link = "<a class='TableLinks' href='project.awp?action=specifications&pid=$id'>";
+			$newlink = "<a class='TableLinksAlert' href='project_add.awp?parent=$id'>";
+			
+			$tbl->StartRow(6);
+			$tbl->AddCell("&nbsp;&nbsp;$prename$link$name</a>");
+			$tbl->AddCell($newlink."[new subproject]</a>", false, 'center');
+			$tbl->AddCell("$pri", false, 'center');
+			$tbl->AddCell("&nbsp;&nbsp;$started");
+			$tbl->AddCell("&nbsp;&nbsp;$deadline");
+			$tbl->AddCell("&nbsp;&nbsp;$completed", true, 'center');
+			$tbl->AddCell("<a class='TableLinks' href=\"JavaScript:DeleteProject('$action', '$id')\"'><img src='../images/icons/deleteTask.gif' border='0' title='Delete'></a><br>", false, 'center');
+			$tbl->EndRow();			
+			
+			
+			// Find any child projects
+			PrintChildProjects(&$dbh, $id, $userid, $condition, $level+1, &$bgcolor, &$tbl);
+		}
+		$dbh->FreeResults($result);
+		*/
+	}
+?>		
+<html>
+<head>
+	<title>Templates</title>
+	
+	<link rel="STYLESHEET" type="text/css" href="../css/<?php echo UserGetTheme(&$dbh, $USERID, 'css') ?>">
+	
+	<script language="javascript" type="text/javascript">
+	function DeleteTemplate(id)
+	{
+		if (confirm("Are you sure you want to delete this template?"))
+		{
+			document.location = "templates.awp?dtid="+id;
+		}
+	}
+	
+	function DeleteMember(id)
+	{
+		if (confirm("Are you sure you want to delete this template?"))
+		{
+			document.location = "templates.awp?dmid="+id;
+		}
+	}
+	</script>
+</head>
+
+<body class='appTopSpacer'>
+<?php
+	if (is_numeric($_GET['dtid']))
+	{
+		// Get list of subprojects
+		//$proj_array = explode(":", ProjectGetListOfSubProjects(&$dbh, $HTTP_GET_VARS['dpid']));
+		
+		$dbh->Query("delete from project_templates where id='".$_GET['dtid']."'");
+		/*
+		foreach ($proj_array as $sub_p_id)
+		{
+			if (is_numeric($sub_p_id))
+			{
+				$dbh->Query("delete from projects where id='$sub_p_id'");
+				DeleteProjectDacl(&$dbh, $sub_p_id);
+				ProjectRemoveFiles(&$dbh, $sub_p_id);
+			}
+		}
+		*/
+	}
+	
+	if (is_numeric($_GET['dmid']))
+	{
+		$dbh->Query("delete from project_template_share where template_id='".$_GET['dmid']."' and user_id='$USERID'");
+	}
+		
+	/********************************************************************************************
+	*	Begin Master Project Manager List
+	*********************************************************************************************/
+	TableContentOpen("100%", "My Project Templates", NULL, 3);
+	
+	// Create new tool table
+	$tbl = new CToolTable;	
+	
+	// Create table headers
+	$tbl->StartHeaders();
+	$tbl->AddHeader("Template");
+	$tbl->AddHeader("Tasks", 'center', '50px');
+	$tbl->AddHeader("Date Created", 'center', '100px');
+	$tbl->AddHeader("Delete", 'center', '50px');
+	$tbl->EndHeaders();
+	
+	$query = "select project_templates.id, project_templates.user_id, project_templates.name, 
+				to_char(project_templates.time_created, 'MM/DD/YYYY') as created from 
+				project_templates where 
+				project_templates.user_id='$USERID'
+				union all
+				select project_templates.id, project_templates.user_id, project_templates.name, 
+				to_char(project_templates.time_created, 'MM/DD/YYYY') as created from 
+				project_templates, project_template_share where project_template_share.user_id='$USERID' and 
+				project_template_share.template_id=project_templates.id and  project_template_share.accepted = 't'
+				order by name";
+	$result = $dbh->Query($query);
+	$numrows = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $numrows; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+		$id = $row["id"];
+		$name = $row["name"];
+		
+		$link = "<a class='TableLinks' href='template.awp?tmpid=$id&retpage=".base64_encode("templates.awp")."'>";
+		$newlink = "<a class='TableLinksAlert' href='project_add.awp?parent=$id'>";
+		
+		if ($row['user_id'] == $USERID)
+			$del = "DeleteTemplate('$id')";
+		else
+			$del = "DeleteMember('$id')";
+		$tbl->StartRow();
+		$tbl->AddCell("&nbsp;&nbsp;$link$name</a>");
+		$tbl->AddCell("&nbsp;&nbsp;".ProjectTemplateTaskCount(&$dbh, $id), NULL, 'center');
+		$tbl->AddCell("&nbsp;&nbsp;".$row['created'], NULL, 'center');
+		$tbl->AddCell("<a class='TableLinks' href=\"JavaScript:".$del."\"'>
+						<img src='/images/themes/$THEMENAME/deleteTask.gif' border='0' title='Delete'>
+					   </a><br>", false, 'center');
+		$tbl->EndRow();			
+			
+		// Find any child projects
+		PrintChildProjects(&$dbh, $id, $userid, $condition, 1, &$bgcolor, &$tbl);
+	}
+	$dbh->FreeResults($result);
+	$tbl->PrintTable();	
+	if (!$numrows)
+		echo "<span style=\"background-color: white;\"><strong>No Projects Were Found</strong></span>";
+	
+
+	// Close the content table
+	TableContentClose();
+?>
+</body>
+</html>

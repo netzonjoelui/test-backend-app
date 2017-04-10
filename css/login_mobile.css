@@ -1,0 +1,86 @@
+<?php 
+	header("Content-type: text/css"); 
+?>
+
+input[type=text], input[type=password]
+{
+	border:none;
+	-webkit-box-shadow:0 0 5px #666;
+	-moz-box-shadow:0 0 5px #666;
+	box-shadow:0 0 5px #666;
+	height:32px;
+	line-height:25px;
+	text-indent:5px;
+	margin: 0;
+	width: 100%;
+
+	border: 1px solid #666;
+	-webkit-border-radius:3px;
+	-moz-border-radius:3px;
+	border-radius:3px;
+}
+
+#maincon
+{ 
+	width: 100%;
+	margin-top: 10px;
+	margin-right: 0;
+	margin-left: 0;
+	text-align: left;
+}
+
+#header
+{
+	text-align:center;
+	height: 10px;
+}
+
+#loginBox
+{
+	background-color: transparent;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+	margin: 0;
+	border: 0;
+
+	/*
+	background-image:url("/images/login/login-box-bg.png");
+	background-position:center; 
+	background-repeat:no-repeat;
+	height: 300px;
+	*/
+}
+
+#loginBoxForm
+{
+	margin:10px 30px 10px 20px;
+}
+
+#loginBoxForm h3
+{
+	margin-bottom: 3px;
+}
+
+#footer
+{
+	text-align:center;	
+	padding:30px;
+	margin:0 auto 0 auto;
+	color: #6699cc;
+}
+.loginMessage
+{
+	color:#9A0000;
+	text-align:center;
+	font-family: arial, verdana, helvitica, sans-serif; 
+	font-size: 16px; 
+	font-weight: bold;
+	padding:30px 20px 0 20px;
+}
+
+#buttons
+{
+	text-align:left;
+   	margin-top: 15px;
+}

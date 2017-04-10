@@ -1,0 +1,458 @@
+<?php
+class CAutoComplete
+{
+	var $acName;
+	var $acNameId;
+	var $acXml;
+	var $acId;
+	var $txtVal;
+	var $txtOther;
+	var $delimiter;
+	var $delimiter2;
+	
+	function CAutoComplete($xmlfile, $name, $id, $val=NULL, $other=NULL, $delimiter=NULL)
+	{
+		global $AUTOCOMPLETEID;
+		if (!$AUTOCOMPLETEID) 
+		{
+			$AUTOCOMPLETEID = 1;
+			$this->PrintXmlJs();
+		}
+		else
+			$AUTOCOMPLETEID++;
+
+		$this->acId = $AUTOCOMPLETEID;
+		$this->acName = $name;
+		$this->acNameId = ($id) ? $id : $name;
+		$this->acXml = $xmlfile;
+		$this->txtVal = $val;
+		$this->txtOther = $other;
+		
+		if ($delimiter)
+		{
+			$dparts = explode("|", $delimiter);
+			
+			if ($dparts[0])
+				$this->delimiter = $dparts[0];
+			if ($dparts[1])
+				$this->delimiter2 = $dparts[1];
+		}
+	}
+	function PrintTextBox()
+	{
+		$name = $this->acName;
+		$id_name = $this->acNameId;
+		$id = $this->acId;
+		echo "<div style=\"position:relative;overflow:visible;\">
+				<input type=\"text\" id=\"$id_name\" name=\"$name\"
+					onkeydown=\"ACOnKeyDown".$id."(event);\" 
+					onkeyUp=\"ACHandleKeyUp".$id."(event, 'ACDiv".$id."');\" onblur=\"ACOnBlur".$id."();\"
+					onfocus=\"SetEnd(this);\"
+					onkeypress=\"FilterEnter(event, 'ACDiv".$id."')\" value='".$this->txtVal."' autocomplete='off' ".$this->txtOther.">
+				 <div id='ACDiv".$id."'
+					style=\"position:absolute;left:0px;top:21px;visibility:hidden;border:solid #666 1px;background-color:#EEEEEE;z-index:".(100-$id)."\">
+				 </div>
+			  </div>";
+		$this->PrintJS();
+	}
+
+	function PrintXmlJs()
+	{
+        echo "  <script language=\"javascript\" type=\"text/javascript\">
+			function CJL_loadXmlDocument(xmlFile, cbFun)
+			{
+			   var xdoc;
+
+			   if( window.ActiveXObject && /Win/.test(navigator.userAgent) )
+			   {
+				  xdoc = new ActiveXObject(\"Microsoft.XMLDOM\");
+			
+				  xdoc.async = false;
+				  xdoc.load(xmlFile);
+			
+				  cbFun(xdoc);
+
+				  return true;
+			   }
+			   else if( document.implementation && document.implementation.createDocument )
+			   {
+				  xdoc = document.implementation.createDocument(\"\", \"\", null);
+				  xdoc.load(xmlFile);
+
+				  xdoc.onload = function()
+				  {
+					 cbFun(xdoc);
+				  }
+
+				  return true;
+			   }
+			   else
+			   {
+				  return false;
+			   }
+			}
+			// BASE64 Functions
+			//First things first, set up our array that we are going to use.
+			var keyStr = \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\" + //all caps
+			\"abcdefghijklmnopqrstuvwxyz\" + //all lowercase
+			\"0123456789+/=\"; // all numbers plus +/=
+			
+			//Heres the encode function
+			function encode64(inp)
+			{
+				var out = \"\"; //This is the output
+				var chr1, chr2, chr3 = \"\"; //These are the 3 bytes to be encoded
+				var enc1, enc2, enc3, enc4 = \"\"; //These are the 4 encoded bytes
+				var i = 0; //Position counter
+				
+				do { //Set up the loop here
+				chr1 = inp.charCodeAt(i++); //Grab the first byte
+				chr2 = inp.charCodeAt(i++); //Grab the second byte
+				chr3 = inp.charCodeAt(i++); //Grab the third byte
+
+				//Here is the actual base64 encode part.
+				//There really is only one way to do it.
+				enc1 = chr1 >> 2;
+				enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+				enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+				enc4 = chr3 & 63;
+				
+				if (isNaN(chr2)) {
+				enc3 = enc4 = 64;
+				} else if (isNaN(chr3)) {
+				enc4 = 64;
+				}
+				
+				//Lets spit out the 4 encoded bytes
+				out = out + keyStr.charAt(enc1) + keyStr.charAt(enc2) + keyStr.charAt(enc3) +
+				keyStr.charAt(enc4);
+				
+				// OK, now clean out the variables used.
+				chr1 = chr2 = chr3 = \"\";
+				enc1 = enc2 = enc3 = enc4 = \"\";
+				
+				} while (i < inp.length); //And finish off the loop
+				
+				//Now return the encoded values.
+				return out;
+			}
+			function decode64(encStr) 
+			{
+				var bits, decOut = '', i = 0;
+				for(; i<encStr.length; i += 4)
+				{
+					bits =	(keyStr.indexOf(encStr.charAt(i))    & 0xff) <<18 |
+							(keyStr.indexOf(encStr.charAt(i +1)) & 0xff) <<12 | 
+							(keyStr.indexOf(encStr.charAt(i +2)) & 0xff) << 6 |
+	  						 keyStr.indexOf(encStr.charAt(i +3)) & 0xff; 
+					decOut += String.fromCharCode((bits & 0xff0000) >>16, (bits & 0xff00) >>8, bits & 0xff);
+				}
+				if(encStr.charCodeAt(i -2) == 61)
+				undecOut=decOut.substring(0, decOut.length -2);
+				else if(encStr.charCodeAt(i -1) == 61)
+				undecOut=decOut.substring(0, decOut.length -1);
+				else undecOut=decOut;
+				
+				return unescape(undecOut);		//line add for chinese char
+			}
+			function FilterEnter(evt, divid)
+			{
+				if(window.event) 
+					var code = window.event.keyCode;
+				else
+					var code = evt.which;
+
+				if (code == 13 || code == 9) // keycode for a return
+				{
+					if(window.event)
+						window.event.keyCode = 0;
+					else
+						evt.preventDefault();
+
+					var d = document.getElementById(divid);
+					d.style.visible = 'hidden';
+				}
+			}
+
+			function SetEnd(TB)
+			{
+				if (TB.createTextRange)
+				{
+					var FieldRange = TB.createTextRange();
+					FieldRange.moveStart('character', TB.value.length);
+					FieldRange.collapse();
+					FieldRange.select();
+				} 								
+			}
+			</script>";
+	}
+	
+	function PrintJS()
+	{
+		$name = $this->acName;
+		$name_id = $this->acNameId;
+		$id = $this->acId;
+		$xml = $this->acXml;
+		
+		echo "
+			<script language=\"javascript\" type=\"text/javascript\">
+			function ACHandleKeyUp".$id."(evnt, divid)
+			{
+				var div = document.getElementById(divid);
+				
+				if(window.event) 
+					var code = window.event.keyCode;
+				else
+					var code = evnt.which;
+				
+				// Keycodes:  LeftArrow: 37  UpArrow: 38  RightArrow: 39  DownArrow: 40
+				switch(code)
+				{
+					case 40: 	
+						var matches = div.childNodes;
+						var currentSelectionIndex = -1;
+						// Find currently selected match node, if exists
+						for (var i = 0; i < matches.length; i++) 
+						{
+							if (matches.item(i).isActive) 
+								currentSelectionIndex = i;
+						}
+						if(currentSelectionIndex == -1 || currentSelectionIndex == matches.length - 1) 
+						{
+							// Make first item in list highlighted
+							matches.item(matches.length-1).style.backgroundColor = '#EEEEEE';
+							matches.item(matches.length-1).isActive = false;
+							matches.item(0).style.backgroundColor = '#9999CC';
+							matches.item(0).isActive = true;
+						}
+						else 
+						{
+							// Make next item in list highlighted
+							matches.item(currentSelectionIndex).style.backgroundColor = '#EEEEEE';
+							matches.item(currentSelectionIndex).isActive = false;
+							matches.item(currentSelectionIndex + 1).style.backgroundColor = '#9999CC';
+							matches.item(currentSelectionIndex + 1).isActive = true;
+						}
+						break
+					case 38:
+						var matches = div.childNodes;
+						var currentSelectionIndex = -1;
+						// Find currently selected match node, if exists
+						for (var i = 0; i < matches.length; i++) 
+						{
+							if (matches.item(i).isActive)
+								currentSelectionIndex = i;
+						}
+						if(currentSelectionIndex == -1 || currentSelectionIndex == 0) 
+						{
+							// Make last item in list highlighted
+							matches.item(0).style.backgroundColor = '#EEEEEE';
+							matches.item(0).isActive = false;
+							matches.item(matches.length-1).style.backgroundColor = '#9999CC';
+							matches.item(matches.length-1).isActive = true;
+						}
+						else
+						{
+							// Make previous item in list highlighted
+							matches.item(currentSelectionIndex).style.backgroundColor = '#EEEEEE';
+							matches.item(currentSelectionIndex).isActive = false;
+							matches.item(currentSelectionIndex - 1).style.backgroundColor = '#9999CC';
+							matches.item(currentSelectionIndex - 1).isActive = true;
+						}
+						break
+					/*
+					case 9:
+						if(window.event)
+							window.event.keyCode = 0;
+						else
+							evnt.preventDefault();
+						break;
+					*/
+					case 13: // Return was pressed - make sure the form is not submitted
+						if(window.event)
+							window.event.keyCode = 0;
+						else
+							evnt.preventDefault();
+						break;
+					default:
+						// Autocomplete the text, no keyboard interaction happening
+						ACOnChange".$id."();
+				}
+			}
+
+			function ACOnKeyDown".$id."(e)
+			{
+				if(window.event) // IE
+					keycode = window.event.keyCode; // for IE, same as window.event.keyCode
+				else 
+					keycode = e.which;
+				
+				if (keycode == 13 || keycode == 9) 
+				{
+					try
+					{
+					var div = document.getElementById('ACDiv".$id."');
+					var txt = document.getElementById('".$name_id."');
+
+					var matches = div.childNodes;
+					var currentSelectionIndex = -1;
+					for (var i = 0; i < matches.length; i++)
+					{
+						if (matches.item(i).isActive)
+						{
+							currentSelectionIndex = i;
+						}
+					}
+					// Set input box to highlighted value";
+					if ($this->delimiter)
+					{
+						echo "\n
+							  var strTest = txt.value;
+							  if (strTest.lastIndexOf('".$this->delimiter."') != -1)
+							  {
+								txt.value = strTest.substring(0, strTest.lastIndexOf('".$this->delimiter."') + 1) + ' '
+											+ matches.item(currentSelectionIndex).firstChild.nodeValue ".
+												(($this->delimiter) ? "+ '".$this->delimiter."'" : '').";
+							  }";
+					if ($this->delimiter2)
+					{
+						echo" else if (strTest.lastIndexOf('".$this->delimiter2."') != -1)
+							  {
+								txt.value = strTest.substring(0, strTest.lastIndexOf('".$this->delimiter2."') + 1) + ' '
+											+ matches.item(currentSelectionIndex).firstChild.nodeValue ".
+												(($this->delimiter2) ? "+ '".$this->delimiter2."'" : '').";
+							  }";
+					}
+					echo "	  else
+								txt.value = matches.item(currentSelectionIndex).firstChild.nodeValue ".
+												(($this->delimiter) ? "+ '".$this->delimiter."'" : '').";";
+					}
+					else
+					{
+						echo "txt.value = matches.item(currentSelectionIndex).firstChild.nodeValue;";
+					}
+					echo "
+					// Hide the popup
+					div.innerHTML = \"\";
+					div.style.visibility = \"hidden\";
+
+					// Now clear enter event to keep form from submitting
+					/*	
+					if(window.event)
+						window.event.keyCode = 0;
+					else
+						e.preventDefault();
+					*/	
+					if (keycode == 9)						
+						 setTimeout(\"document.getElementById('$name_id').focus()\", 50);	
+					
+					}
+					catch (e) {}
+
+					return false;
+				}
+				
+				return true;
+			}
+
+			function ACOnBlur".$id."()
+			{
+				var e = document.getElementById('ACDiv".$id."');
+				e.innerHTML =\"\";
+				e.style.visibility = \"hidden\";
+			}
+
+			function ACOnChange".$id."()
+			{
+				var e = document.getElementById('ACDiv".$id."');
+				var txt = document.getElementById('".$name_id."');
+
+				if (txt.value != \"\")
+				{
+					e.innerHTML = \"\";
+					var xmlstr = \"".$xml."\" + '?data=' + encode64(txt.value);
+					//alert(xmlstr);
+					CJL_loadXmlDocument(xmlstr, ACWriteXMLData".$id.");
+				}
+				else
+				{
+					e.innerHTML = \"\";
+					e.style.visibility = \"hidden\";
+				}
+			}
+
+			function ACWriteXMLData".$id."(xdoc)
+			{
+				var e = document.getElementById('ACDiv".$id."');
+				var results = xdoc.getElementsByTagName(\"item\");
+                e.innerHTML = \"\";
+				e.style.visibility = \"hidden\";
+				//alert(results.length);
+				if (results.length > 0)
+				{
+					for(var i = 0; i < results.length; ++i)
+					{
+						var nDiv = document.createElement(\"div\");
+						e.appendChild(nDiv)
+						nDiv.innerHTML = decode64(results[i].firstChild.nodeValue);
+						//nDiv.style.fontWeight = \"bold\";
+						nDiv.style.backgroundColor = '#EEEEEE';
+						nDiv.style.color = '#660000';
+						nDiv.style.paddingLeft = '2px';
+						nDiv.style.paddingRight = '2px';
+						//nDiv.style.whiteSpace = 'nowrap';
+						nDiv.onmousedown = onDivMouseDown".$id.";
+						nDiv.onmouseover = onDivMouseOver".$id.";
+						nDiv.onmouseout = onDivMouseOut".$id.";
+					}
+					e.style.visibility = \"visible\";
+					
+					var matches = e.childNodes;
+					matches.item(matches.length-1).style.backgroundColor = '#EEEEEE';
+					matches.item(matches.length-1).isActive = false;
+					matches.item(0).style.backgroundColor = '#9999CC';
+					matches.item(0).isActive = true;
+				}
+			}
+
+			function onDivMouseDown".$id."()
+			{
+				var txt = document.getElementById('".$name_id."');";
+			
+			if ($this->delimiter)
+			{
+				echo "\n
+					  var strTest = txt.value;
+					  var strNew = this.innerHTML;
+					  rExp = /&lt;/gi;
+					  rExp2 = /&gt;/gi;
+					  strNew = strNew.replace(rExp, '<');
+					  strNew = strNew.replace(rExp2, '>');
+					  if (strTest.lastIndexOf('".$this->delimiter."') != -1)
+					  {
+						txt.value = strTest.substring(0, strTest.lastIndexOf('".$this->delimiter."') + 1) + ' ' + strNew ".
+							(($this->delimiter) ? "+ '".$this->delimiter."'" : '').";
+					  }
+					  else
+						txt.value = strNew;\n";
+			}
+			else
+			{
+				echo "txt.value = this.innerHTML;";
+			}
+			echo "
+			}
+			
+			function onDivMouseOver".$id."()
+			{
+				this.style.backgroundColor = '#9999CC';
+			}
+			
+			function onDivMouseOut".$id."()
+			{
+				this.style.backgroundColor = '#EEEEEE';
+			}
+			</script>";
+	}
+}
+?>

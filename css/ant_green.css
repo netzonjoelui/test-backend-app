@@ -1,0 +1,239 @@
+<?php 
+	/**************************************************************************************
+	* Theme:	green
+	*
+	* Notes:	Global definitions go in this file, specific classes
+	* 			should all be included via php includes
+	*			http://www.colourlovers.com/palette/119408/halcyon
+	***************************************************************************************/
+	header("Content-type: text/css"); 
+?>
+
+/**************************************************************************************
+*	 Containers:	Global body classes
+***************************************************************************************/
+body 
+{ 
+	background: #fff;
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	font-size: 11px;
+	color: #000000;
+}
+/* used for all popups */
+body.popup
+{
+	background-color:#FFFFFF;
+	color:#000000;
+	margin: 0px 10px 0 10px;
+	padding: 0px;
+}
+/* application name/title container */
+#appname
+{
+	background-color: white; 
+	border-bottom: 0;
+	color:#F07E13;
+
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 2px;
+	font-size:18px; 
+	font:Verdana, Arial, Helvetica, sans-serif;
+	font-weight:bold; 
+}
+/* application title container */
+.apptitle
+{
+	background-color: white; 
+	border-bottom: 0;
+	color:#F07E13;
+	font:Verdana, Arial, Helvetica, sans-serif;
+	margin-bottom: 0;
+}
+
+/* application body frame/container */
+#appbody
+{
+	margin-left: 5px;
+}
+
+/**************************************************************************************
+*	Links and buttons
+***************************************************************************************/
+/* Global Link classes */
+a:link { text-decoration: underline; color: #000066; }
+a:active { text-decoration: underline; color: #FFFF66; }
+a:visited { text-decoration: underline; color: #000066; }
+a:hover { text-decoration: underline; color: #FF0000; }
+.link { text-decoration: underline; color: #000066; } /* Used for span and text acting like a link */
+
+/**************************************************************************************
+*	 Global container
+***************************************************************************************/
+/* used for creating think hr lines in tables */
+.horizontalline, hr
+{
+	height:1px;
+	background-color:#0066FF;
+}
+/* loading div or span */
+.loading
+{
+	background-image: url(/images/loading.gif);	
+	background-repeat: no-repeat;
+	width: 16px;
+	height: 16px;
+	margin: 10px;
+}
+
+/**************************************************************************************
+*	ANT Header
+***************************************************************************************/
+.header
+{
+	background-color:#69a728;
+	color:#FFFFFF;
+	vertical-align: middle;
+}
+
+.header a
+{
+	color:#FFFFFF;
+	font-weight:bold; 
+	font-size:12px; 
+	text-decoration:none;
+}
+
+.headerTitle
+{
+	padding: 5px;
+	color:#FFFFFF;
+	font-size:20px; 
+	font:Verdana, Arial, Helvetica, sans-serif;
+	font-weight:bold; 
+}
+
+/**************************************************************************************
+*	Topnav
+***************************************************************************************/
+.topNavbarBG 
+{
+	background:#69a728;
+	border: 0;
+}
+
+.topNavbarShadow 
+{
+	height:0px;
+	background-color:#7f95ac;
+}
+
+.topNavbarHr
+{
+	background-color: #7f95ac;
+	height:0px;
+}
+
+.topNavTabOut
+{
+	cursor:pointer;
+	color:#000000;
+	background-color: #e0e0e0;
+	border: 0;
+	border-right: 1px solid #7f95ac;
+	height:25px;
+	font-size: 12px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+}
+.topNavTabOut div 
+{ 
+	padding-left:10px; padding-right:10px; padding-top:5px;
+	border: 0;
+}
+
+.topNavTabOver
+{
+	cursor:pointer;
+	color:#fff;
+	background-color: #5b8922;
+	border: 0;
+	border-right: 1px solid #7f95ac;
+	height:25px;
+	font-size: 12px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+}
+.topNavTabOver div 
+{ 
+	padding-left:10px; padding-right:10px; padding-top:5px;
+	border: 0;
+}
+
+.topNavTabOn
+{
+	cursor:pointer;
+	color:#262C26;
+	background-color: white;
+	border-right: 1px solid #7f95ac;
+	height:25px;
+	font-size: 12px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+}
+.topNavTabOn div { 
+	border: 0;
+	padding-left:10px; padding-right:10px; padding-top:5px;
+}
+
+/**************************************************************************************
+*	 Forms:	Global form classes
+***************************************************************************************/
+.formTitle
+{
+	font-size: 16px;
+	font-weight: bold;
+	text-align:left;
+	padding:5px 5px 5px 0px;
+	margin:0px;
+	color: #F07E13;
+}
+/* The name of the field/property */
+.formLabel
+{
+	font-weight: bold;
+}
+/* The value and the input */
+.formValue, .formValue.td
+{
+	padding-bottom: 3px;
+	font-size: 13px;
+}
+
+.objectLoaderHeader
+{
+	font-size: 18px;
+	font-weight: bold;
+	text-align:left;
+	padding:5px 5px 0 0;
+	margin:0px;
+	color: #F07E13;
+}
+
+/**************************************************************************************
+*	Theme Includes
+***************************************************************************************/
+<?php
+	$folder = "green";
+	/*
+	*	List of styles that control the look of aereuslib classes
+	*/
+	include("$folder/CContentTable.css");
+	include("$folder/CToolbar.css");
+	include("$folder/CTabs.css");
+	include("$folder/CToolTable.css");
+	include("$folder/CWindowFrame.css");
+	//include("$folder/DynDiv.css");
+	include("$folder/AntObjectBrowser.css");
+	include("$folder/CNavBar.css");
+?>

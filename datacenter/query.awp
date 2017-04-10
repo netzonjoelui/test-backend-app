@@ -1,0 +1,239 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/content_table.awp");
+	require_once("../lib/Button.awp");
+	require_once("../users/user_functions.php");
+	require_once("datacenter_functions.awp");
+
+	$dbh = new CDatabase();
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$QID = $_GET['qid'];
+	$DBID = $_GET['dbid'];
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+	<title>Query</title>
+	<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme($dbh, $USERID, 'css'); ?>">
+	<?php
+		include("../lib/aereus.lib.js/js_lib.php");
+	?>
+	<script language='javascript' type='text/javascript'>
+	var g_qid = <?php print(($QID) ? $QID : 'null'); ?>;
+	var g_dbid = <?php print($DBID); ?>;
+	var g_theme = "<?php echo UserGetTheme($dbh, $USERID, 'name'); ?>";
+	// Update database
+	var dbh = new CAdcClient("/datacenter/xml_query.awp", g_dbid);
+	var g_newrowData = null;
+
+	// Add table
+	var g_tbl = new CToolTable("100%");
+	var g_cols = new Array();	// Array of col attribs
+	var g_numrows = 1;			// Total number of rows
+	var g_txtQuery = null;		// textarea holding query
+	var g_txtName = null;		// Name of query input box
+	var g_namecon  = null;		// Div showing the name input
+	var g_rescon = null;		// Results container
+	
+	function main()
+	{
+		var tb = new CToolbar();
+		var btn = new CButton("Run Query", runQuery, null, "b2");
+		tb.AddItem(btn.getButton(), "left");
+		var btn = new CButton("Save Changes", saveQuery);
+		tb.AddItem(btn.getButton(), "left");
+		tb.print(document.getElementById('toolbar'));
+
+		var con = document.getElementById("bdy");
+
+		// Add name container (hidden of not saved)
+		g_namecon = ALib.m_document.createElement("div");
+		con.appendChild(g_namecon);
+		alib.dom.styleSet(g_namecon, "display", "none");
+		var frm0 = new CWindowFrame("Name", null, "3px");
+		var frmcon = frm0.getCon();
+		g_txtName = ALib.m_document.createElement("input");
+		g_txtName.type = "text";
+		g_txtName.size = "64";
+		frmcon.appendChild(g_txtName);
+		frm0.print(g_namecon);
+
+		// Create query
+		var frm1 = new CWindowFrame("Query", null, "3px");
+		var frmcon = frm1.getCon();
+		g_txtQuery = ALib.m_document.createElement("textarea");
+		g_txtQuery.value = "-- Enter query here";
+		alib.dom.styleSet(g_txtQuery, "width", "100%");
+		alib.dom.styleSet(g_txtQuery, "height", "30px");
+		//alib.dom.textAreaAutoResizeHeight(g_txtQuery, 30);
+		frmcon.appendChild(g_txtQuery);
+		frm1.print(con);
+
+		// Create results table
+		var frm2 = new CWindowFrame("Results");
+		g_rescon = frm2.getCon();
+		frm2.print(con);
+
+		if (g_qid)
+			loadSavedQuery(g_qid);
+	}
+
+	function runQuery()
+	{
+		if (g_txtQuery.value)
+		{
+			loadTable(g_txtQuery.value);
+		}
+	}
+
+	function saveQuery()
+	{
+		if (g_qid)
+		{
+			var args = [["dbid", g_dbid], ["query", g_txtQuery.value], ["qid", g_qid], ["name", g_txtName.value]];
+			var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "save_query_changes", args);
+		}
+		else
+		{
+			var name = prompt("Query name:", "My Query");
+
+			var cb_fun = function(id)
+			{
+				g_qid = id;
+
+				g_txtName.value = name;
+				alib.dom.styleSet(g_namecon, "display", "block");
+			};
+			var args = [["dbid", g_dbid], ["query", g_txtQuery.value], ["name", name]];
+			var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "save_query", args, cb_fun);
+		}
+	}
+
+	function loadSavedQuery(qid)
+	{
+		var ajax = new CAjax();
+		ajax.onload = function(root)
+		{
+			var num = root.getNumChildren();
+			for (i = 0; i < num; i++)
+			{
+				var name = "";
+				var query = "";
+
+				var child = root.getChildNode(i);
+				if (child.m_name == "query")
+				{
+					var num_vars = child.getNumChildren();
+					for (j = 0; j < num_vars; j++)
+					{
+						var dbattr = child.getChildNode(j);
+						switch (dbattr.m_name)
+						{
+						case "name":
+							name = (dbattr.m_text) ? unescape(dbattr.m_text) : "";
+							g_txtName.value = name;
+							break;
+						case "query":
+							query = (dbattr.m_text) ? unescape(dbattr.m_text) : "";
+							g_txtQuery.value = query;
+							break;
+						}
+					}
+				}
+				alib.dom.styleSet(g_namecon, "display", "block");
+			}
+		};
+
+		var url = "/datacenter/xml_getquerydet.awp?qid="+g_qid;
+		ajax.exec(url);
+	}
+
+	function loadTable(query)
+	{	
+		g_numrows = 1;
+
+		// Clean table con
+		clearTable();
+		
+		// Create table
+		g_tbl = new CToolTable("100%");
+		g_cols = new Array();
+
+		dbh.onload = function()
+		{
+			var num = this.getNumCols();
+			for (var i = 0; i < num; i++)
+			{
+				var col = this.getCol(i);
+				g_tbl.addHeader(col.name);
+
+				var ind = g_cols.length;
+				g_cols[ind] = new Object();
+				g_cols[ind].name = col.name;
+			}	
+
+			num = this.getNumRows();
+			for (var i = 0; i < num; i++)
+			{
+				var rw = g_tbl.addRow();
+
+				// Loop through cols (skip id, start with 1)
+				for (var j = 0; j < this.getNumCols(); j++)
+				{
+					var col = this.getCol(j);
+					var val = unescape(this.getValue(i, j));
+					//rw.addCell(unescape(this.getValue(i, j)));
+					switch (col.type)
+					{
+					case 'antfs_folder':
+						if (val)
+						{
+							var f_dv = ALib.m_document.createElement("div");
+							rw.addCell(f_dv, "center", null, null, true);
+							f_dv.innerHTML = "<img border='0' src='/images/themes/" + g_theme + "/icons/managefilesfolder_small.gif' />";
+							alib.dom.styleSet(f_dv, "cursor", "pointer");
+							alib.dom.styleSet(f_dv, "text-align", "center");
+							f_dv.m_fid = val;
+							f_dv.onclick = function()
+							{
+								window.open("/userfiles/browse.awp?catid=" + this.m_fid);
+							}
+						}
+						else
+						{
+							rw.addCell('&nbsp;');
+						}
+						break;
+					default:
+						rw.addCell(val);
+						break;
+					}
+				}
+			}
+
+			// clear onload
+			this.onload = function() {}
+			g_tbl.print(g_rescon);
+		}
+		dbh.query(query);
+	}
+	function clearTable()
+	{	
+		g_tbl = null;
+		g_cols = null;
+		g_rescon.innerHTML = "";
+	}
+	</script>
+</head>
+
+<body onload='main()' class='popup'>
+<div id='toolbar' class='popup_toolbar'></div>
+<div id='bdy' class='popup_body'></div>
+</body>
+</html>

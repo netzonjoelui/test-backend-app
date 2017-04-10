@@ -1,0 +1,173 @@
+/**************************************************************************************
+*	Chat:		For Chat Classes
+***************************************************************************************/
+
+.ChatInputWindowImage
+{
+	margin-top: 2px;
+}
+.ChatInputWindow
+{
+	padding-right:6px;
+	padding-top:3px;
+	margin-left: 4px;
+	margin-right: 6px;
+}
+.ChatActionsBar
+{
+	padding-right:3px;
+	padding-left:3px;
+	padding-top:3px;
+	text-align: right;
+	font-size: 9px;
+}
+.ChatViewWindow
+{
+	width:100%;
+	padding-left:3px;
+	padding-right:3px;
+	padding-top:3px;
+}
+.ChatMainFrame
+{
+	background-color:#FFFFFF;
+	border:1px solid #B1B1B1;
+	padding-left:3px;
+	padding-top:3px;
+	overflow:auto;
+}
+.ChatTitle
+{
+	color:#333333;
+	font-size:14px; 
+	padding-left:3px; 
+	padding-top:3px;
+	font-weight:bold;
+}
+
+.ChatStatusTitle
+{
+	color:#000000;
+	font-size:12px; 
+	padding-left:3px; 
+	padding-top:3px;
+	font-weight:bold;
+}
+
+a.chat
+{
+	color:#FF0000;
+	text-decoration:underline;
+	font-size:11px;
+	font-family:Arial, Verdana, Helvetica, sans-serif;
+}
+a.chat:hover
+{
+	color:#660000;
+	text-decoration:none;
+	font-size:11px;
+	font-family:Arial, Verdana, Helvetica, sans-serif;
+}
+a.chat:visited
+{
+	color:#ABABAB;
+	text-decoration:none;
+	font-size:11px;
+	font-family:Arial, Verdana, Helvetica, sans-serif;
+}
+
+.antChatStyles 
+{
+	font-family: Arial, Verdana,  Helvetica, sans-serif; 
+	font-size: 12px; 
+	border: #B1B1B1; 
+	border-style:solid; 
+	border-top-width: 1px; 
+	border-right-width: 1px; 
+	border-bottom-width: 1px; 
+	border-left-width: 1px; 
+	width:99%; 
+	height:30px;
+}
+
+/**
+ * Chat Messenger container
+ */
+.chatMessenger
+{
+	border: 1px solid #ccc;
+	margin-top: 5px;
+	background-color: #fff;
+}
+
+.chatMessengerTitle
+{
+	height: 15px;
+	font-size: 12px;
+	font-weight: bold;
+	padding: 5px;
+	color: #606060;
+	border-bottom: solid 1px #b7b7b7;
+	background: #fff;
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#cccccc));
+	background: -moz-linear-gradient(top,  #fff,  #cccccc);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#cccccc');
+
+    /*alib.dom.styleSet(this.headerCon, "width", "240px");*/
+}
+
+.chatMessengerList
+{
+	height: 300px;
+	width: 250px;
+	margin: 5px 0 5px 0;
+	overflow-y: auto;
+}
+
+/**
+ * Chat window outer container
+ */
+.chatClient
+{
+	border: 1px solid #ccc;
+	margin-top: 5px;
+	background-color: #fff;
+}
+
+.chatClientTitle
+{
+	height: 15px;
+	font-size: 12px;
+	font-weight: bold;
+	padding: 5px;
+	color: #606060;
+	border-bottom: solid 1px #b7b7b7;
+	background: #fff;
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#cccccc));
+	background: -moz-linear-gradient(top,  #fff,  #cccccc);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#cccccc');
+}
+
+/**
+ * Chat client message
+ */
+.chatClientMessage
+{
+	padding: 10px;
+	-webkit-border-radius: 5px; 
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	width: 165px;
+
+	color: #606060;
+	/*background: #bed73b; green */
+	background: #e3e3e3;
+
+	/*
+	border: solid 1px #b7b7b7;
+	background: #fff;
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ededed));
+	background: -moz-linear-gradient(top,  #fff,  #ededed);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#ededed');
+	*/
+}

@@ -1,0 +1,23 @@
+<?php
+	$db_handle = pg_connect("dbname=mailsystem user=administrator password=kryptos78 host=192.168.0.96");
+	
+	if ($_GET['ssec'] == "F234dG")
+	{
+		if ($_GET['a'])
+		{
+			$result = pg_query($db_handle, "select id from email_users where email_address='".$_GET['a']."@myaereus.com'");
+			if (pg_num_rows($result))
+			{
+				pg_free_result($result);
+			}
+			else
+			{
+				pg_query("insert into email_users(email_address, maildir) values('".$_GET['a']."@myaereus.com', 'aereus_mya');");
+			}
+		}
+		if ($_GET['d'])
+		{
+			$result = pg_query($db_handle, "delete from email_users where email_address='".$_GET['d']."'@myaereus.com");
+		}
+	}
+?>

@@ -1,0 +1,234 @@
+<?php 
+	/**************************************************************************************
+	* Theme:	moonlight
+	*
+	* Notes:	Global definitions go in this file, specific classes
+	* 			should all be included via php includes
+	*			http://www.colourlovers.com/palette/656966/Koi_Carp
+	***************************************************************************************/
+	header("Content-type: text/css"); 
+?>
+
+/**************************************************************************************
+*	 Containers:	Global body classes
+***************************************************************************************/
+body 
+{ 
+	background-color: #FFFFFB;
+	font-family:Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	font-size: 11px;
+	color: #000000;
+}
+/* used for all popups */
+body.popup
+{
+	background-color:#FFFFFF;
+	color:#000000;
+	margin: 0px;
+	padding: 0px;
+}
+/* application name/title container */
+#appname
+{
+	background-color: #070506; 
+	border-bottom: 1px solid #070506;
+	color:#FFFFFB;
+
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 2px;
+	font-size:18px; 
+	font:Verdana, Arial, Helvetica, sans-serif;
+	font-weight:bold; 
+}
+/* application title container */
+.apptitle
+{
+	background-color: #070506; 
+	border-bottom: 1px solid #070506;
+	color:#FFFFFB;
+
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 2px;
+	font-size:18px; 
+	font:Verdana, Arial, Helvetica, sans-serif;
+	font-weight:bold; 
+}
+.apptitle h1
+{
+	font-size:18px; 
+	margin: 0 0 3px 0;
+	padding: 0;
+	font-weight:bold; 
+}
+
+/* application body frame/container */
+#appbody
+{
+	margin-left: 5px;
+}
+
+/**************************************************************************************
+*	Links and buttons
+***************************************************************************************/
+/* Global Link classes */
+a:link { text-decoration: underline; color: #000066; }
+a:active { text-decoration: underline; color: #FFFF66; }
+a:visited { text-decoration: underline; color: #000066; }
+a:hover { text-decoration: underline; color: #FF0000; }
+.link { text-decoration: underline; color: #000066; } /* Used for span and text acting like a link */
+
+/**************************************************************************************
+*	 Global container
+***************************************************************************************/
+/* used for creating think hr lines in tables */
+.horizontalline, hr
+{
+	height:1px;
+	background-color:#0066FF;
+}
+/* loading div or span */
+.loading
+{
+	background-image: url(/images/loading.gif);	
+	background-repeat: no-repeat;
+	width: 16px;
+	height: 16px;
+	margin: 10px;
+}
+
+/**************************************************************************************
+*	ANT Header
+***************************************************************************************/
+.header
+{
+	background-color:#1E324A;
+	color:#FFFFFF;
+	vertical-align: middle;
+}
+
+.header a
+{
+	color:#FFFFFF;
+	font-weight:bold; 
+	font-size:12px; 
+	text-decoration:none;
+}
+
+.headerTitle
+{
+	padding: 5px;
+	color:#FFFFFB;
+	font-size:20px; 
+	font:Verdana, Arial, Helvetica, sans-serif;
+	font-weight:bold; 
+}
+
+/**************************************************************************************
+*	Topnav
+***************************************************************************************/
+.topNavbarBG 
+{
+	background-color:#1E324A;
+	padding-left: 5px;
+}
+
+.topNavbarShadow 
+{
+	height:0px;
+	background-color:#7f95ac;
+}
+
+.topNavbarHr
+{
+	background-color: #7f95ac;
+	height:0px;
+}
+
+.topNavTabOut
+{
+	cursor:pointer;
+	color:#F0A00D;
+	background-color: #524235;
+	border-right: 1px solid #7f95ac;
+	height:25px;
+	font-size: 12px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+}
+.topNavTabOut div 
+{ 
+	padding-left:10px; padding-right:10px; padding-top:5px;
+}
+
+.topNavTabOver
+{
+	cursor:pointer;
+	color:#FFFFFB;
+	background-color: #524235;
+	border-right: 1px solid #7f95ac;
+	height:25px;
+	font-size: 12px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+}
+.topNavTabOver div 
+{ 
+	padding-left:10px; padding-right:10px; padding-top:5px;
+}
+
+.topNavTabOn
+{
+	cursor:pointer;
+	color:#FFFFFB;
+	background-color: #070506;
+	border-right: 1px solid #7f95ac;
+	height:25px;
+	font-size: 12px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+}
+.topNavTabOn div { padding-left:10px; padding-right:10px; padding-top:5px;}
+
+/**************************************************************************************
+*	 Forms:	Global form classes
+***************************************************************************************/
+.formTitle
+{
+	font-size: 16px;
+	font-weight: bold;
+	text-align:left;
+	padding:5px 5px 5px 0px;
+	margin:0px;
+	color: #F0A00D;
+}
+/* The name of the field/property */
+.formLabel
+{
+	font-weight: bold;
+}
+/* The value and the input */
+.formValue, .formValue.td
+{
+	padding-bottom: 3px;
+	font-size: 13px;
+}
+
+/**************************************************************************************
+*	Theme Includes
+***************************************************************************************/
+<?php
+	$folder = "moonlight";
+	/*
+	*	List of styles that control the look of aereuslib classes
+	*/
+	include("$folder/CContentTable.css");
+	include("$folder/CToolbar.css");
+	include("$folder/CTabs.css");
+	include("$folder/CToolTable.css");
+	include("$folder/CWindowFrame.css");
+	//include("$folder/DynDiv.css");
+	include("$folder/AntObjectBrowser.css");
+	include("$folder/CNavBar.css");
+?>

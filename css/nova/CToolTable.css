@@ -1,0 +1,53 @@
+/**************************************************************************
+ *	CToolTable.js
+ **************************************************************************/
+.CTTMainTable
+{
+	border-bottom:solid 1px #ADADAD;
+	border-left:solid 1px #ADADAD;
+}
+.CTTHeaderCell
+{
+	background-color:#666; 
+	color:#FFFFFF;
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	font-weight:bold;
+	padding-top:2px;
+	padding-bottom:3px;	
+	border-right:1px solid #ADADAD;
+}
+.CTTRowOne
+{
+	color:#FFFFFF;
+	border-right:1px solid #ADADAD;
+	vertical-align:middle;
+	background-color: transparent;
+	background-image:url(/images/themes/nova/bg2.png);
+	background-repeat:repeat;
+}
+.CTTRowOneBold
+{
+	border-right:1px solid #ADADAD;
+	vertical-align:middle;
+}
+.CTTRowTwo
+{
+	background-color: transparent;
+	background-image:url(/images/themes/nova/bg2.png);
+	background-repeat:repeat;
+	border-right:1px solid #ADADAD;
+	vertical-align:middle;
+	color:#FFFFFF;
+}
+.CTTRowTwoBold
+{
+	border-right:1px solid #ADADAD;
+	vertical-align:middle;
+}
+.CTTRowSpacer
+{
+	background-color:#ADADAD;
+	border-right:1px solid transparent;
+	height:1px;
+}

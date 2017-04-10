@@ -1,0 +1,104 @@
+<?php
+	if ($_POST['add_email'] && $_POST['add_member'])
+	{
+		$parts = explode(",", $_POST['add_email']);
+		
+		foreach ($parts as $part)
+		{
+			if (!$part) // Skip the empty parts
+				continue;
+				
+			$part = str_replace(" ", '', $part);
+			// Get user id
+			$result = $dbh->Query("select user_id from email_accounts where address='".$part."'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$dbh->FreeResults($result);
+				
+				if ($row['user_id'] == $USERID)
+				{
+					$status_message = "You do not need to add yourself!";
+				}
+				else if ($row['user_id'])
+				{
+					$dbh->Query("insert into project_template_share(user_id, template_id)
+								 values('".$row['user_id']."', '$TMPID');");
+				}
+			}
+			else
+				$status_message = "User not found: $part!";
+		}
+
+	}
+	
+	if ($_GET['dmid'])
+		$dbh->Query("delete from project_template_share where id='".$_GET['dmid']."'");
+		
+	WindowFrameToolbarStart('100%');
+	if ($RETPAGE) echo ButtonCreate("Go Back", "document.location='".base64_decode($RETPAGE)."'", "b2");
+	echo "<div style='float:right;padding-right:3px;font-weight:bold;font-size:14px;'>$status_message</div>";
+	WindowFrameToolbarEnd();
+	
+	echo "<div style='padding-top:10px;'>";
+	WindowFrameStart("Share Template with User", "100%");
+	echo "<form name='edit_template' action='template.awp?$FWDVARS' method='post'>
+			<table border='0'>
+				<tr>
+					<td>User Email:</td>
+					<td colspan='2'>";
+	$acField = new CAutoComplete('xml_users_ac.awp', 'add_email', 
+								 NULL, '', "style='width:350px;'", ',');
+	$acField->PrintTextBox();				
+	echo "			</td>
+					<td>".ButtonCreate("Add Attendee", "SUBMIT:edit_template:add_member")."</td>
+				</tr>
+			</table>
+		  </form>";
+	WindowFrameEnd();
+	echo "</div>";
+	
+	$intervals = "<option value='3' selected>day(s)</option>
+				  <option value='4'>week(s)</option>
+				  <option value='5'>month(s)</option>";
+	
+	echo "<div style='padding-top:10px;'>";
+	WindowFrameStart("Existing Members", "100%");
+	// Create new tool table
+	$tbl = new CToolTable;
+	// Create table headers
+	$tbl->StartHeaders();
+	$tbl->AddHeader("Name");
+	$tbl->AddHeader("Full Name");
+	$tbl->AddHeader("Email");
+	$tbl->AddHeader("Accepted");
+	$tbl->AddHeader("Delete", 'center', '50px');
+	$tbl->EndHeaders();
+	// Get attendees (users)
+	$query = "select project_template_share.id, users.id as user_id, users.name, users.full_name, 
+				project_template_share.accepted from project_template_share, users where 
+				project_template_share.template_id='$TMPID'
+				and  project_template_share.user_id = users.id
+				order by name";
+	$result = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($result);
+	for ($i=0; $i<$num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$name = $row['name'];
+		
+		$tbl->StartRow();
+		$tbl->AddCell($row['name']);
+		$tbl->AddCell($row['full_name']);
+		$tbl->AddCell(UserGetEmail(&$dbh, $row['user_id']));
+		$tbl->AddCell(('t' == $row['accepted']) ? 'yes' : 'no');
+		$tbl->AddCell("<a href=\"javascript:DeleteTemplateMember('".$row['id']."');\">
+						<img src='/images/themes/$THEMENAME/deleteTask.gif' border='0' title='Delete'></a>", 
+						true, 'center');
+		$tbl->EndRow();
+	}
+	$dbh->FreeResults($result);
+	$tbl->PrintTable();
+	WindowFrameEnd();
+	echo "</div>";
+?>

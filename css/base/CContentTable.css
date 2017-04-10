@@ -1,0 +1,111 @@
+/**************************************************************************************
+*	LIB:		CContentTable
+*	Purpose:	aereus.lib.js class used throughout ant for each content table
+***************************************************************************************/
+/* outer table */
+.ContentTable
+{
+	border-width:1px;
+	border-style:solid; 
+	border-left-color:#999999; 
+	border-left-width:1px; 
+	border-top-width:1px; 
+	border-top-color:#999999; 
+	border-bottom-color:#666666; 
+	border-bottom-width:1px;  
+	border-right-color:#666666; 
+	border-right-width:1px;
+}
+/* Upper Left Corner */
+.ContentTableTitleLeftCorn
+{
+	width:0px;
+}
+/* Center of title bar */
+.ContentTableTitleCenter
+{
+	/*
+	background-color:#FFFFFF; 
+	background-image:url(/images/themes/skygrey/windowHeaderShade.gif); 
+	background-position:0px 0px; 
+	background-repeat:repeat-x;
+	height:18px;
+	*/
+	background-color:#5A6A7A;
+	height: 20px;
+}
+/* Upper Right Corner */
+.ContentTableTitleRightCorn
+{
+	width:0px;
+}
+/* Label Container - For title */
+.ContentTableTitleLabel
+{
+	font-family:Tahoma, Verdana, Arial, Helvetica, sans-serif; 
+	text-align:left;
+	font-size:13px; 
+	padding-left:3px;
+	padding-top:1px;
+	padding-bottom:2px;
+	color:#FFFFFF;
+	font-weight: bold;
+}
+/* Context Container - For title */
+.ContentTableTitleContext
+{
+	margin-top: 1px;
+	margin-right: 1px;
+}
+/* Left border of table body */
+.ContentTableBodyLeft
+{
+	width:0px;
+}
+/* Table body */
+.ContentTableBody
+{
+	background-color:#FFFFFF; 
+	padding:4px; 
+	/*
+	background-image:url(/images/templates/windowBodyShade.gif); 
+	background-position:0px 0px; 
+	background-repeat:repeat-x;
+	*/
+	height:100%
+}
+/* Right border of table body */
+.ContentTableBodyRight
+{
+	width:0px;
+}
+/* Small 1px hr at the bottom of the table */
+.ContentTableFooterHrLeft
+{
+
+}
+.ContentTableFooterHr 
+{
+	background-color:#FFFFFF;
+	height:1px;
+}
+.ContentTableFooterHrRight
+{
+
+}
+
+/* The fotter row where the menu might optionally be placed */
+.ContentTableFooterLeftCorn
+{
+
+}
+
+.ContentTableFooterRow
+{
+
+}
+
+.ContentTableFooterRightCorn
+{
+
+}

@@ -1,0 +1,145 @@
+/**************************************************************************************
+*	Pages:	CWidgetBox classes
+***************************************************************************************/
+.CWidgetBoxDrSPOff
+{
+	border-top: 5px solid transparent;
+}
+.CWidgetBoxDrSPOver
+{
+	border-top: 5px solid blue;
+}
+
+a.FavoriteLinks
+{
+	color:#666666;
+	text-decoration:none;
+	font-size:11px;
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+}
+
+a.FavoriteLinks:hover
+{
+	color:#FF0000;
+	text-decoration:underline;
+	font-size:11px;
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+}
+
+/**************************************************************************************
+*	Page:		/home_stocks.awp
+*	Purpose:	Stock Ticker Page
+***************************************************************************************/
+.HStocksHeader
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px; 
+	color: #000000; 
+	font-weight:bold;
+	background-color:#EEEEEE;
+}
+
+.HStocksHeaderHr
+{
+	height:1px;
+	background-color:#FFFFFF;
+}
+
+.HStocksMarketsRow
+{
+	background-color:#EEEEEE;
+}
+
+.HStocksPosNum
+{
+	color:#006600;
+}
+
+.HStocksNegNum
+{
+	color:#FF0000;
+}
+
+.HStocksRow1
+{
+	background-color:#FFF;
+}
+
+.HStocksRow2
+{
+	background-color:#FFF;
+}
+
+/**************************************************************************************
+*	Pages:		For Aereus Friends Specific Classes
+***************************************************************************************/
+
+.websearchStyles 
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+	font-size: 11px; 
+	border: #808080; 
+	border-style:solid;
+	border-top-width: 1px; 
+	border-right-width: 1px; 
+	border-bottom-width: 1px; 
+	border-left-width: 1px; 
+	height:18px; 
+	width:100%;
+}
+.myasearchStyles 
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	font-size: 11px; 
+	border: #808080; 
+	border-style:solid; 
+	border-top-width: 1px; 
+	border-right-width: 1px; 
+	border-bottom-width: 1px; 
+	border-left-width: 1px; 
+	height:18px; 
+	width:100%;
+}
+.antFavoritesStyles 
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	font-size: 11px; 
+	border: #808080; 
+	border-style:solid; 
+	border-top-width: 1px; 
+	border-right-width: 1px; 
+	border-bottom-width: 1px; 
+	border-left-width: 1px; 
+	padding-left:2px; 
+	width:100%;
+}
+
+/**************************************************************************************
+*	Page:		home_welcome.awp
+***************************************************************************************/
+.HomeWelcomeText
+{
+	color:#666666;
+}
+
+.HomeWelcomeProgressBarLeft
+{
+	float:left;
+	height:13px;
+	
+	background-color:#666666;
+	border-bottom: 1px solid #666666;
+	border-top: 1px solid #666666;
+	border-left: 1px solid #666666;
+}
+
+.HomeWelcomeProgressBarRight
+{
+	float:left;
+	height:13px;
+	border-bottom: 1px solid #666666;
+	border-top: 1px solid #666666;
+	border-right: 1px solid #666666;
+}
+
+

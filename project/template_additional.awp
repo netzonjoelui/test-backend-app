@@ -1,0 +1,55 @@
+<?php
+	if ($_GET['dtid'])	
+		$dbh->Query("delete from project_template_tasks where id='".$_GET['dtid']."'");
+		
+	$result = $dbh->Query("select custom_fields from project_templates where id='$TMPID'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$custom_fields = $row['custom_fields'];
+	}
+	$dbh->FreeResults($result);
+	
+	echo "<form name='edit_template' action='template.awp?$FWDVARS' method='post'>"; 
+	
+	WindowFrameToolbarStart('100%');
+	echo ButtonCreate("Save Changes", "SUBMIT:edit_template:save_template");
+	if ($RETPAGE) echo ButtonCreate("Go Back", "document.location='".base64_decode($RETPAGE)."'", "b2");
+	echo "<div style='float:right;color:#990000;padding-right:3px;font-weight:bold;font-size:14px;'>$status_message</div>";
+	WindowFrameToolbarEnd();
+	
+	echo "<div style='padding-top:10px;'>";
+	WindowFrameStart("Existing Tasks", "100%");
+	// Create new tool table
+	$tbl = new CToolTable;
+	// Create table headers
+	$tbl->StartHeaders();
+	$tbl->AddHeader("Include", 'center', '50px');
+	$tbl->AddHeader("Name");
+	$tbl->AddHeader("Type", 'center', '50px');
+	$tbl->EndHeaders();
+	$query = "select id, name, field_type from project_fields where user_id='$USERID'";
+	//if ($custom_fields == 't')
+	//	$query .= " and id in (select field_id from project_fields_custom where template_id='$TMPID')";
+	$result = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($result);
+	for ($i=0; $i<$num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$id = $row['id'];
+		$name = $row['name'];
+		$type = $row['field_type'];
+		$deletelink = "<a href=\"JavaScript:DeleteLabel('$id', '".$name."')\" class='TableLinksAlert'>";
+		$tbl->StartRow();
+		$tbl->AddCell("<input type='checkbox' value='".$row['id']."[]' checked>", true, 'center');
+		$tbl->AddCell($name);
+		$tbl->AddCell($type, false, 'center');
+		$tbl->EndRow();
+	}
+	$dbh->FreeResults($result);
+	
+	$tbl->PrintTable();
+	WindowFrameEnd();
+	echo "</div>";
+	echo "</form>";
+?>

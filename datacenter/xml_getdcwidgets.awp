@@ -1,0 +1,66 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/aereus.lib.php/CChart.php");
+	require_once("../users/user_functions.php");
+	require_once("datacenter_functions.awp");
+
+	$dbh = new CDatabase();
+	$dbh_dc = new CDatabase($settings_db_server, $settings_db_datacenter, 
+						    $settings_db_user, $settings_db_password, "pgsql");
+
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$TABLE = $_GET['table'];
+	$DBID = $_GET['dbid'];
+	$SHOWCOLS = 3; // Later this will be dynamic
+
+	header("Content-type: text/xml");			// Returns XML document
+	echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'; 
+
+	echo "<dashboard>";
+
+	$columns = array();
+	$lastcol = -1;
+	$numcols = 0; // Later this will be dynamic
+	$result = $dbh->Query("select id, col, graph_id from dc_dashboard where user_id='$USERID' order by col, indx");
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		
+		$columns[$row['col']] .= "<widget>";
+		$columns[$row['col']] .= "<id>".rawurlencode($row['id'])."</id>";
+		$columns[$row['col']] .= "<graph_id>".rawurlencode($row['graph_id'])."</graph_id>";
+		if (is_numeric($row['graph_id']))
+		{
+			$columns[$row['col']] .= "<name>".rawurlencode(dc_graphGetName($dbh, $row['graph_id']))."</name>";
+			$columns[$row['col']] .= "<type>graph</type>";
+		}
+		$columns[$row['col']] .= "</widget>";
+	}
+	$dbh->FreeResults($result);
+
+	$wild_used = false;
+	for ($i = 0; $i < $SHOWCOLS; $i++)
+	{
+		$width = UserGetPref($dbh, $USERID, "datacenter/dashboard/col".$i."_width");
+		if (!$width) 
+		{
+			if (!$wild_used)
+			{
+				$width = "*";
+				$wild_used = true;
+			}
+			else
+				$width = "300px";
+		}
+
+		echo "<column width='".rawurlencode($width)."'>".$columns[$i]."</column>";
+	}
+
+	echo "</dashboard>";
+?>
+

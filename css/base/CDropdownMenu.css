@@ -1,0 +1,92 @@
+/**************************************************************************************
+*	Page:		CDropdownMenu.awp
+*	Purpose:	Styles for dropdown menu
+***************************************************************************************/
+
+.CDropdownMenuIcon
+{
+	background-image: url(/images/themes/ant_os/icons/CDropdownMenuIcon.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-y;
+	text-align:center;
+	padding:1px;
+	width: 12px;
+}
+
+.CDropdownMenuIconOver
+{
+	background-color:#FFEEC2;
+	text-align:center;
+	padding:1px;
+	width: 12px;
+}
+
+.CDropdownMenuLink
+{
+	background-color:#FFFFFF;
+	color:#000;
+	padding:2px 0px 2px 4px;
+	text-align: left;
+}
+
+.CDropdownMenuLinkOver
+{
+	background-color:#FFEEC2;
+	color:#000;
+	padding:2px 0px 2px 4px;
+	text-align: left;
+}
+
+.CDropdownMenuRight
+{
+	background-color:#FFFFFF;
+	text-align: left;	
+	color:#000;
+	padding:1px;
+}
+
+.CDropdownMenuRightOver
+{
+	background-color: #FFEEC2;
+	text-align: left;		
+	color:#000;	
+	padding:1px;
+}
+
+/* Use to defile icon that suggests a sub-menu */
+.CDropdownMenuRightIcon
+{
+	background-image: url(/images/icons/tilde_green.png);
+	background-position:0 0;
+	background-repeat:no-repeat;
+	width: 12px;
+	text-align:center;
+}
+.CDropdownMenuRightIconOver
+{
+	/*background-image: url(/images/themes/ant_os/icons/tilde.gif);*/
+	background-image: url(/images/icons/tilde_green.png);
+	background-position:0 0;
+	background-repeat:no-repeat;
+	width: 12px;
+	text-align:center;
+}
+
+.CDropdownMenuContainer
+{
+	background-color:#FDFAFF;
+	border:1px solid #7C7C94; 
+	padding:1px;
+}
+
+.CDropdownMenuButtonPrefix
+{
+	background-image: url(/images/themes/nova/buttons/options_aarow.png);
+	background-position:50% 50%;
+	background-repeat:no-repeat;
+	/*content: "\21D3";*/
+	width: 10px;
+	height: 5px;
+	vertical-align: middle;
+}
+

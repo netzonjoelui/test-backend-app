@@ -1,0 +1,164 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../users/user_functions.php");
+	require_once("../calendar/calendar_functions.awp");
+	require_once("../contacts/contact_functions.awp");
+	require_once("../customer/customer_functions.awp");
+	
+	$dbh = new CDatabase();
+	
+	// Get start/end date and time
+	$MONTH_START = ($_GET['month_start']) ? $_GET['month_start'] : date("m");
+	$DAY_START = ($_GET['day_start']) ? $_GET['day_start'] : date("d");
+	$YEAR_START = ($_GET['year_start']) ? $_GET['year_start'] : date("Y");
+	$MONTH_END = ($_GET['month_end']) ? $_GET['month_end'] : date("m");
+	$DAY_END = ($_GET['day_end']) ? $_GET['day_end'] : date("d");
+	$YEAR_END = ($_GET['year_end']) ? $_GET['year_end'] : date("Y");
+
+	// Get calendars to view
+	switch($_GET['toget'])
+	{
+	case 'tlc':
+		$cals_cond .= "(calendars.id='63' and calendar_events.sharing = '2')";
+		$CALID = 63;
+		break;
+	case 'general':
+		$cals_cond .= "(calendars.id='64' and calendar_events.sharing = '2')";
+		$CALID = 64;
+		break;
+	case 'hosea':
+		$cals_cond .= "(calendars.id='115' and calendar_events.sharing = '2')";
+		$CALID = 115;
+		break;		
+	default: // Do not process if no calendar
+		exit;
+	}
+	
+	header("Content-type: text/xml");			// Returns XML document
+	echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'; 
+	echo "<events>\n";
+	
+	$curDate = strtotime(date("$YEAR_START-$MONTH_START-$DAY_START"));
+	$endDate = strtotime(date("$YEAR_END-$MONTH_END-$DAY_END"));
+	while ($curDate <= $endDate)
+	{
+		// Check for recurring events
+		RecurringCreateLinks(&$dbh, $CALID, date("m", $curDate), date("d", $curDate), date("Y", $curDate));
+		$tev = "calendar_events"; // main events table
+		if ($FILTER)
+		{
+			if ($FILTER == "contact")
+				$filter_cond = " and $tev.contact_id is not null";
+		}
+		$query = "select $tev.id, $tev.date_start, $tev.date_end, $tev.start_block, $tev.end_block, $tev.location, $tev.name,
+				  calendar_events_labels.color, calendar_events_labels.name as label, $tev.all_day, $tev.recur_id, $tev.status, 
+				  $tev.contact_id, $tev.calendar, $tev.notes
+				  from calendars, $tev left outer join calendar_events_labels on ($tev.label = calendar_events_labels.id)
+				  where (
+				  ($tev.date_start ='".date("Y-m-d", $curDate)."' and $tev.date_start=$tev.date_end)
+				  or
+				  ($tev.date_start <='".date("Y-m-d", $curDate)."' and 
+				   $tev.date_end>='".date("Y-m-d", $curDate)."' and $tev.date_start!=$tev.date_end))
+				  and $tev.calendar=calendars.id and ($cals_cond) $filter_cond
+				  order by $tev.all_day DESC, $tev.date_start, $tev.date_end DESC, $tev.start_block, $tev.end_block";
+		
+		$res = $dbh->Query($query);
+		$num = $dbh->GetNumberRows($res);
+		for ($i=0; $i<$num; $i++)
+		{
+			$row = $dbh->GetNextRow($res, $i);
+			$stname = CalGetStatusName(&$dbh, $row['status']);
+
+			$lblcolor = ($row['color']) ? $row['color'] : 'EEEEEE';
+			
+			if ($stname && $stname != "Open") 
+				$stname = "(".$stname.")";
+			else
+				$stname = "";
+				
+			if ($row['contact_id'])
+				$cname = ContactGetName(&$dbh, $row['contact_id']).": ";
+			else
+				$cname = "";
+				
+			$display = (date("Y-m-d", $curDate) == date("Y-m-d")) ? "Today" : date("l", $curDate);
+			
+			// Check for new date header
+			if (date("Y-m-d", $curDate) != $last_date)
+			{
+				if ($last_date)
+					echo "</section>";
+
+				$last_date = date("Y-m-d", $curDate);
+				
+				echo "<section>";
+				echo "<section_weekday>".$display,"</section_weekday>";
+				echo "<section_date>".date("F jS", strtotime($last_date)),"</section_date>";
+				
+				$close = "</section>";
+			}
+			
+			echo "<event>";
+			// Check if event is a one day event
+			if ($row['date_start'] == $row['date_end'])
+			{
+				// Check for all day event
+				if ($row['all_day'] == 't')
+				{
+					echo "<time_start>All Day</time_start><time_end></time_end>";
+				}
+				else
+				{
+					echo "<time_start>".GetBlockName($row['start_block'])."</time_start>
+						  <time_end>".GetBlockName($row['end_block'])."</time_end>";
+				}
+			}
+			else
+			{
+				echo "<time_start>Multi-day Event</time_start>";
+			}
+			
+			echo "<rid>";
+			if (is_numeric($row['recur_id']))
+				echo $row['recur_id'];		
+			echo "</rid>";
+
+			// Check for additional fields
+			$res2 = $dbh->Query("select id, name from calendar_fields where calendar_id='$CALID' order by name");
+			$num2 = $dbh->GetNumberRows($res2);
+			if ($num2 && !$row['recur_id'])
+			{
+				for ($j = 0; $j < $num2; $j++)
+				{
+					$row2 = $dbh->GetNextRow($res2, $j);
+
+					echo "<".$row2['name'].">".CalGetAdditionalVal(&$dbh, $row2['id'], $row['id'])."</".$row2['name'].">";
+				}
+				$dbh->FreeResults($res2);
+			}
+
+			echo "<eid>".$row['id']."</eid>";
+			echo "<name>".rawurlencode(stripslashes($cname.$row['name']." ".$stname))."</name>";
+			echo "<location>".rawurlencode(stripslashes($row['location']))."</location>";
+			echo "<notes>".rawurlencode(stripslashes($row['notes']))."</notes>";
+			echo "<labelclr>$lblcolor</labelclr>";
+			echo "<calendar_id>".$row['calendar']."</calendar_id>";
+			echo "<weekday>".$display."</weekday>";
+			echo "<date>".date("F, jS", strtotime($last_date))."</date>";
+	
+			echo "</event>";
+		}
+		$dbh->FreeResults($res);
+		
+		$curDate = strtotime("+1 day", $curDate);
+	}
+
+	// Close the last section	
+	echo $close;
+
+	echo "</events>";
+?>
+
+

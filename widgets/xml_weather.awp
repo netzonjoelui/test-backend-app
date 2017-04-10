@@ -1,0 +1,256 @@
+<?php
+	require_once("SOAP/Client.php");
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("lib/aereus.lib.php/CPageCache.php");
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+
+	class CWeatherDay
+	{
+		var $maxTemp;
+		var $minTemp;
+		var $description;
+		var $icon;
+		var $name;	
+	}
+
+	$zip = UserGetPref($dbh, $USERID, "userdata/zipcode");
+	$numdays = 5;
+
+	if (!$zip)
+	{
+		// Print xml results
+		header("Content-type: text/xml");
+
+		echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+		echo "<forecast>";
+		echo "<error>nozip</error>";
+		echo "</forecast>";
+
+		return;
+	}
+
+	// 1800 = 30 minutes
+	$cache = new CPageCache(1800, "widgets-xml-weather-$USERID-$zip");
+
+	if ($cache->IsExpired() && $zip && $zip!='null')
+	{
+		// First get lat and long
+		$result = $dbh->Query("select city, state, latitude, longitude from app_us_zipcodes where zipcode='$zip'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$city = $row['city'];
+			$state = $row['state'];
+			$latitude = $row['latitude'];
+			$longitude = $row['longitude'];
+		}
+		$dbh->FreeResults($result);
+
+		// Crate WD objects
+		$wd_days = array();
+
+		for ($i = 0; $i < $numdays; $i ++)
+		{
+			$wd_days[$i] = new CWeatherDay();
+			if ($i == 0)
+				$wd_days[$i]->name = "Today";
+			else
+				$wd_days[$i]->name = date("l", strtotime("+ $i days"));
+		}
+
+		/* Create a new SOAP client using PEAR::SOAP's SOAP_Client-class: */
+		$client = new SOAP_Client('http://www.weather.gov/forecasts/xml/DWMLgen/wsdl/ndfdXML.wsdl');
+
+		/* Define the parameters we want to send to the server's helloWorld-function.
+			   Note that these arguments should be sent as an array: */
+
+		$params = array('latitude' => $latitude,
+							'longitude'  => $longitude,
+							'startDate' => date("Y-m-d"),
+							'numDays' => $numdays,
+							'format' => '24 hourly');
+		/* Send a request to the server, and store its response in $response: */
+		$xml_response = $client->call('NDFDgenByDay',$params, 'uri:DWMLgenByDay','uri:DWMLgenByDay/NDFDgenByDay', array('style'=>'document'));
+
+		// Parse XML document and populate CWeatherDay objects
+		$PATH = "";
+		$g_current_day = 0;
+		$g_process_days_name = false;
+		$g_process_days_temp = false;
+		$g_process_days_icon = false;
+		$g_process_days_desc = false;
+		$g_current_weather = 1;
+		$g_next_item = 1;
+		$g_first_jump = 2;
+
+		function startElement($parser, $name, $attrs)
+		{
+			global $PATH, $g_process_days_name, $g_current_day, $wd_days, $g_current_weather, $g_first_jump,
+				   $g_process_days_temp, $g_process_days_icon, $g_process_days_desc, $g_next_item;
+			$PATH .= ($PATH) ?  ":".$name : $name;
+			switch ($PATH)
+			{
+			case 'DWML:DATA:TIME-LAYOUT':
+				// Look for right 
+				break;
+			case 'DWML:DATA:TIME-LAYOUT:LAYOUT-KEY':
+				break;
+			case 'DWML:DATA:TIME-LAYOUT:START-VALID-TIME':
+				/*
+				if ($g_process_days_name)
+				{
+					if ($g_current_weather == $g_next_item)
+					{
+						$wd_days[$g_current_day]->name = $attrs['PERIOD-NAME'];
+						$g_current_day++;
+
+						if ($attrs["PERIOD-NAME"] == "Tonight")
+						{
+							$g_first_jump = 1;
+						}
+					}
+					
+					$g_current_weather++;
+
+					if ($g_next_item == 1)
+						$g_next_item += $g_first_jump;
+					else
+						$g_next_item += 2;
+				}
+				*/
+				break;
+			case 'DWML:DATA:PARAMETERS:TEMPERATURE':
+				$g_process_days_temp = $attrs['TYPE'];
+				$g_current_day = 0;
+				break;
+			case 'DWML:DATA:PARAMETERS:WEATHER':
+				$g_current_day = 0;
+				break;
+			case 'DWML:DATA:PARAMETERS:WEATHER:WEATHER-CONDITIONS':
+				// conditions are for both night and day so take only odd numbers
+				//if ($g_current_weather == $g_next_item)
+				//{
+					$wd_days[$g_current_day]->description = $attrs['WEATHER-SUMMARY'];
+					$g_current_day++;
+				//}
+				
+				$g_current_weather++;
+
+				if ($g_next_item == 1)
+					$g_next_item += $g_first_jump;
+				else
+					$g_next_item += 2;
+				break;
+			case 'DWML:DATA:PARAMETERS:CONDITIONS-ICON':
+				$g_current_day = 0;
+				$g_current_weather = 1;
+				$g_next_item = 1;
+				break;
+			}
+		}
+
+		function endElement($parser, $name)
+		{
+			global $PATH, $g_process_days_name, $g_current_day, $wd_days, $g_next_item,
+				   $g_process_days_temp, $g_process_days_icon, $g_process_days_desc;
+
+			switch ($PATH)
+			{
+			case 'DWML:DATA:TIME-LAYOUT':
+				$g_process_days_name = false;
+				break;
+			}
+			
+			$PATH = substr($PATH, 0, strrpos($PATH, ":"));
+		}
+
+		function characterData($parser, $data)
+		{
+			global $PATH, $g_process_days_name, $g_current_day, $numdays, $wd_days, $g_current_weather,
+				   $g_process_days_temp, $g_process_days_icon, $g_process_days_desc, $g_next_item, $g_first_jump;
+			
+			switch ($PATH)
+			{
+			case 'DWML:DATA:TIME-LAYOUT:LAYOUT-KEY':
+				if ($data == "k-p24h-n".$numdays."-1")
+				{
+					$g_process_days_name = true;
+					$g_current_weather = 1;
+					$g_next_item = 1;
+					$g_current_day = 0;
+				}
+				break;
+			case 'DWML:DATA:PARAMETERS:TEMPERATURE:VALUE':
+				if ($g_process_days_temp == "maximum")
+					$wd_days[$g_current_day]->maxTemp = $data;
+				if ($g_process_days_temp == "minimum")
+					$wd_days[$g_current_day]->minTemp = $data;
+				$g_current_day++;
+				break;
+			case 'DWML:DATA:PARAMETERS:CONDITIONS-ICON:ICON-LINK':
+				// conditions are for both night and day so take only odd numbers
+				//if ($g_current_weather == $g_next_item)
+				//{
+					$wd_days[$g_current_day]->icon = $data;
+					$g_current_day++;
+				//}
+
+				$g_current_weather++;
+
+				if ($g_next_item == 1)
+					$g_next_item += $g_first_jump;
+				else
+					$g_next_item += 2;
+
+				break;
+
+			}
+		}
+
+		$xml_parser = xml_parser_create();
+		xml_set_element_handler($xml_parser, "startElement", "endElement");
+		xml_set_character_data_handler($xml_parser, "characterData");
+		
+		if (!xml_parse($xml_parser, $xml_response))
+		{
+			die(sprintf("XML error: %s at line %d", 
+						xml_error_string(xml_get_error_code($xml_parser)), 
+						xml_get_current_line_number($xml_parser)));
+		}
+		
+		xml_parser_free($xml_parser);
+
+		// Print xml results
+
+		$cache->put('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>');
+		$cache->put("<forecast>");
+		// Always show zipcode used
+		$cache->put("<zip>$zip</zip>");
+		$cache->put("<city>$city</city>");
+		$cache->put("<state>$state</state>");
+
+		foreach ($wd_days as $day)
+		{
+			$icon = str_replace("http://www.nws.noaa.gov/weather/images/fcicons/", "/images/icons/weather/", $day->icon);
+			$cache->put("<day>");
+			$cache->put("<name>".$day->name."</name>");
+			$cache->put("<forecast>".$day->description."</forecast>");
+			$cache->put("<icon>".$icon."</icon>");
+			$cache->put("<tempMax>".$day->maxTemp."</tempMax>");
+			$cache->put("<tempMin>".$day->minTemp."</tempMin>");
+			$cache->put("</day>");
+		}
+
+		$cache->put("</forecast>");
+	}
+
+
+	header("Content-type: text/xml");
+	$cache->printCache();
+?>

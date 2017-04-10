@@ -1,0 +1,60 @@
+<?php header("Content-type: text/css"); ?>
+/* Header.awp */
+
+
+/* Standard Link Classes */
+
+a:link { text-decoration: none; color: #000066; }
+a:alink { text-decoration: none; color: #000066; }
+a:vlink { text-decoration: none; color: #000066; }
+a:hover{ text-decoration: underline; color: #FF0000; }
+
+/* Custom Link Classes */
+
+a.headerLinks { text-decoration : none; color : #FFFFFF; font-family:Verdana, Arial, Helvetica, sans-serif; font-size:11px; }
+a.headerLinks:hover { text-decoration : underline; color : #FFFFFF; font-family:Verdana, Arial, Helvetica, sans-serif; font-size:11px; }
+
+/* Tables */
+
+table { 
+	font-family: arial, verdana, helvitica, sans-serif; 
+	font-size: 11px; 
+	color: #000000;
+}
+.title_header {
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:17px;
+	font-weight:bold;
+	color:#FFFFFF;
+	padding-top:26px;
+	padding-left:0px;
+}
+.headerProj {
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:18px;
+	font-weight:bold;
+	color:#FFFFFF;
+	padding-top:30px;
+}
+.welcome {
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:10px;
+	font-weight:bold;
+	color:#FFFFFF;
+	padding-top:20px;
+}
+span.TableLinksAlertSpan 
+{ 
+	color: #990000; 
+	text-decoration: none; 
+	font-size: 11px; 
+	font-family: Arial, Verdana, Helvetica, sans-serif; 
+}
+
+span.TableLinksAlertSpan:hover 
+{ 
+	color: #FF0000; 
+	text-decoration: underline; 
+	font-size: 11px; 
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+}

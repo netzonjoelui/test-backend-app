@@ -1,0 +1,117 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/content_table.awp");
+	require_once("../lib/Button.awp");
+	require_once("../users/user_functions.php");
+	require_once("../calendar/calendar_functions.awp");
+	require_once("../contacts/contact_functions.awp");
+
+	$dbh = new CDatabase();
+	
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$EVNTID = $_GET['evntid'];
+?>
+<html>
+<head>
+	<title>Calendar Reminder</title>
+	<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme(&$dbh, $USERID, 'css'); ?>">
+</head>
+
+<body class="bgimage" topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0">
+	
+<?php
+	/********************************************************************************************
+	*	Begin Help Window
+	*********************************************************************************************/
+	TableContentOpen("100%", "Event Reminder", "100%", 3);
+	
+	if ($_POST['save_snooze'] && is_numeric($_POST['time']))
+	{
+		$query = "insert into calendar_events_reminders(event_id, count, interval, type, send_to, is_snooze)
+					values(".db_CheckNumber($EVNTID).", ".db_CheckNumber($_POST['time']).", 
+							".db_CheckNumber($_POST['interval']).", '3', '$USERNAME', 't');
+					select currval('calendar_events_reminders_id_seq') as id;";
+		$idres = $dbh->Query($query);
+		if ($dbh->GetNumberRows($idres))
+		{
+			$idrow = $dbh->GetNextRow($idres, 0);
+			if (is_numeric($_POST['time']) && $_POST['interval'] && $idrow['id'])
+			{
+				switch ($_POST['interval'])
+				{
+				case 1:
+					$instr = "MINUTES";
+					break;
+				case 2:
+					$instr = "HOURS";
+					break;
+				case 3:
+					$instr = "DAYS";
+					break;
+				case 4:
+					$instr = "WEEKS";
+					break;
+				}
+				
+				$dbh->Query("update calendar_events_reminders set execute_time='now'::TIMESTAMP 
+							+ INTERVAL '".$_POST['time']." $instr' where id='".$idrow['id']."'");
+			}
+			$dbh->FreeResults($idres);
+		}
+		
+		print("<br>I will remind you again in ".$_POST['time']." ".CalGetReminderIntervalName($_POST['interval'])."<br><br>");
+		print(ButtonCreate("Close", "window.close();"));
+	}
+	else
+	{
+		$query = "select calendar_events.name,  calendar_events.start_block, 
+					calendar_events.end_block, calendar_events.all_day, calendar_events.contact_id, 
+					calendar_events.date_start, calendar_events.date_end, calendar_events.location
+					from calendar_events
+					where calendar_events.id='$EVNTID'";
+					
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dates = $row['date_start']." - ".(($row['date_end']) ? $row['date_end'] : "No End");
+			$times = ($row['all_day'] == 't') ? "All Day" : GetBlockName($row['start_block'])." - ".GetBlockName($row['end_block']);
+			$location = $row['location'];
+			
+			if ($row['contact_id'])
+				$cname = ContactGetName(&$dbh, $row['contact_id']).": ";
+			else
+				$cname = "";
+			// Set reminder complete
+			// Send reminder
+			print("<table>");
+			print("<tr><td><strong>Name:</strong>".(($cname) ? " $cname" : '').$row['name']."</td></tr>");
+			print("<tr><td><strong>Location:</strong> ".$location."</td></tr>");
+			print("<tr><td><strong>Dates:</strong> ".$dates."</td></tr>");
+			print("<tr><td><strong>Times:</strong> ".$times."</td></tr>");
+			print("</table>");
+		}
+		$dbh->FreeResults($result);
+		
+		print("<br><br>");
+		print(ButtonCreate("Dismiss", "window.close();"));
+		print(ButtonCreate("Go to event", "window.open('/calendar/event?eid=$EVNTID');window.close();"));
+		
+		// Create snooze feature
+		print("<br><br><br><table border='0'><tr>");
+		print("<td>Remind me again in:</td>");
+		echo "<td><form name='snooze' method='post' action='pop_reminder.awp?evntid=$EVNTID'>
+			  <input name='time' type='text' size='4' value='15'></td>
+			  <td><select name='interval'><option value='1'>minute(s)</option><option value='2'>hour(s)</option>
+			   <option value='3'>day(s)</option><option value='4'>week(s)</option><select></td><td>";
+		print(ButtonCreate("Snooze", "SUBMIT:snooze:save_snooze"));
+		print("</td></tr></table></form>");
+	}
+	TableContentClose();
+?>
+</body>
+</html>

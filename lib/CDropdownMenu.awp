@@ -1,0 +1,592 @@
+<?php
+/***************************************************************************************
+*	Class:		CDropMenu
+*
+*	Copyright:	2005, Aereus
+*	
+*	Purpose:	Create dynamic JavaMenu via php class
+*	
+*	Example:	------------------------------------------------------------
+*				$myMenu = new CDropMenu("mytestmenu", 'down');
+*				$myMenu->AddMenuItem("&bul; Test", "world.html", '/images/iconpath.gif');
+*				$myMenu->AddMenuItem("&bul; Test2", "us.html");
+*				*** Now use one of the three print link functions ***
+*				--- Link menu option ---
+*				$myMenu->PrintLinkMenu("TESTING", 'text-decoration:none;');
+*				--- Button menu option ---
+*				$myMenu->PrintButtonMenu("TESTING");
+*				--- Image menu option ---
+*				$myMenu->CreateImageMenu("/menuimage.jpg", "/over.jpg", "/click.jpg");
+***************************************************************************************/
+
+require_once("lib/Button.awp");
+require_once("users/user_functions.php");
+
+class CDropMenu
+{
+	var $menuName;
+	var $mTable;
+	var $mDropUp;
+	var $mDropType;
+	var $mEvent;
+	var $mParent;
+	var $mTheme;
+	
+	/***********************************************************************************
+	*	Function:	PrintLinkMenu
+	*	Purpose:	Prints link and menu for link type drop up/down
+	*	Parameters:
+	*				1. name - each menu must have a unique name
+	*				2. mjsprinted (reference) - set to true when js is printed
+	*				2. droptype (optional) - up, down, left, right
+	************************************************************************************/
+	function CDropMenu($name, $droptype = 'down', $event = 'click', $parent=NULL)
+	{
+		$this->menuName = $name;
+		$this->mDropType = $droptype;
+		$this->mEvent = $event;
+		$this->mParent = $parent;
+		$this->maxheight = true;
+		
+		global $JSDMPRINTED, $DMLVL;
+		
+		$DMLVL++;
+		if (!$JSDMPRINTED)
+		{
+			print($this->PrintJSFunction());
+			$JSDMPRINTED = true;
+		}
+		
+		// Get user theme
+		global $_SESSION, $dbh;
+		if ($dbh && $_SESSION["USER_NAME"])
+		{
+			$USERNAME = $_SESSION["USER_NAME"];
+			$this->mTheme = UserGetTheme($dbh, UserGetId($dbh->GetHandle(), $USERNAME), 'name');
+		}
+		else
+			$this->mTheme = "default";
+	}
+	
+	/***********************************************************************************
+	*	Function:	PrintJSFunction
+	*	Purpose:	Create function for handling client side instructions
+	*				This function is called any time a menu is interacted with
+	************************************************************************************/
+	function PrintJSFunction()
+	{
+		return "<script language=\"javascript\" type=\"text/javascript\">
+				var mDivMClicked = null;
+				var mDivRootMenu = null;
+				var GTIMERCLEAR = null;
+				
+				var mRootBtn = null;
+				var mRootDiv = null;
+				var mChildActive = null;
+				
+				if (!self.CDropdownMenuOnclickHandled)
+				{
+					document.onclick = function() {
+						if (mRootDiv)
+						{
+							if ((mRootDiv.HaveMouseFocus == false || !mRootDiv.HaveMouseFocus) && 
+								(mRootDiv.btnh.HaveMouseFocus == false || !mRootDiv.btnh.HaveMouseFocus))
+							{
+								mRootDiv.UnloadMe();
+								mRootDiv = null;
+							}
+						}
+					}
+				}
+				
+				function DMcreateMenu(mname, imgsrc, imgover, imgout, droptype, parentdiv, btnh)
+				{
+					if (!btnh)
+						var btnh = document.getElementById('btn' + mname);
+					var fm = document.getElementById(mname);
+					fm.btnh = btnh;
+					var parent_fm = null;
+					if (parentdiv)
+					{
+						parent_fm = document.getElementById(parentdiv);
+					}
+					
+					tmpx=btnh.offsetLeft;
+					tmpy=btnh.offsetTop;
+					tmpheight=btnh.offsetHeight;
+					tmpParent=btnh.offsetParent;
+					
+					while(tmpParent !=null)
+					{
+						tmpy+=tmpParent.offsetTop;
+						tmpx+=tmpParent.offsetLeft;
+						tmpParent=tmpParent.offsetParent;
+						if (parent_fm)
+							if (tmpParent == parent_fm) break;
+					}
+					
+					if (fm.style.visibility == \"visible\")
+					{
+						fm.style.visibility = 'hidden';
+						if (parent_fm)
+						{
+							parent_fm.hndChild.UnloadMe()
+							parent_fm.hndChild = null;
+						}
+						else
+						{
+							mRootDiv.UnloadMe();
+							mRootDiv = null;
+						}
+						//if (imgsrc)
+						//	btnh.src = imgsrc;
+					}
+					else
+					{
+						//if (imgsrc)
+						//	btnh.src = imgout;
+						
+						switch (droptype)
+						{
+						case 'up':
+							fm.style.top = tmpy - fm.offsetHeight + 'px';
+							if ((tmpy - fm.offsetHeight) < 10)
+							{
+								fm.style.top = tmpy + tmpheight + 'px';
+							}
+							fm.style.left = tmpx + 'px';
+							break;
+						case 'down':
+							fm.style.top = tmpy + 1 + tmpheight + 'px';
+							fm.style.left = tmpx + 1 + 'px';
+							break;
+						case 'right':
+							fm.style.top = tmpy + 'px';
+							fm.style.left = btnh.offsetWidth + 10 + 'px';
+							break;
+						}
+						
+						// clear existing menu
+						if (mRootDiv && !parent_fm)
+						{
+							mRootDiv.UnloadMe();
+						}
+						
+						fm.style.visibility = \"visible\";
+						
+						if (parent_fm)
+						{
+							if (parent_fm.hndChild)
+								parent_fm.hndChild.UnloadMe();
+							parent_fm.hndChild = fm;
+						}
+						else
+						{
+							mRootDiv = fm;
+						}
+						//if (imgsrc)
+						//	btnh.outImage = imgsrc;
+						
+						fm.UnloadMe = function()
+						{
+							//if (!this.HaveMouseFocus)
+							//{
+								this.style.visibility = \"hidden\";
+								if (this.hndChild)
+								{
+									this.hndChild.UnloadMe();
+								}
+								this.hndChild = null;
+							//}
+						};
+					}
+				}
+				
+				function DMMouseOut(name, parentdiv)
+				{
+					var fm = document.getElementById(name);
+					if (fm == mRootDiv)
+						GTIMERCLEAR = setTimeout('DMClear()',2000);
+					/*
+					var fm = document.getElementById(name);
+					if (fm.HaveMouseFocus == false)
+						DMcreateMenu(name, '', '', '', '', parentdiv)
+					*/
+				}
+				function DMMouseOver(name, parentdiv)
+				{
+					if (GTIMERCLEAR)
+						window.clearTimeout(GTIMERCLEAR);
+				}
+				
+				function DMCleanChildren(name)
+				{
+					var fm = document.getElementById(name);
+					if (fm.hndChild)
+						DMcreateMenu(fm.hndChild.id, '', '', '', '', fm.id)
+				}
+				function DMClear()
+				{
+					if (mRootDiv) 
+						mRootDiv.UnloadMe();
+					
+					mRootDiv = null;
+				}
+				</script>";
+	}
+	
+	/***********************************************************************************
+	*	Function:	CreateLinkMenu
+	*	Purpose:	Create full menu by combining div tags, name, and menu table
+	*	Parameters:
+	*				1. img_std - The main image to use for menu button
+	*				2. img_over (optional) - On mouse over image
+	*				3. img_click (optional) - On click image
+	*				4. cache (optional) - set to true if you wish to print div tags later
+	*				   If you set this to true, result of ReturnDiv() must be stored and 
+	*				   printed in the calling script
+	************************************************************************************/
+	function CreateImageMenu($img_std = "", $img_over = "", 
+								$img_click = "", $cache = false, $addclick = NULL)
+	{
+		$name = $this->menuName;
+		$event = $this->mEvent;
+		$dropup = $this->mDropType;
+		$tname = $this->mTheme;
+			
+		$img_std = ($img_std) ? $img_std : "/images/themes/$tname/optionsButtonTrans.gif";
+		$img_over = ($img_over) ? $img_over : "/images/themes/$tname/optionsButtonTransOver.gif";
+		$img_click = ($img_click) ? $img_click : "/images/themes/$tname/optionsButtonTransClick.gif";
+		
+		$create_distroy = $addclick."DMcreateMenu('$name', '$img_std', '', '$img_click', '$dropup');";
+		if ($event == "over")
+			$over = $create_distroy;
+			
+		$buf = "<span id='btn$name' onclick=\"$create_distroy\" style='z-index:100;display:table;'
+					 	onMouseOver=\"this.HaveMouseFocus=true;DMMouseOver('$name');\" 
+						onMouseOut=\"this.HaveMouseFocus=false;DMMouseOut('$name')\">
+					<img src='$img_std' border='0' style='display:block;' />";
+		$buf .= "</span>";
+		if ($cache == false)
+			$buf .= $this->ReturnDiv($name);
+			
+		return $buf;
+	}
+	
+	/***********************************************************************************
+	*	Function:	CreateBarMenu
+	*	Purpose:	Create full menu by combining div tags, name, and menu table
+	*	Parameters:
+	*				1. img_std - The main image to use for menu button
+	*				2. img_over (optional) - On mouse over image
+	*				3. img_click (optional) - On click image
+	*				4. cache (optional) - set to true if you wish to print div tags later
+	*				   If you set this to true, result of ReturnDiv() must be stored and 
+	*				   printed in the calling script
+	************************************************************************************/
+	function CreateBarMenu($buttonname, $width = NULL, $height = NULL, $cache = false, $addclick = NULL)
+	{
+		$name = $this->menuName;
+		$event = $this->mEvent;
+		$dropup = $this->mDropType;
+		$tname = $this->mTheme;
+		
+		$create_distroy = $addclick."DMcreateMenu('$name', '$img_std', '', '$img_click', '$dropup');";
+		if ($event == "over")
+			$over = $create_distroy;
+			
+		$buf = "<span id='btn$name' onclick=\"$create_distroy\" 
+					style='z-index:100;'
+					 	onMouseOver=\"this.HaveMouseFocus=true;DMMouseOver('$name');\"
+						onMouseOut=\"this.HaveMouseFocus=false;DMMouseOut('$name');\">
+					$buttonname ";
+		$buf .= "</span>";
+		if ($cache == false)
+			$buf .= $this->ReturnDiv($name);
+			
+		return $buf;
+	}
+	
+	/***********************************************************************************
+	*	Function:	CreateButtonMenu
+	*	Purpose:	Create full menu by combining div tags, name, and menu table
+	*	Parameters:
+	*				1. mname - the title of the link
+	*				2. width (optional) - width of button
+	*				3. height (optional) - height of button
+	*				4. cache (optional) - set to true if you wish to print div tags later
+	*				   If you set this to true, result of ReturnDiv() must be stored and 
+	*				   printed in the calling script
+	************************************************************************************/
+	function CreateButtonMenu($buttonname="", $width = NULL, $height = NULL, $cache = false, $addclick = NULL)
+	{
+		$name = $this->menuName ;
+		$dropup = $this->mDropType;
+		$tname = $this->mTheme;
+		
+		/*$buf = "<div id='btn$name' onclick=\"$create_distroy\"
+					 	 onmouseover='this.HaveMouseFocus=true;$over' 
+						 onmouseout='this.HaveMouseFocus=false;$over'>".*/
+		$title = ($buttonname == "") ? "*" : $buttonname."&nbsp;";
+		$buf = ButtonCreate($title, $addclick."DMcreateMenu('$name', '', '', '', '$dropup');", 
+						"b1", NULL, "this.HaveMouseFocus=true;$over", "this.HaveMouseFocus=false;$over", 'left', "id='btn$name'");
+		//$buf .= "</div>";
+
+		if ($cache == false)
+			$buf .= $this->ReturnDiv($name);
+
+		return $buf;
+	}
+	
+	/***********************************************************************************
+	*	Function:	CreateLinkMenu
+	*	Purpose:	Create full menu by combining div tags, name, and menu table
+	*	Parameters:
+	*				1. mname - the title of the link
+	*				2. style (optional) - link inline style
+	*				4. cache (optional) - set to true if you wish to print div tags later
+	*				   If you set this to true, result of ReturnDiv() must be stored and 
+	*				   printed in the calling script
+	************************************************************************************/
+	function CreateLinkMenu($lname, $other = NULL, $cache = false, $class='link')
+	{
+		$name = $this->menuName ;
+		$event = $this->mEvent;
+		$dropup = $this->mDropType;
+		
+		$create_distroy = "DMcreateMenu('$name', '', '', '', '$dropup');";
+		if ($event == "over")
+		{
+			//$over = "onMouseOver=\"this.style.backgroundColor='#CCCCCC';$create_distroy\" 
+			//		 onMouseOut=\"this.style.backgroundColor='';$create_distroy\"";
+		}
+		$buf = "<span id='btn$name' onclick=\"$create_distroy\" style='cursor:pointer;' $other ".(($class)?"class='$class'":'')."
+					 	onmouseover=\"this.HaveMouseFocus=true;$over;DMMouseOver('$name');\" 
+						onmouseout=\"this.HaveMouseFocus=false;$over;DMMouseOut('$name');\">";
+		//if ($style) $buf .= " style='$style' ";
+		$buf .= "$lname</span>";
+		
+		if ($cache == false)
+			$buf .= $this->ReturnDiv($name);
+
+		return $buf;
+	}
+	
+	/***********************************************************************************
+	*	Function:	CreateSubLinkMenu
+	*	Purpose:	Create full menu by combining div tags, name, and menu table
+	*	Parameters:
+	*				1. lname - the title of the link
+	*				2. style (optional) - link inline style
+	************************************************************************************/
+	function CreateSubLinkMenu($lname, $link = NULL, $style = NULL, $spacer)
+	{
+		$name = $this->menuName;
+		$event = $this->mEvent;
+		$dropup = $this->mDropType;
+		$parent = $this->mParent;
+		$parent_name = $parent->menuName;
+		
+		$create_distroy = "DMcreateMenu('$name', '', '', '', '$dropup', '".$parent_name."');";
+		
+		if ($event == "over")
+		{
+			$over = "$create_distroy";
+			$out = "DMMouseOut('$name', '".$parent_name."');";
+			if ($link)
+				$divclick = "onclick=\"$link\"";
+		}
+		else
+		{
+			$divclick = "onclick=\"$create_distroy\"";
+		}
+			
+		$buf = "<div id='btn$name' $divclick style='cursor:pointer;'
+					 	onmouseover=\"this.HaveMouseFocus=true;$over;DMMouseOver('$name');\" 
+						onmouseout=\"this.HaveMouseFocus=false;$out;DMMouseOut('$name');\">".$lname."</div>";
+		
+		if ($cache == false)
+			$buf .= $this->ReturnDiv($name);
+
+		return $buf;
+	}
+	
+	/***********************************************************************************
+	*	Function:	AddMenuSection
+	*	Purpose:	Add a menu item with a title only for making sections
+	*	Parameters:
+	*				1. name - the title of the link
+	************************************************************************************/
+	function AddMenuSection($name, $icon=NULL)
+	{							
+		$this->mTable .= "<div><table border='0' cellpadding='0' cellspacing='0' height='100%' width='100%'><tr>";
+		$this->mTable .= "<td bgcolor=\"#DBD8D2\" width=\"12\" nowrap>";
+		if ($icon)
+			$this->mTable .= "<img src=\"$icon\" border=\"0\">";
+		$this->mTable .= "</td><td bgcolor=\"#F3F2F0\" style=\"color:#000000;\" nowrap>&nbsp;<strong>$name</strong></td>";
+		$this->mTable .= "</tr></table></div>";
+	}
+	
+	/***********************************************************************************
+	*	Function:	AddSubmenuItem
+	*	Purpose:	Add a menu item to the menu table that will be hidden unil clicked
+	*	Parameters:
+	*				1. name - the title of the link
+	*				2. link - location to follow
+	*				3. icon (optional) - img src to optional icon
+	*				4. target (optional) - alternative target for link
+	************************************************************************************/
+	function AddSubmenuItem($menu, $name, $link = NULL, $target = NULL, $icon = NULL, $texticon = NULL, $spacer='&nbsp;')
+	{
+		$menu->mParent = $this;
+		$mName = $this->menuName;
+		$event = $this->mEvent;
+
+		if ($event == "over")
+		{
+			$over = "$create_distroy";
+			$out = "DMMouseOut('$name', '".$parent_name."');";
+		}
+		
+		$this->mTable .= "<div><table border='0' cellpadding='0' cellspacing='0' height='100%' width='100%'><tr>";
+		$this->mTable .= "<td align=\"center\" class='CDropdownMenuIcon' nowrap style='width:13px;'>";
+		$this->mTable .= "<img src=\"/images/tilde.gif\" border=\"0\">";
+		$this->mTable .= "</td><td class='CDropdownMenuLink' nowrap>";
+		$this->mTable .= $menu->CreateSubLinkMenu($name, $link, NULL, $spacer);
+		//if ($target)
+		//	$this->mTable .= " target=\"$target\" ";
+		$this->mTable .= "</td></tr></table></div>";
+	}
+	
+	/***********************************************************************************
+	*	Function:	AddMenuItem
+	*	Purpose:	Add a menu item to the menu table that will be hidden unil clicked
+	*	Parameters:
+	*				1. name - the title of the link
+	*				2. link - location to follow
+	*				3. icon (optional) - img src to optional icon
+	*				4. target (optional) - alternative target for link
+	************************************************************************************/
+	function AddMenuItem($name, $link, $target = NULL, $icon = NULL, $texticon = NULL, $bold = false)
+	{							
+		$mname = $this->menuName;
+		if (substr(strtolower($link), 0, 11) == "javascript:")
+		{
+			if ($this->mParent)
+			{
+				//$destroy = "DMcreateMenu('".$mname."', '', '', '', 'right', '".$this->mParent."');DMcreateMenu('".$this->mParent."');";
+			}
+			else
+			{
+				//$destroy = "DMcreateMenu('".$mname."');";
+			}
+			$destroy = "DMClear();";
+			//$onclick = "onclick = \"".substr($link, 11).";$destroy\"";
+			//$link = 'javascript:void(0);';
+			$link .= ";".$destroy;
+		}
+		else
+			$link = str_replace("_", '', $target).(($target) ? '.' : '')."document.location='$link'";
+		
+		// onmouseover=\"DMCleanChildren('$mname')\"
+		$this->mTable .= "<div><table border='0' cellpadding='0' cellspacing='0' height='100%' width='100%'><tr>";
+		$this->mTable .= "<td class='CDropdownMenuIcon' style='width:13px;'><div style='width:12px;padding-left:1px;'>";
+		if ($icon)
+			$this->mTable .= "<img src=\"$icon\" border=\"0\">";
+		else if ($texticon)
+			$this->mTable .= $texticon;
+		else
+			$this->mTable .= "&nbsp;";
+		$this->mTable .= "</div></td><td class='CDropdownMenuLink' nowrap><div onclick=\"$link\" style='cursor:pointer;'";
+		//if ($target)
+		//	$this->mTable .= "target=\"$target\" ";
+		$this->mTable .= ">".(($bold) ? "<strong>": '' )."$name".(($bold) ? "</strong>": '' )."</div></td>";
+		$this->mTable .= "</tr></table></div>";
+	}
+	
+	/***********************************************************************************
+	*	Div tags mignt need to be printed outside of any table elements
+	************************************************************************************/
+	function ReturnDiv()
+	{
+		global $DMLVL;
+		$name = $this->menuName;
+		
+		$buf = "<div STYLE=\"position: absolute; left:0px; top:0px; visibility:hidden; z-index:$DMLVL; ";
+		if ($this->maxheight)
+			$buf .= "max-height:300px;overflow:auto;padding-right:18px;";
+		$buf .= "\" id=\"$name\"  
+					onMouseOver=\"this.HaveMouseFocus=true;DMMouseOver('$name');\" 
+					onMouseOut=\"this.HaveMouseFocus=false;DMMouseOut('$name');\">
+				<table border='0' cellpadding='0' cellspacing='0' class='CDropdownMenuContainer'><tr><td>";
+		$buf .= $this->mTable;
+		$buf .=	"</td></tr></table>
+				 </div>";
+		return $buf;
+	}
+	
+	/***********************************************************************************
+	*	Function:	PrintImageMenu
+	*	Purpose:	Prints image and menu for image type drop up/down
+	*	Parameters:
+	*				1. img_std - The main image to use for menu button
+	*				2. img_over (optional) - On mouse over image
+	*				3. img_click (optional) - On click image
+	*				4. cache (optional) - set to true if you wish to print div tags later
+	*				   If you set this to true, result of ReturnDiv() must be stored and 
+	*				   printed in the calling script
+	************************************************************************************/
+	function PrintImageMenu($img_std, $img_over = NULL, $img_click = NULL, $cache = false, $addclick = NULL)
+	{
+		echo $this->CreateImageMenu($img_std, $img_over, $img_click, $cache, $addclick);
+	}
+	
+	/***********************************************************************************
+	*	Function:	PrintButtonMenu
+	*	Purpose:	Prints button and menu for button type drop up/down
+	*	Parameters:
+	*				1. name - the title of the button and menu
+	*				2. width (optional) - width of button in px
+	*				3. height (optional) - height of button in px
+	*				4. cache (optional) - set to true if you wish to print div tags later
+	*				   If you set this to true, result of ReturnDiv() must be stored and 
+	*				   printed in the calling script
+	************************************************************************************/
+	function PrintButtonMenu($name="",  $width = NULL, $height = NULL, $cache = false, $addclick = NULL)
+	{
+		echo $this->CreateButtonMenu($name, $width, $height, $cache, $addclick);
+	}
+	
+	/***********************************************************************************
+	*	Function:	PrintButtonMenu
+	*	Purpose:	Prints button and menu for button type drop up/down
+	*	Parameters:
+	*				1. name - the title of the button and menu
+	*				2. width (optional) - width of button in px
+	*				3. height (optional) - height of button in px
+	*				4. cache (optional) - set to true if you wish to print div tags later
+	*				   If you set this to true, result of ReturnDiv() must be stored and 
+	*				   printed in the calling script
+	************************************************************************************/
+	function PrintBarMenu($buttonname, $width = NULL, $height = NULL, $cache = false, $addclick = NULL)
+	{
+		echo $this->CreateBarMenu($buttonname, $width, $height, $cache, $addclick);
+	}
+	
+	
+	/***********************************************************************************
+	*	Function:	PrintLinkMenu
+	*	Purpose:	Prints link and menu for link type drop up/down
+	*	Parameters:
+	*				1. name - the title of the link
+	*				2. style (optional) - link inline style
+	*				3. cache (optional) - set to true if you wish to print div tags later
+	*				   If you set this to true, result of ReturnDiv() must be stored and 
+	*				   printed in the calling script
+	************************************************************************************/
+	function PrintLinkMenu($name, $style = NULL, $cache = false)
+	{
+		echo $this->CreateLinkMenu($name, $style, $cache);
+	}
+}
+?>

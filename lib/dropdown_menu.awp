@@ -1,0 +1,159 @@
+<?php
+class CDropMenu
+{
+	var $menuName;
+	var $mTable;
+	var $mDropUp;
+	
+	function CDropMenu($name, $dropup = false)
+	{
+		$this->menuName = $name;
+		
+		// $dropup is used to set the default
+		// If true the the menu will go up by defailt
+		$this->mDropUp = $dropup;
+	}
+	
+	function PrintJSFunction()
+	{
+		return "<script language=\"javascript\" type=\"text/javascript\">
+				function DMcreateMenu(btnh, mname, imgsrc, imgover, imgout, dropup)
+				{
+					if (!btnh)
+						btnh = document.getElementById('lnk' + mname);
+					fm = document.getElementById(mname);
+					
+					tmpx=btnh.offsetLeft;
+					tmpy=btnh.offsetTop;
+					tmpheight=btnh.offsetHeight;
+					
+					tmpParent=btnh.offsetParent;
+					while(tmpParent !=null)
+					{
+						tmpy+=tmpParent.offsetTop;
+						tmpx+=tmpParent.offsetLeft;
+						tmpParent=tmpParent.offsetParent;
+					}
+					
+					if (fm.style.visibility == \"visible\")
+					{
+						fm.style.visibility = \"hidden\";
+						if (imgsrc)
+							btnh.src = imgsrc;
+					}
+					else
+					{
+						if (imgsrc)
+							btnh.src = imgout;
+						
+						if (dropup)
+						{
+							fm.style.top = tmpy - fm.offsetHeight;
+							if ((tmpy - fm.offsetHeight) < 10)
+							{
+								fm.style.top = tmpy + tmpheight;
+							}
+							fm.style.left = tmpx + 'px';
+						}
+						else
+						{
+							fm.style.top = tmpy + tmpheight;
+							fm.style.left = tmpx;
+						}
+						fm.style.visibility = \"visible\";
+					}
+					
+				}
+				</script>";
+	}
+	
+	function CreateMenu($img_std = NULL, $img_over = NULL, $img_click = NULL)
+	{
+		$name = $this->menuName ;
+		$dropup = $this->mDropUp;
+		
+		if ($img_std && $img_over && $img_click)
+		{
+			$buf = "<img src='$img_std' 
+			  onclick=\"DMcreateMenu(this, '$name', '$img_std', '$img_over', '$img_click', '$dropup');\" border='0'>";
+		}
+		else
+		{
+			$buf = "<input type=button value='Menu'
+			  onclick=\"DMcreateMenu(this, '$name', '$img_std', '$img_over', '$img_click', '$dropup');\" border='0'>";
+		}
+		
+		$buf .= $this->ReturnDiv($name);
+			
+		return $buf;
+	}
+	
+	function CreateButtonMenu($buttonname, $height = NULL)
+	{
+		$name = $this->menuName ;
+		$dropup = $this->mDropUp;
+		
+
+		$buf = "<input type=button value='$buttonname'
+		  onclick=\"DMcreateMenu(this, '$name', '$img_std', '$img_over', '$img_click', '$dropup');\"";
+		if ($height) $buf .= " style='height:$height;' ";
+		$buf .= ">";
+
+		
+		$buf .= $this->ReturnDiv($name);
+						
+		return $buf;
+	}
+	function CreateLinkMenu($mname, $style = NULL)
+	{
+		$name = $this->menuName ;
+		$dropup = $this->mDropUp;
+		
+
+		$buf = "<div id='lnk$name'><a href=\"JavaScript:DMcreateMenu( '$name', '', '', '', '$dropup');\"";
+		if ($style) $buf .= " style='$style' ";
+		$buf .= " id='ln$mname'>$mname</a></div>";
+
+		
+		//$buf .= $this->ReturnDiv($name);
+			
+		return $buf;
+	}
+
+	function AddMenuItem($name, $link)
+	{
+		$this->mTable .= "<tr><td bgcolor=\"#FFFFFF\" onMouseOver=\"this.bgcolor='CCCCCC';\" nowrap>
+							<a href=\"$link\" style=\"text-decoration:none;color:#000000;\">$name</a>
+							</td></tr>";
+	}
+	
+	function PrintMenu($img_std = NULL, $img_over = NULL, $img_click = NULL)
+	{
+		echo $this->CreateMenu($img_std, $img_over, $img_click);
+	}
+	
+	function PrintButtonMenu($name, $height = NULL)
+	{
+		echo $this->CreateButtonMenu($name, $height);
+	}
+	
+	function PrintLinkMenu($name, $style = NULL)
+	{
+		echo $this->CreateLinkMenu($name, $style);
+	}
+	
+	/***********************************************************************************
+	*	Div tags should be printed outside of any table elements to make things cleaner
+	************************************************************************************/
+	function ReturnDiv()
+	{
+		$name = $this->menuName ;
+		$buf = "<DIV STYLE=\"position: absolute; left:0px; top:0px; visibility:hidden; z-index:2;\" id=\"$name\">
+				<table border=\"0\" cellpadding=\"2\" cellspacing=\"1\" bgcolor=\"#CCCCCC\"\">";
+		$buf .= $this->mTable;
+		$buf .=	"</table>
+			</DIV>";
+		return $buf;
+	}
+}
+?>

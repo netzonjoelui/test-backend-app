@@ -1,0 +1,322 @@
+<?php
+	$TTYPE = ($_POST['task_type']) ? $_POST['task_type'] : $_GET['task_type'];
+	$FID = $_GET['fid'];
+	$task_name = $_POST['task_name'];
+	$task_cost = $_POST['cost'];
+	$scnt = (is_numeric($_POST['start_count'])) ? $_POST['start_count'] : '';
+	$dcnt = (is_numeric($_POST['due_count'])) ? $_POST['due_count'] : '';
+	
+	if ($_GET['dtid'])	
+		$dbh->Query("delete from project_template_tasks where id='".$_GET['dtid']."'");
+		
+	if ($_POST['save_template'])
+	{
+		if ($_POST['task_name'] && is_numeric($_POST['start_count']) && is_numeric($_POST['due_count']) && 
+				(!$_POST['task_type'] || ($_POST['task_type'] && $_POST['file_id'])))
+		{
+			// Get member or position
+			if (strpos($_POST['assign_to'], "pos_") !== false)
+			{
+				$pos_id = substr($_POST['assign_to'], 4);
+				$user_id = "";
+			}
+			else
+			{
+				$pos_id = "";
+				$user_id = $_POST['assign_to'];
+			}
+			
+			if ($_POST['eid'])
+			{
+				$query = "update project_template_tasks set
+							name='".$dbh->Escape($_POST['task_name'])."', 
+							notes='".$dbh->Escape($_POST['notes'])."', 
+							template_id='$TMPID', start_count='".$_POST['start_count']."', 
+							start_interval='".$_POST['start_interval']."', due_count='".$_POST['due_count']."',
+							due_interval='".$_POST['due_interval']."', timeline='".$_POST['timeline']."', 
+							timeline_date_begin='".$_POST['timeline_date_begin']."',
+							timeline_date_due='".$_POST['timeline_date_due']."',
+							type=".db_CheckNumber($_POST['task_type']).", 
+							cost_estimated=".db_CheckNumber($_POST['cost']).", 
+							file_id=".db_CheckNumber($_POST['file_id']).", 
+							user_id=".db_CheckNumber($user_id).",
+							position_id=".db_CheckNumber($pos_id)." where id='".$_POST['eid']."'";
+				$dbh->Query($query);
+				$status_message = "Task changes saved!";
+			}
+			else
+			{
+				$query = "insert into project_template_tasks(name, notes, template_id, start_count, start_interval, due_count,
+							 due_interval, timeline, timeline_date_begin, timeline_date_due, type, file_id, user_id, position_id, cost_estimated) 
+							 values('".$dbh->Escape($_POST['task_name'])."', '".$dbh->Escape($_POST['notes'])."', 
+							'$TMPID', '".$_POST['start_count']."', 
+							'".$_POST['start_interval']."', '".$_POST['due_count']."', '".$_POST['due_interval']."', 
+							'".$_POST['timeline']."', '".$_POST['timeline_date_begin']."', '".$_POST['timeline_date_due']."',
+							".db_CheckNumber($_POST['task_type']).", ".db_CheckNumber($_POST['file_id']).",
+							".db_CheckNumber($user_id).", ".db_CheckNumber($pos_id).", ".db_CheckNumber($_POST['cost']).")";
+				$dbh->Query($query);
+				$status_message = "New task added!";
+			}
+			$task_name = "";
+		}
+		else
+		{
+			if (!is_numeric($_POST['start_count']))
+				$status_message = "Please enter a number into &quot;Start&quot;";
+			if (!is_numeric($_POST['due_count']))
+				$status_message = "Please enter a number into &quot;Due&quot;";
+			if (!$_POST['task_name'])
+				$status_message = "Please enter a name for this task!";
+			if ($_POST['task_type'] && !$_POST['file_id'])
+				$status_message = "Please select a file to use with this task!";
+		}
+	}
+	
+	WindowFrameToolbarStart('100%');
+	if ($RETPAGE) echo ButtonCreate("Go Back", "document.location='".base64_decode($RETPAGE)."'", "b2");
+	echo "<div style='float:right;color:#990000;padding-right:3px;font-weight:bold;font-size:14px;'>$status_message</div>";
+	WindowFrameToolbarEnd();
+	
+	// Check for editing task
+	if ($_GET['eid'])
+	{
+		$result = $dbh->Query("select * from project_template_tasks where id='".$_GET['eid']."'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$start_interval = $row['start_interval'];
+			$due_interval = $row['due_interval'];
+			$task_name = stripslashes($row['name']);
+			$task_notes = stripslashes($row['notes']);
+			$user_id = $row['user_id'];
+			$timeline = $row['timeline'];
+			$position_id = $row['position_id'];
+			$task_cost = $row['cost_estimated'];
+			$timeline_date_begin = ($row['timeline_date_begin']) ? $row['timeline_date_begin'] : 'date_deadline';
+			$timeline_date_due = ($row['timeline_date_due']) ? $row['timeline_date_due'] : 'date_deadline';
+			if (!$scnt)
+				$scnt = $row['start_count'];
+			if (!$dcnt)
+				$dcnt = $row['due_count'];
+			if (!$TTYPE) // Only set if not already set
+				$TTYPE = $row['type'];
+			if (!$FID)
+				$FID = $row['file_id'];
+		}
+	}
+	
+	if (!$scnt)
+		$scnt = 2;
+	if (!$dcnt)
+		$dcnt = 1;
+
+	$intervals = array("3"=>"day(s)","4"=>"week(s)","5"=>"month(s)");
+	
+	echo "<div style='padding-top:10px;'>
+			<form name='edit_template' action='template.awp?$FWDVARS' method='post'>
+			<input type='hidden' name='eid' value='".$_GET['eid']."'>";
+	WindowFrameStart(($_GET['eid']) ? 'Edit Task' : "New Task", "100%");
+	echo "<table border='0'>
+			<tr>
+				<td>Task Type</td>
+				<td colspan='3'>
+					<select name='task_type' onchange=\"document.location='template.awp?$FWDVARS&task_type='+this.value+''\">
+						<option value=''>Standard TODO</option>
+						<option value='1' ".(($TTYPE == '1') ? selected : '').">
+								Print Letter/Document (ADT)</option>
+						<option value='2' ".(($TTYPE == '2') ? selected : '').">
+								Send Email</option>
+					</select>
+				</td>
+			</tr>";
+	// Handle the different task types
+	switch ($TTYPE)
+	{
+	case 1:
+		if ($FID)
+			$filename = UserFilesGetFileName(&$dbh, $FID);
+
+		$lnk = "window.open('/document/editor.awp?fid=$FID', 'editor_$FID', 
+					'top=200,left=100,width=818,toolbar=no,menubar=no,scrollbars=no,location=no,directories=no,status=no,resizable=yes');";
+		echo "<tr>
+				<td>Document Template</td>
+				<td colspan='2' id='file_name_lbl'>
+					".(($filename) ? "<a href='javascript:void(0);' onclick=\"$lnk\">$filename</a>" : 'None Selected')."
+				</td>
+				<td>
+					<input type='hidden' name='file_id' id='file_id' value='".$FID."'>
+					".ButtonCreate("Select File", "openBrowser(document.getElementById('file_id'))")."
+				</td>
+			  </tr>";
+		break;
+	case 2:
+		if ($FID)
+			$filename = UserFilesGetFileName(&$dbh, $FID);
+		echo "<tr>
+				<td>Email Template</td>
+				<td colspan='2' id='file_name_lbl'>
+				".(($filename) ? "<a href='javascript:void(0);' onclick=\"emailComposeOpen(null, [['fid', $FID]]);\">$filename</a>" : 'None Selected')."
+					
+				</td>
+				<td>
+					<input type='hidden' name='file_id' id='file_id' value='".$FID."'>
+					".ButtonCreate("Select File", "openBrowser(document.getElementById('file_id'))")."
+				</td>
+			  </tr>";
+		break;
+	}
+	echo "	<tr>
+				<td>Task Name</td><td colspan='2'><input type='text' name='task_name' value='".$task_name."'></td>
+			</tr>
+			<tr>
+				<td>Estimated Cost</td><td colspan='2'><input type='text' name='cost' value='".$task_cost."'></td>
+			</tr>
+			<tr>
+				<td>This task should start</td>
+				<td>
+					<input type='text' name='start_count' size='2' value='$scnt'> 
+					<select name='start_interval'>";
+	foreach ($intervals as $intval=>$intname)
+		echo "<option value='$intval' ".(($intval == $start_interval) ? 'selected' : '').">$intname</option>";
+	echo "			</select>
+				</td>
+				<td>
+					<select name='timeline'>
+						<option value='before' ".(($timeline=='before')?'selected':'').">before</option>
+						<option value='after' ".(($timeline=='after')?'selected':'').">after</option>
+					</select>
+				</td>
+				<td>the project <select name='timeline_date_begin'>";
+	foreach ($PROJECT_DATES as $tld=>$tlname)
+		echo "<option value='$tld' ".(($timeline_date_begin == $tld) ? 'selected' : '').">$tlname</option>";
+	
+	echo "		</select></td>
+			</tr>
+			<tr>
+				<td>This task is due</td>
+				<td>
+					<input type='text' name='due_count' size='2' value='$dcnt'> 
+					<select name='due_interval'>";
+	foreach ($intervals as $intval=>$intname)
+		echo "<option value='$intval' ".(($intval == $due_interval) ? 'selected' : '').">$intname</option>";
+	echo "			</select>
+				</td>
+				<td>
+					<select name='timeline'>
+						<option value='before' ".(($timeline=='before')?'selected':'').">before</option>
+						<option value='after' ".(($timeline=='after')?'selected':'').">after</option>
+					</select>
+				</td>
+					<td>the project <select name='timeline_date_due'>";
+	foreach ($PROJECT_DATES as $tld=>$tlname)
+		echo "<option value='$tld' ".(($timeline_date_due == $tld) ? 'selected' : '').">$tlname</option>";
+	
+	echo "		</select></td>
+			</tr>
+			<tr>
+				<td>Assign to:</td>
+				<td colspan='2'>
+					<select name='assign_to'>
+						<option value='$USERID'>Me</option>
+						<option value=''>Anyone (user must take ownership)</option>";
+	// Print members
+	$query = "select project_template_members.id, users.id as user_id, users.name, users.full_name 
+				from project_template_members, users where project_template_members.template_id='$TMPID'
+				and  project_template_members.user_id = users.id
+				order by name";
+	$result = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($result);
+	for ($i=0; $i<$num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		echo "<option value='".$row['user_id']."' ".(($user_id == $row['user_id']) ? 'selected' : '').">".$row['name']."</option>";
+	}
+	$dbh->FreeResults($result);
+	$query = "select project_positions.id, project_positions.name 
+				from project_positions where 
+				project_positions.template_id='$TMPID'
+				order by name";
+	$result = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($result);
+	for ($i=0; $i<$num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		
+		echo "<option value='pos_".$row['id']."' ".(($position_id == $row['id']) ? 'selected' : '').">
+			  Position: ".$row['name']."</option>";
+	}
+	$dbh->FreeResults($result);
+
+	echo "		</select></td>
+			</tr>";
+
+	echo "	<tr>
+				<td valign='top'>Notes:</td>
+				<td colspan='4'><textarea name='notes' style='width:350px;height:50px;'>$task_notes</textarea></td>
+			</tr>";
+
+	echo "	<tr>
+				<td>".ButtonCreate("Add Task", "SUBMIT:edit_template:save_template")."</td>
+			</tr>
+		  </table>";
+	WindowFrameEnd();
+	echo "</div></form>";
+	
+	echo "<div style='padding-top:10px;'>";
+	WindowFrameStart("Existing Tasks", "100%");
+	// Create new tool table
+	$tbl = new CToolTable;
+	// Create table headers
+	$tbl->StartHeaders();
+	$tbl->AddHeader("Name");
+	$tbl->AddHeader("Assigned");
+	$tbl->AddHeader("Begin");
+	$tbl->AddHeader("Due");
+	$tbl->AddHeader("Delete", 'center', '50px');
+	$tbl->EndHeaders();
+	// Get attendees (users)
+	$query = "select id, name, start_interval, start_count, due_interval, due_count, 
+				timeline, type, file_id, user_id, position_id, timeline_date_begin, timeline_date_due, 
+				(due_count*-1) as dc_sort
+				from
+			    project_template_tasks where template_id='$TMPID'  and timeline='before'
+				union all
+			  select id, name, start_interval, start_count, due_interval, due_count, 
+			  	timeline, type, file_id, user_id, position_id, timeline_date_begin, timeline_date_due,
+			  	due_count as dc_sort
+				from
+			    project_template_tasks where template_id='$TMPID'  and timeline='after'
+			    order by timeline_date_due DESC, timeline DESC, dc_sort, start_count ";
+	$result = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($result);
+	for ($i=0; $i<$num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$name = stripslashes($row['name']);
+		if (($row['type'] == 1 || $row['type'] == 2) && $row['file_id'])
+		{
+			$name .= " (".UserFilesGetFileName(&$dbh, $row['file_id']).")";
+		}
+		
+		$tbl->StartRow();
+		$tbl->AddCell("<a href='template.awp?$FWDVARS&eid=".$row['id']."'>".$name."</a>", true);
+		if ($row['position_id'])
+			$tbl->AddCell("Position: ".ProjectGetPositionName(&$dbh, $row['position_id']));
+		else
+			$tbl->AddCell(UserGetName(&$dbh, $row['user_id']));
+		$tbl->AddCell($row['start_count']." ".ProjectGetTaskIntervalName($row['start_interval'])." 
+			".$row['timeline']." project ".ProjectGetDateName($row['timeline_date_begin']));
+		$tbl->AddCell($row['due_count']." ".ProjectGetTaskIntervalName($row['due_interval'])." 
+						".$row['timeline']." project ".ProjectGetDateName($row['timeline_date_due']));
+		$tbl->AddCell("<a href=\"javascript:DeleteTemplateTask('".$row['id']."');\">
+						<img src='/images/themes/$THEMENAME/deleteTask.gif' border='0' title='Delete'></a>", 
+						true, 'center');
+		$tbl->EndRow();
+	}
+	$dbh->FreeResults($result);
+
+	$tbl->PrintTable();
+	WindowFrameEnd();
+	echo "</div>";
+?>

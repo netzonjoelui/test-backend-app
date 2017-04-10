@@ -1,0 +1,26 @@
+<?php
+function PrintIframeResize()
+{
+	echo "<script type=\"text/javascript\">
+			function resizeIframe() 
+			{
+				try
+				{
+					i = parent.document.getElementById(window.name);
+					if (document.body.scrollHeight == 0)
+						setTimeout('resizeIframe()',200);
+					else
+					{
+						if (navigator.appName != 'Microsoft Internet Explorer')
+							i.style.height = 75 + 'px';
+					}
+					iHeight = document.body.scrollHeight;
+					if (typeof ALib != 'undefined')
+						iHeight += alib.dom.getScrollBarWidth();
+					i.style.height = (iHeight) + 'px';\n
+				}
+				catch (e) { }\n";
+	echo "}
+		  </script>\n";
+}
+?>

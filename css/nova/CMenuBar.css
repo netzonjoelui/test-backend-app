@@ -1,0 +1,25 @@
+/**************************************************************************
+ *	CMenubar.js
+ **************************************************************************/
+.CMenubar
+{
+	background-color: #CCC;
+}
+
+.CMenuBarLink
+{
+	cursor: default;
+}
+
+.CMenuBarLinkOver
+{
+	background-color: white;
+	cursor: default;
+}
+
+.CMenuBarLinkOn
+{
+	background-color: blue;
+	color: white;
+	cursor: default;
+}

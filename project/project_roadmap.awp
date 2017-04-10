@@ -1,0 +1,381 @@
+<?php
+	require_once("../lib/CTreeChart.awp");
+	require_once("../lib/CToolTip.awp");
+	
+	ini_set("memory_limit", "100M"); // 700 megs
+
+	// Get report type (default to 3)
+	$RPTTYPE = ($_GET['rpttype']) ? $_GET['rpttype'] : 3;
+	$RPTINT = ($_GET['rptint']) ? $_GET['rptint'] : "weeks";
+
+	function ProjectRptTimeline($dbh, $tbl, $pid, $start_ts, $end_ts, $int)
+	{
+		$name = GetProjectName(&$dbh, $pid);
+		$start_date = ProjectGetAttrib($dbh, "date_started", $pid);
+		$end_date = ProjectGetAttrib($dbh, "date_deadline", $pid);
+		$proj_start = strtotime($start_date);
+		$proj_end = strtotime($end_date); 
+
+		$act = "<table style='width:100%;height:100%;background-color:blue;'><tr><td>&nbsp;</td></tr></table>";
+		$link = "<a href='project.awp?pid=$pid&retpage=$RETPAGE&tabnav=$TABNAV'>";
+
+		$tbl->StartRow();
+		$tbl->AddCell("$link$name</a>", true, 'left', 'white-space: nowrap;padding:2px;');
+		$cur_ts = $start_ts;
+		while ($cur_ts <= $end_ts)
+		{
+			if ($cur_ts >= $proj_start && $cur_ts <= $proj_end)
+				$use = $act;
+			else
+				$use = "";
+
+			$tbl->AddCell($use, false, 'left', '', NULL, false);
+
+			$cur_ts = strtotime("+ 1 $int", $cur_ts);
+		}
+		$tbl->EndRow();
+
+		// Now check for children
+		$substr = ProjectGetListOfSubProjects(&$dbh, $pid);
+		$pids = explode(":", $substr);
+		foreach ($pids as $p)
+		{
+			if ($p)
+			{
+				ProjectRptTimeline(&$dbh, &$tbl, $p, $start_ts, $end_ts, $int);
+			}
+		}
+	}
+
+	function GetTotalTasks(&$dbh, $pid)
+	{
+		$result = $dbh->Query("select count(*) as cnt from project_tasks where project='$pid'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+			$total = $row['cnt'];
+		}
+		$dbh->FreeResults($result);
+		
+		// Now look for sub projects
+		$result = $dbh->Query("select id from projects where parent='$pid'");
+		$num = $dbh->GetNumberRows($result);
+		for ($i=0; $i<$num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+			$id = $row['id'];
+			$total += GetTotalTasks(&$dbh, $id);
+		}
+		$dbh->FreeResults($result);
+		
+		return $total;
+	}
+	
+	function GetCompletedTasks(&$dbh, $pid)
+	{
+		$result = $dbh->Query("select count(*) as cnt from project_tasks where project='$pid' 
+								and date_completed is not null");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+			$complete = $row['cnt'];
+		}
+		$dbh->FreeResults($result);
+		
+		// Now look for sub projects
+		$result = $dbh->Query("select id from projects where parent='$pid'");
+		$num = $dbh->GetNumberRows($result);
+		for ($i=0; $i<$num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+			$id = $row['id'];
+			$complete += GetCompletedTasks(&$dbh, $id);
+		}
+		$dbh->FreeResults($result);
+		
+		return $complete;
+	}
+	
+	function GetIncompleteTasks(&$dbh, $pid)
+	{
+		$result = $dbh->Query("select count(*) as cnt from project_tasks where 
+								project='$pid' and date_completed is null");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+			$complete = $row['cnt'];
+		}
+		$dbh->FreeResults($result);
+		
+		// Now look for sub projects
+		$result = $dbh->Query("select id from projects where parent='$pid'");
+		$num = $dbh->GetNumberRows($result);
+		for ($i=0; $i<$num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+			$id = $row['id'];
+			$complete += GetCompletedTasks(&$dbh, $id);
+		}
+		$dbh->FreeResults($result);
+		
+		return $complete;
+	}
+	
+	function GetPercentTasks(&$dbh, $pid)
+	{
+		$total = GetTotalTasks(&$dbh, $pid);
+		$complete = GetCompletedTasks(&$dbh, $pid);
+		$percent =($total) ? round((($complete / $total) * 100), 0).'%' : 'N/A';
+		
+		return $percent;
+			 
+	}
+	
+	// Status Codes: 1 = Open; 2 = Open Behind Schedule; 3 = Closed
+	function GetNode($id, $name, $deadline, $completed, $incomplete, $status = 1)
+	{
+		global $RPTTYPE, $TABNAV;
+		
+		$buf = "<table border='0' cellspacing='1'>
+					<tr>
+						<td>
+							<table>
+								<tr>
+									<td nowrap><a href='project.awp?action=specifications&pid=$id&tabnav=$TABNAV' 
+										class='TableLinksAlert'><strong>$name</strong></a></td>
+								</tr>
+								<tr>
+									<td style='font-style:italic;' nowrap>
+										Deadline: $deadline<br>
+										Imcomplete Tasks: $incomplete<br>
+										<strong>Completed:</strong> <span style='color:0000CC;'>$completed</span>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					</table>";
+		switch ($RPTTYPE)
+		{
+		case 1:
+			return $buf;
+			break;
+		case 2:
+			switch($status)
+			{
+			case 1:
+				$image = "blue_square.gif";
+				break;
+			case 2:
+				$image = "red_square.gif";
+				break;
+			case 3:
+				$image = "green_square.gif";
+				break;
+			}
+			$mToolTip = new CToolTip("tt".$id, NULL, NULL, "");
+			$mToolTip->AddToBuf("<div style='padding-top:10px;'>$buf</div>");
+			
+			return "<table border='0' cellspacing='1'>
+					<tr>
+						<td>
+							".($mToolTip->CreateImageMenu("/images/project/$image", "/images/project/$image",
+								"project.awp?action=specifications&pid=$id&tabnav=$TABNAV&rpttype=$RPTTYPE"))."</td>
+					</tr>
+					</table>";
+			break;
+		}
+	}
+	
+	function GetSubProjects(&$dbh, $proj_id, &$pChart)
+	{
+		// Get all projects under this project
+		$result = $dbh->Query("select  
+								projects.id, projects.name, projects.date_deadline, date_completed
+								from projects
+								where projects.parent = '$proj_id'");
+
+		$numrows = $dbh->GetNumberRows($result);
+		if ($numrows)
+		{
+			$pChart->StartSubNodes($numrows);
+			for ($i = 0; $i < $numrows; $i++)
+			{
+				$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+				$id = $row['id'];
+				$name = $row['name'];
+				$completed = $row['date_completed'];
+				$deadline = date("m/d/Y", strtotime($row['date_deadline']));
+				if (strtotime($row['date_deadline']) < strtotime('now') && $completed == '')
+				{
+					$status = 2;
+					$deadline = "<span style='color:red;'>$deadline</span>";
+				}
+				else if ($completed)
+				{
+					$status = 3;
+					$deadline = "<span style='color:0000CC;'>".date("m/d/Y", strtotime($completed))."</span>";
+				}
+				else
+				{
+					$status = 1;
+					$deadline = "<span style='color:006633;'>$deadline</span>";
+				}
+					
+				$pChart->StartSubNode(GetNode($id, "$name", $deadline, GetPercentTasks(&$dbh, $id), GetIncompleteTasks(&$dbh, $id), $status));
+				GetSubProjects(&$dbh, $id, &$pChart);
+				$pChart->EndSubNode();
+			}
+			$pChart->EndSubNodes();
+		}
+		$dbh->FreeResults($result);
+	}	
+	// Print onchange javascript
+	echo "<script type='text/javascript' language='javascript'>
+			function ChangeReportType(tpid)
+			{
+				document.location = 'project.awp?pid=$PID&tabnav=$TABNAV&retpage=$RETPAGE&rpttype=' + tpid;
+			}
+			function ChangeReportInt(tpid)
+			{
+				document.location = 'project.awp?$FWD&rpttype=$RPTTYPE&rptint=' + tpid;
+			}
+			function PrintReport()
+			{
+				var html = \"<html><head><title>Print Report</title>\";
+				html += \"<link rel='STYLESHEET' type='text/css' \";
+				html += \"href='/css/".UserGetTheme(&$dbh, $USERID, 'css')."'>\";
+				html += \"</head><body>\";
+				html += document.getElementById('mainrpt').innerHTML;
+				html += \"\</body></html>\";
+				var re = new RegExp ('src=\"/userfiles', 'gi');
+				html = html.replace(re, 'src=\"http://$settings_localhost/userfiles');
+				document.printform.printbody.value = html;
+				document.printform.submit();
+			}
+		  </script>";
+	
+	WindowFrameToolbarStart('100%');
+	
+	// Print parent if exists
+	$res = $dbh->Query("select parent from projects where id='$PID'");
+	if ($dbh->GetNumberRows($res))
+	{
+		$row = $dbh->GetNextRow($res, 0);
+		$parent = $row['parent'];
+		if (is_numeric($parent))
+		{
+			$nres = $dbh->Query("select id, name from projects where id='$parent'");
+			if ($dbh->GetNumberRows($nres))
+			{
+				$row = $dbh->GetNextRow($nres, 0);
+				echo ButtonCreate("Go To Parent: ".$row['name'], 
+									"document.location='project.awp?tabnav=roadmap&pid=".$row['id']."&rpttype=$RPTTYPE'");
+			}
+		}
+	}
+	echo ButtonCreate("Print", "PrintReport()");
+	echo "<div style='float:left;padding-left:10px;padding-right:1px;padding-bottom:0px;vertical-align:middle;'>
+			Report Type: <select style='height:18px;' name='rpt_type' onchange='JavaScript:ChangeReportType(this.value)'>
+			<option value='1' ".(($RPTTYPE == 1) ?  'selected' : '').">Detailed</option>
+			<option value='2' ".(($RPTTYPE == 2) ?  'selected' : '').">Summary</option>
+			<option value='3' ".(($RPTTYPE == 3) ?  'selected' : '').">Timeline</option></select>
+			</div>";
+	if ($RPTTYPE == 3)
+	{
+		echo "<div style='float:left;padding-left:10px;padding-right:1px;padding-bottom:0px;vertical-align:middle;'>
+			Interval: <select style='height:18px;' name='rpt_interval' onchange='JavaScript:ChangeReportInt(this.value)'>
+			<option value='days' ".(($RPTINT == "days") ?  'selected' : '').">Days</option>
+			<option value='weeks' ".(($RPTINT == "weeks") ?  'selected' : '').">Weeks</option>
+			<option value='months' ".(($RPTINT == "months") ?  'selected' : '').">Months</option>
+			<option value='years' ".(($RPTINT == "years") ?  'selected' : '').">Years</option></select>
+			</div>";
+	}
+	WindowFrameToolbarEnd();
+	
+	if ($RPTTYPE == 2)
+	{
+		echo "<table border='0'><tr>
+				<td><img src='/images/project/blue_square.gif' border='0'></td>
+				<td valign=\"middle\"> = Open</td> 
+			 	<td><img src='/images/project/red_square.gif' border='0'></td>
+				<td valign='middle'> = Behind Schedule</td>
+			 	<td><img src='/images/project/green_square.gif' border='0'></td>
+				<td valign='middle'> = Completed</td></tr></table>";
+	}
+
+	echo "<div id='mainrpt'>";
+	if ($RPTTYPE == 3)
+	{
+		$start_date = ProjectGetAttrib($dbh, "date_started", $PID);
+		$end_date = ProjectGetAttrib($dbh, "date_deadline", $PID);
+
+		$start_ts = strtotime($start_date);
+		$end_ts = strtotime($end_date);
+		
+		// Create new tool table
+		$tbl = new CToolTable;
+		// Create table headers
+		$tbl->StartHeaders();
+		$tbl->AddHeader("Project", 'center');
+
+		// Add headers for corrent number of days
+		$cur_ts = $start_ts;
+		while ($cur_ts <= $end_ts)
+		{
+			$tbl->AddHeader(date("m-d", $cur_ts), 'center');
+			$cur_ts = strtotime("+ 1 $RPTINT", $cur_ts);
+		}
+		$tbl->EndHeaders();
+	
+		ProjectRptTimeline(&$dbh, &$tbl, $PID, $start_ts, $end_ts, $RPTINT);
+
+		$tbl->PrintTable();
+	}
+	else
+	{	
+		print("<br><center>");
+		$pChart = new CTreeChart;
+
+		$result = $dbh->Query("select name, id, date_deadline, date_completed from projects where id='$PID'");
+
+		$numrows = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $numrows; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+			$id = $row['id'];
+			$name = $row['name'];
+			$deadline = date("m/d/Y", strtotime($row['date_deadline']));
+		}
+		$dbh->FreeResults($result);
+		
+		if (strtotime($row['date_deadline']) < strtotime('now') && $row['date_completed'] == '')
+			$status = 2;
+		else if ($row['date_completed'])
+			$status = 3;
+		else
+			$status = 1;
+		
+		$pChart->StartRootNode(GetNode($PID, $name, $deadline, GetPercentTasks(&$dbh, $PID), 
+								GetIncompleteTasks(&$dbh, $PID), $status));
+		GetSubProjects(&$dbh, $PID, &$pChart);
+
+		$pChart->EndRootNode();
+		print("</center><br>");
+	}
+	echo "</div>";
+
+	// Create Print Form    
+	echo "<form name='printform' method='post' action='/lib/html_to_pdf/ant_pdf_create.awp' target='_blank'>
+			<input type='hidden' name='printbody' value='' />
+			<input type='hidden' name='leftmargin' value='$leftmargin' />
+			<input type='hidden' name='rightmargin' value='$rightmargin' />
+			<input type='hidden' name='topmargin' value='$topmargin' />
+			<input type='hidden' name='bottommargin' value='$bottommargin' />
+			<input type='hidden' name='pixels' value='805' />
+			<input type='hidden' name='method' value='fpdf' />
+			<input type='hidden' name='output' value='1' />
+			<input type='hidden' name='landscape' value='1' />
+			<input type='hidden' name='renderimages' value='1' />
+		  </form>";
+?>

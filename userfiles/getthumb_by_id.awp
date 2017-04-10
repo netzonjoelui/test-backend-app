@@ -1,0 +1,260 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("lib/CDatabase.awp");
+	require_once("users/user_functions.php");
+	require_once("lib/aereus.lib.php/CAnsClient.php");
+	require_once("lib/aereus.lib.php/AnsClient.php");
+	require_once("file_functions.awp");
+	
+	$dbh = $ANT->dbh;
+	// Create Object
+	$ans = new CAnsCLient();
+	
+	// mode 1 = max width only, 2 = stretch
+	function ResizeThumbImage($filename, $max_width, $max_height, $type, $stretch = NULL)
+	{
+		global $ANT;
+
+		list($orig_width, $orig_height) = getimagesize($filename);
+		
+		$width = $orig_width;
+		$height = $orig_height;
+		
+		if ($max_height)
+		{
+			// taller
+			if (!$stretch)
+			{
+				if ($height > $max_height) 
+				{
+				   $width = ($max_height / $height) * $width;
+				   $height = $max_height;
+				}
+			}
+			else
+			{
+				 $width = ($max_height / $height) * $width;
+				 $height = $max_height;
+			}
+		}
+		if ($max_width)
+		{	
+			// wider
+			if (!$stretch && $width)
+			{
+				if ($width > $max_width) 
+				{
+				   $height = ($max_width / $width) * $height;
+				   $width = $max_width;
+				}
+			}
+			else if ($width)
+			{
+				$height = ($max_width / $width) * $height;
+				$width = $max_width;
+			}
+		}
+				
+        if(!is_numeric($width) || !is_numeric($height))
+            return;
+                
+		$image_p = imagecreatetruecolor($width, $height);
+		
+		switch($type)
+		{
+		case IMAGETYPE_JPEG:
+			$image = imagecreatefromjpeg($filename);
+			break;
+		case IMAGETYPE_GIF:
+			$image = imagecreatefromgif($filename);
+			break;
+		case IMAGETYPE_PNG:
+			imageAntiAlias($image_p,true);
+			imagealphablending($image_p, false);
+			imagesavealpha($image_p,true);
+			$transparent = imagecolorallocatealpha($image_p, 255, 255, 255, 0);
+			for($x=0;$x<$width;$x++) 
+			{
+				for($y=0;$y<$height;$y++)
+			 		imageSetPixel($image_p, $x, $y, $transparent);
+			}
+			$image = imagecreatefrompng($filename);
+			break;
+		case IMAGETYPE_BMP:
+			$image = imagecreatefromwbmp($filename);
+			break;
+		default:
+			break;
+		}
+        
+		imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $orig_width, $orig_height);
+		
+		return $image_p;
+	}
+
+	// View options
+	$ans_tmp_file = "";
+	
+	$FID = $_GET['fid'];
+	$w = $_GET["iw"];
+    $h = $_GET["ih"];
+	$stretch = $_GET['stretch'];
+	 
+     // Redirect to new file system
+    $url = "/public/antfs/stream_image.php?fid=$FID";
+    if ($w)
+        $url .= "&w=" . $w;
+    if ($h)
+        $url .= "&h=" . $h;
+
+    header("Location: $url");
+    exit;
+     
+	/*$result = $dbh->Query("select file_name, file_title, file_type, user_id, file_size, ans_key,
+						   category_id, remote_file from user_files where id = '$FID'");
+
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		$name = $row['file_name'];
+		$title = $row['file_title'];
+		$ans_key = $row['ans_key'];
+		$type = $row['file_type'];
+		$USERID = $row['user_id'];
+		$remote_file = $row['remote_file'];
+
+		$settings_account_number = $ANT->accountId;
+		//$settings_account_number2 = UserGetAccount(&$dbh, $row['user_id']);
+		
+		if ($type == 'adf')
+			$title = str_replace(".adf", ".html", $title);
+
+		$file_dir = AntConfig::getInstance()->data_path."/$settings_account_number/userfiles";
+		$file_dir2 = AntConfig::getInstance()->data_path."/$settings_account_number2/userfiles";
+			
+		if ($USERID)
+		{
+			$file_dir .= "/$USERID";
+			$file_dir2 .= "/$USERID";
+		}
+
+		if (!file_exists($file_dir."/".$name))
+		{
+			if (file_exists($file_dir2."/".$name))
+				$file_dir = $file_dir2;
+		}
+
+		if ($ans_key)
+		{
+			// load from v2 ans server
+			$ansClient = new AnsClient(); // TODO: remove manual server
+			$handle = fopen($ansClient->getFileUrl($ans_key), 'rb');
+			if ($handle)
+			{
+				$tmpFolder = (AntConfig::getInstance()->data_path) ? AntConfig::getInstance()->data_path."/tmp" : sys_get_temp_dir();
+				if (!file_exists($tmpFolder))
+					@mkdir($tmpFolder, 0777);
+				$ans_tmp_file = tempnam($tmpFolder, "rsimg");
+				$tmphnd = fopen($ans_tmp_file, "w");
+
+				if ($tmphnd)
+				{
+
+					while (!feof($handle))
+					{
+						fwrite($tmphnd,  fread($handle, 4096));
+					}
+
+					fclose($tmphnd);
+				}
+			}
+		}
+		else if ($remote_file || !file_exists($file_dir."/".$name))
+		{
+			if (!$remote_file)
+				$remote_file = $title;
+
+			if ($ans->fileVerify($remote_file, $FID, "/userfiles/".$settings_account_number))
+			{
+				$remote_file_page = $ans->getImageResizedUrl($remote_file, $FID, "/userfiles/".$settings_account_number, 1, $w, $h);
+			}
+			// TODO: comment the below out
+			else if ($ans->fileVerify($remote_file, $settings_account_number."/".$FID, "/userfiles"))
+			{
+				$remote_file_page = $ans->getImageResizedUrl($remote_file, $settings_account_number."/".$FID, "/userfiles", 1, $w, $h);
+			}
+			else if ($ans->fileVerify($remote_file, "/".$FID, "/userfiles"))
+			{
+				$remote_file_page = $ans->getImageResizedUrl($remote_file, "/".$FID, "/userfiles", 1, $w, $h);
+			}
+			else if ($ans->fileVerify($remote_file, $FID, "/userfiles"))
+			{
+				$remote_file_page = $ans->getImageResizedUrl($remote_file, $FID, "/userfiles", 1, $w, $h);
+			}
+		}
+	}
+	else
+	{*/
+	//}
+	//$dbh->FreeResults($result);
+
+	if ($remote_file_page)
+	{
+			// Get URL to download the file
+			header("Location: $remote_file_page");
+	}
+	else
+	{
+		if ($ans_tmp_file)
+		{
+			$file_dir = $ans_tmp_file;
+		}
+		else
+		{
+			// Check in backup just in case
+			if (!file_exists($file_dir."/".$name))
+				$file_dir .= "/backup";
+
+			$file_dir .= "/".$name;
+		}
+
+		if (!file_exists($file_dir))
+			return;
+
+		$info = getimagesize($file_dir);
+		$filetype = $info[2];
+		$image = ResizeThumbImage($file_dir, $w, $h, $filetype, $stretch);
+        
+        if(empty($image))
+            return;
+        
+		switch (strtolower($filetype))
+		{
+		case IMAGETYPE_JPEG:
+			header("Content-type: image/jpeg");
+			imagejpeg($image);
+			break;
+		case IMAGETYPE_GIF:
+			header("Content-type: image/gif");
+			imagegif($image);
+			break;
+		case IMAGETYPE_PNG:
+			header("Content-type: image/png");
+			imagepng($image);
+			break;
+		case IMAGETYPE_BMP:
+			header("Content-type: image/bmp");
+			imagewbmp($image);
+			break;
+		default:
+			break;
+		}
+
+		imagedestroy($image);
+
+		// Clean up temp downloaded image
+		if ($ans_tmp_file)
+			@unlink($ans_tmp_file);
+	}
+?>

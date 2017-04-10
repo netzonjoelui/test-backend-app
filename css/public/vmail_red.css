@@ -1,0 +1,350 @@
+<?php 
+	header("Content-type: text/css"); 
+?>
+html, body
+{
+	height:100%;
+	margin: 0;
+	padding: 0;
+	background: #BB1616 url(/images/blogs/pp3_bar.gif) top center fixed repeat-x;
+	font-family: Arial, Helvetica, sans-serif;
+	color: black;
+	text-align: center;
+	border:none;
+}
+
+/* unvisited link */
+a:link 
+{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:11px;
+	color: #333;
+	text-decoration: underline;
+}   
+	  
+/* visited link */
+a:visited 
+{
+	color: #333;
+	text-decoration: none;
+}
+
+/* selected link */
+a:active 
+{
+	color: #333;
+	text-decoration: underline;
+}   
+
+/* mouse over link */
+a:hover 
+{
+	color: #000;
+	text-decoration:none;
+} 
+	
+h1 
+{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size : 16px;
+	font-weight : bold;
+	color: #ED940F;
+	border-bottom:1px solid #ED940F;
+	padding-top: 5px;
+	margin: 0px;
+}
+	
+h2 
+{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:12px;
+	font-weight: normal;
+	color: #000;
+	text-transform:capitalize;
+	border-bottom:2px solid #FFF;
+	letter-spacing:normal;
+	padding-left:4px;
+	padding-top:0px;
+	padding-bottom:0px;
+	margin:0px;
+}
+	
+blockquote 
+{
+	align: center; 
+	line-height: 16px;
+	text-align: justify;
+	padding: 10px;
+	color: #666;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-style: normal;
+	letter-spacing: 1px;
+	border-left:1px solid #999;
+}
+
+
+
+
+/* The following hack is to correct paragraph text size in IE/WIN */
+
+/* \*/ * html body p { font-size: 80%; } /* */
+
+
+#globalContainer
+{
+	position: relative;
+	text-align: left;
+	vertical-align: middle;
+	margin: 0 auto;
+	width: 720px;
+	background: #FFF;
+	border-bottom:1px solid transparent;
+}
+
+#contentBody
+{
+	width: 720px;
+	background: #FFF;
+	border-bottom:1px solid transparent;
+}
+	
+#globalFooter
+{
+	width: 720px;
+	height: 39px;
+	background: #FFFFFF url(/images/public/footer_red_720.gif) top center no-repeat;
+}
+
+#globalFooter div
+{
+	font-size: 10px;
+	font-weight: normal;
+	font-family: Arial, Helvetica, sans-serif;
+	text-align: center;
+	padding-top:6px;
+	text-transform:none;
+	letter-spacing: 1px;
+	color: #FFF;
+}
+	
+#globalFooter div a:link 
+{
+	color: #FFF;
+	font-size: 10px;
+	text-decoration: none;
+}   
+	  
+
+#globalFooter div a:visited 
+{
+	color: #FFF;
+	font-size: 10px;
+	text-decoration: none;
+}
+
+
+#globalFooter div a:active 
+{
+	color: #FFF;
+	font-size: 10px;
+	text-decoration: none;
+}   
+
+
+#globalFooter div a:hover 
+{
+	color: #FFF;
+	font-size: 10px;
+	text-decoration:underline;
+} 
+
+#globalFooter div span
+{
+	font-weight:bold;
+	font-size:11px;
+}
+	
+#content
+{
+	margin-left: 25px;
+	margin-right: 245px;
+}
+	
+#header
+{
+	width: 720px;
+	height: 100px;
+	background: #FFFFFF url(/images/public/header_red_720.gif) top center no-repeat;
+}
+
+#header h1
+{
+	font-size: 23px;
+	font-weight: normal;
+	font-family: Arial, Helvetica, sans-serif;
+	text-align: left;
+	padding-top:32px;
+	padding-left:15px;
+	text-transform:none;
+	letter-spacing: 2px;
+	color: #000;
+	border: 0px;
+}
+
+#header h2
+{
+	font-size: 18px;
+	font-weight: normal;
+	font-family: Arial, Helvetica, sans-serif;
+	text-align: left;
+	padding-top:3px;
+	padding-left:15px;
+	text-transform:none;
+	letter-spacing: 2px;
+	color: #000;
+	border: 0px;
+}
+
+#header img
+{
+	margin-top:30px;
+	margin-left:10px;
+	margin-right:5px;
+	float:left;
+}
+
+#sidebar
+{
+	float: right;
+	width: 235px;
+	margin-right: 5px;
+}
+
+/***********************************************************************
+*	Classes that handle sidebar boxes
+*
+*	Layout:
+*	
+*	sidebox
+*	{
+*		sidebox2 -- used for rounded corners (optional)
+*		{
+*			sidebar_title
+*			ul (no class - subclass ".sidebox ul" to style)
+*			{
+*				li ((no class - subclass ".sidebox li" to style))
+*			}
+*		}
+*	}
+*
+*	Available subclasses: profile archive links (use ".sidebox profile")
+*
+************************************************************************/
+
+.sidebox 
+{ 
+	color: #666;
+	font-size: 12px;
+	font-family: Arial, Helvetica, sans-serif;
+	letter-spacing: normal;
+	line-height: 20px; 
+	text-align: left;
+}
+
+.sidebar_title 
+{ 
+	background: #FFFFFF url(/images/blogs/skypat4_sideboxHeader.gif) top center repeat;
+}
+
+.sidebox li
+{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:11px;
+	color: #666;
+	line-height: 1.5em;
+	padding: 0.5em 8px;
+	background: #EEEEEE;
+}
+
+.sidebox li:hover
+{
+	background: #E3E3E3;
+}
+	
+/* unvisited link */
+.sidebox li a:link 
+{
+	display: block;
+	border: none;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:11px;
+	color: #666;
+	text-decoration: none;
+}   
+	  
+/* visited link */
+.sidebox li a:visited 
+{
+	color: #666;
+	text-decoration: none;
+}
+
+/* selected link */
+.sidebox li a:active 
+{
+	color: #666;
+	text-decoration: none;
+}   
+
+/* mouse over link */
+.sidebox li a:hover 
+{
+	color: #000;
+	text-decoration:underline;
+}
+	
+	
+.sidebox ul
+{ 
+	list-style: none;
+	margin: 0px;
+	padding: 0px;
+	background: #E1E1E1;
+}
+
+/***********************************************************************
+*	Button Code
+************************************************************************/
+
+a.boldbuttons{
+background: transparent url('/images/public/vmailbuttons/roundedge-red-left.gif') no-repeat top left;
+display: block;
+font: bold 13px Arial; /* Change 13px as desired */
+line-height: 22px; /* This value + 4px + 4px (top and bottom padding of SPAN) must equal height of button background (default is 30px) */
+height: 30px; /* Height of button background height */
+padding-left: 8px; /* Width of left menu image */
+text-decoration: none;
+
+}
+
+a:link.boldbuttons, a:visited.boldbuttons, a:hover.boldbuttons, a:active.boldbuttons{
+color: white; /*button text color*/
+}
+
+a.boldbuttons span{
+background: transparent url('/images/public/vmailbuttons/roundedge-red-right.gif') no-repeat top right;
+display: block;
+padding: 4px 10px 4px 2px; /*Set 10px to be equal or greater than'padding-left' value above*/
+}
+
+a:hover.boldbuttons{ /* Hover state CSS */
+text-decoration: underline;
+}
+
+
+.buttonwrapper{ /* Container you can use to surround a CSS button to clear float */
+overflow: hidden; /*See: http://www.quirksmode.org/css/clearing.html */
+width: 100%;
+margin-bottom: 5px;
+}

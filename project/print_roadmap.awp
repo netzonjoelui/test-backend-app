@@ -1,0 +1,41 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");
+	require_once("../lib/CDatabase.awp");
+	require_once("project_functions.awp");
+	require_once("../lib/CDropdownMenu.awp");
+	require_once("../lib/content_table.awp");
+	require_once("../users/user_functions.php");
+	require_once("../lib/CToolTabs.awp");
+	require_once("../lib/CToolTable.awp");
+	require_once("../lib/date_time_functions.php");
+	require_once("../lib/WindowFrame.awp");
+	require_once("../lib/CDropdownWindow.awp");
+	require_once("../lib/Button.awp");
+	
+	$USERNAME = $_SESSION["USER_NAME"];
+	
+	$dbh = new CDatabase();
+									  
+	$USERID = $_SESSION["USER_ID"];
+	$USERID = $userid;
+	
+	$PID = $HTTP_GET_VARS['pid'];
+	
+	$TABNAV = ($_GET['tabnav']) ? $_GET['tabnav']: 'specifications';
+
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Print Report</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body onLoad="window.print();">
+<?php
+	include("project_roadmap.awp");
+?>
+</body>
+</html>

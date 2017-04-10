@@ -1,0 +1,351 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>Test</title>
+	
+	<link rel="STYLESHEET" type="text/css" href="../style.css" />
+
+	<script language="javascript" type="text/javascript" src="../jquery.min.js"></script>
+	<script language="javascript" type="text/javascript" src="../jquery/jquery.datetimepicker.js"></script>
+	<script language="javascript" type="text/javascript" src="../userAgent.js"></script>
+	<script language="javascript" type="text/javascript" src="../dom.js"></script>
+	<script language="javascript" type="text/javascript" src="../CTabs.js"></script>
+	<script language="javascript" type="text/javascript" src="../CNavBar.js"></script>
+	<script language="javascript" type="text/javascript" src="../CWindowFrame.js"></script>
+	<script language="javascript" type="text/javascript" src="../CSplitContainer.js"></script>
+	<script language="javascript" type="text/javascript" src="../CContentTable.js"></script>
+	<script language="javascript" type="text/javascript" src="../CToolbar.js"></script>
+	<script language="javascript" type="text/javascript" src="../CMenuBar.js"></script>
+	<script language="javascript" type="text/javascript" src="../CButton.js"></script>
+	<script language="javascript" type="text/javascript" src="../CToolTable.js"></script>
+	<script language="javascript" type="text/javascript" src="../CDatasheet.js"></script>
+	<script language="javascript" type="text/javascript" src="../CDropdownMenu.js"></script>
+	<script language="javascript" type="text/javascript" src="../CDragAndDrop.js"></script>
+	<script language="javascript" type="text/javascript" src="../CTreeView.js"></script>
+	<script language="javascript" type="text/javascript" src="../CDialog.js"></script>
+	<script language="javascript" type="text/javascript" src="../CRte.js"></script>
+	<script language="javascript" type="text/javascript" src="../CEffect.js"></script>
+	<script language="javascript" type="text/javascript" src="../CAutoCompleteCal.js"></script>
+	<script language="javascript" type="text/javascript" src="../CAutoComplete.js"></script>
+	<script language="javascript" type="text/javascript" src="../CAutoCompleteTime.js"></script>
+	<script language="javascript" type="text/javascript" src="../CNavHistory.js"></script>
+	<script language="javascript" type="text/javascript" src="../alib.js"></script>
+	<script language='javascript' type='text/javascript'>
+
+	function appmain()
+	{
+		var main_con = document.getElementById("maincon");
+
+		// Create dropzone - sortable
+		var dv_drop = document.createElement("div");
+		dv_drop.style.border = "1px solid black";
+		dv_drop.style.width = "100px";
+		dv_drop.style.height = "100px";
+		main_con.appendChild(dv_drop);
+		DragAndDrop.registerDropzone(dv_drop, "dz_multiOne");
+		dv_drop.onDragEnter = function(e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid red");
+		}
+		dv_drop.onDragExit = function(e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+		dv_drop.onDragDrop = function(e)
+		{
+			//e.innerHTML = "Deleted!";
+			alib.dom.styleSet(this, "border", "1px solid black");
+
+			e.currentCon.removeChild(e);
+			e.currentCon = this;
+			this.appendChild(e);
+		}
+		dv_drop.onResort = function(e)
+		{
+		}
+
+		var dv_b = alib.dom.createElement("div", dv_drop);
+		dv_b.innerHTML = "Item 1";
+		dv_b.style.border = "1px solid blue";
+		dv_b.currentCon = dv_drop;
+		DragAndDrop.registerDragable(dv_b, null, "dz_multiOne");
+
+		var dv_b = alib.dom.createElement("div", dv_drop);
+		dv_b.innerHTML = "Item 2";
+		dv_b.style.border = "1px solid blue";
+		dv_b.currentCon = dv_drop;
+		DragAndDrop.registerDragable(dv_b, null, "dz_multiOne");
+
+		var dv_b = alib.dom.createElement("div", dv_drop);
+		dv_b.innerHTML = "Item 3";
+		dv_b.currentCon = dv_drop;
+		dv_b.style.border = "1px solid blue";
+
+		DragAndDrop.registerSortable(dv_drop);
+
+
+		// Create second dropzone - sortable
+		var dv_drop2 = document.createElement("div");
+		dv_drop2.style.border = "1px solid black";
+		dv_drop2.style.margin = "10px 0 0 0";
+		dv_drop2.style.width = "100px";
+		dv_drop2.style.height = "100px";
+		main_con.appendChild(dv_drop2);
+		DragAndDrop.registerDropzone(dv_drop2, "dz_multiOne");
+		dv_drop2.onDragEnter = function(e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid red");
+		}
+		dv_drop2.onDragExit = function(e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+		dv_drop2.onDragDrop = function(e)
+		{
+			//e.innerHTML = "Deleted!";
+			alib.dom.styleSet(this, "border", "1px solid black");
+
+			e.currentCon.removeChild(e);
+			e.currentCon = this;
+			this.appendChild(e);
+		}
+		dv_drop2.onResort = function(e)
+		{
+		}
+
+		DragAndDrop.registerSortable(dv_drop2);
+		
+		//===================================================
+		// Test sorting Dropzones inside Dropzones
+		//===================================================
+		// Main Dropzone
+		var main_dz = alib.dom.createElement("div");
+		main_dz.style.border = "1px solid black";
+		main_dz.style.width = "400px";
+		main_dz.style.margin = "3px";
+		main_dz.style.padding = "3px";
+		DragAndDrop.registerDropzone(main_dz, "dz_1");
+		DragAndDrop.registerSortable(main_dz);
+		
+		// Dropzone 1
+		var dz1 = alib.dom.createElement("div");
+		dz1.style.border = "1px solid black";
+		dz1.innerHTML = "Dropzone 1";
+		dz1.style.margin = "5px";
+		dz1.style.padding = "5px";
+		dz1.style.cursor= "move";
+		var m_div1 = alib.dom.createElement("div");
+		m_div1.style.border = "1px solid blue";
+		DragAndDrop.registerDropzone(m_div1, "dz_2");
+		DragAndDrop.registerSortable(m_div1);
+		DragAndDrop.registerDragableChild(null, dz1, null, "dz_1");
+		main_dz.appendChild(dz1);
+		dz1.appendChild(m_div1);
+
+		var dv_b1 = alib.dom.createElement("div");
+		dv_b1.style.border = "1px solid black";
+		dv_b1.innerHTML = "Dz1 Con 1";
+		dv_b1.style.margin = "5px";
+		dv_b1.style.padding = "5px";
+		var i_div = alib.dom.createElement("div");
+		i_div.style.border = "1px solid blue";
+		DragAndDrop.registerDropzone(i_div, "dz_4");
+		DragAndDrop.registerSortable(i_div);
+		DragAndDrop.registerDragableChild(dz1, dv_b1, null, "dz_2");
+		m_div1.appendChild(dv_b1);
+		dv_b1.appendChild(i_div);
+		
+		var i_con1 = alib.dom.createElement("div");
+		i_con1.style.border = "1px solid black";
+		i_con1.innerHTML = "I Con 1";
+		i_con1.style.margin = "5px";
+		i_con1.style.padding = "5px";
+		var i_div1 = alib.dom.createElement("div");
+		i_div1.style.border = "1px solid blue";
+		DragAndDrop.registerDropzone(i_div1, "dz_1");
+		DragAndDrop.registerSortable(i_div1);
+		DragAndDrop.registerDragableChild(dv_b1, i_con1, null, "dz_4");
+		i_div.appendChild(i_con1);
+		i_con1.appendChild(i_div1);
+		
+		var i_con2 = alib.dom.createElement("div");
+		i_con2.style.border = "1px solid black";
+		i_con2.innerHTML = "I Con 2";
+		i_con2.style.margin = "5px";
+		i_con2.style.padding = "5px";
+		var i_div2 = alib.dom.createElement("div");
+		i_div2.style.border = "1px solid blue";
+		DragAndDrop.registerDropzone(i_div2, "dz_1");
+		DragAndDrop.registerSortable(i_div2);
+		DragAndDrop.registerDragableChild(dv_b1, i_con2, null, "dz_4");
+		i_div.appendChild(i_con2);
+		i_con2.appendChild(i_div2);
+		
+		var i_con3 = alib.dom.createElement("div");
+		i_con3.style.border = "1px solid black";
+		i_con3.innerHTML = "I Con 3";
+		i_con3.style.margin = "5px";
+		i_con3.style.padding = "5px";
+		var i_div3 = alib.dom.createElement("div");
+		i_div3.style.border = "1px solid blue";
+		DragAndDrop.registerDropzone(i_div3, "dz_1");
+		DragAndDrop.registerSortable(i_div3);
+		DragAndDrop.registerDragableChild(dv_b1, i_con3, null, "dz_4");
+		i_div.appendChild(i_con3);
+		i_con3.appendChild(i_div3);
+		
+		var dv_b2 = alib.dom.createElement("div");
+		dv_b2.style.border = "1px solid black";
+		dv_b2.innerHTML = "Dz1 Con 2";
+		dv_b2.style.margin = "5px";
+		dv_b2.style.padding = "5px";
+		var i_div = alib.dom.createElement("div");
+		i_div.style.border = "1px solid blue";
+		DragAndDrop.registerDropzone(i_div, "dz_1");
+		DragAndDrop.registerSortable(i_div);
+		DragAndDrop.registerDragableChild(dz1, dv_b2, null, "dz_2");
+		m_div1.appendChild(dv_b2);
+		dv_b2.appendChild(i_div);
+
+		var dv_b3 = alib.dom.createElement("div");
+		dv_b3.style.border = "1px solid black";
+		dv_b3.innerHTML = "Dz1 Con 3";
+		dv_b3.style.margin = "5px";
+		dv_b3.style.padding = "5px";
+		var i_div = alib.dom.createElement("div");
+		i_div.style.border = "1px solid blue";
+		DragAndDrop.registerDropzone(i_div, "dz_1");
+		DragAndDrop.registerSortable(i_div);
+		DragAndDrop.registerDragableChild(dz1, dv_b3, null, "dz_2");
+		m_div1.appendChild(dv_b3);
+		dv_b3.appendChild(i_div);
+		
+		// Dropzone 2
+		var dz2 = alib.dom.createElement("div");
+		dz2.style.border = "1px solid black";
+		dz2.innerHTML = "Dropzone 2";
+		dz2.style.margin = "5px";
+		dz2.style.padding = "5px";
+		dz2.style.cursor= "move";
+		var m_div2 = alib.dom.createElement("div", dz2);
+		m_div2.style.border = "1px solid blue";
+		DragAndDrop.registerDropzone(m_div2, "dz_3");
+		DragAndDrop.registerSortable(m_div2);
+		DragAndDrop.registerDragableChild(null, dz2, null, "dz_1");
+		main_dz.appendChild(dz2);
+		dz2.appendChild(m_div2);
+
+		var dv_b1 = alib.dom.createElement("div");
+		dv_b1.style.border = "1px solid black";
+		dv_b1.innerHTML = "Dz2 Con 1";
+		dv_b1.style.margin = "5px";
+		dv_b1.style.padding = "5px";
+		var i_div = alib.dom.createElement("div");
+		i_div.style.border = "1px solid blue";
+		DragAndDrop.registerDropzone(i_div, "dz_1");
+		DragAndDrop.registerSortable(i_div);
+		DragAndDrop.registerDragableChild(dz2, dv_b1, null, "dz_3");
+		m_div2.appendChild(dv_b1);
+		dv_b1.appendChild(i_div);
+
+		var dv_b2 = alib.dom.createElement("div");
+		dv_b2.style.border = "1px solid black";
+		dv_b2.innerHTML = "Dz2 Con 2";
+		dv_b2.style.margin = "5px";
+		dv_b2.style.padding = "5px";
+		var i_div = alib.dom.createElement("div");
+		i_div.style.border = "1px solid blue";
+		DragAndDrop.registerDropzone(i_div, "dz_1");
+		DragAndDrop.registerSortable(i_div);
+		DragAndDrop.registerDragableChild(dz2, dv_b2, null, "dz_3");
+		m_div2.appendChild(dv_b2);
+		dv_b2.appendChild(i_div);
+
+		var dv_b3 = alib.dom.createElement("div");
+		dv_b3.style.border = "1px solid black";
+		dv_b3.innerHTML = "Dz2 Con 3";
+		dv_b3.style.margin = "5px";
+		dv_b3.style.padding = "5px";
+		var i_div = alib.dom.createElement("div");
+		i_div.style.border = "1px solid blue";
+		DragAndDrop.registerDropzone(i_div, "dz_1");
+		DragAndDrop.registerSortable(i_div);
+		DragAndDrop.registerDragableChild(dz2, dv_b3, null, "dz_3");
+		m_div2.appendChild(dv_b3);
+		dv_b3.appendChild(i_div);
+		main_con.appendChild(main_dz);
+		
+		//DragAndDrop.registerDragable(dv_b, null, "dz_multiTwo");
+		/*
+		// Source
+		var dv_source = alib.dom.createElement("div", main_con);
+		dv_source.style.position = "absolute";
+		dv_source.style.left = "400px";
+		dv_source.style.top = "3px";
+		dv_source.style.width = "100px";
+
+		// Group 1
+		var dv_b = document.createElement("div");
+		dv_b.innerHTML = "Group 1";
+		dv_b.style.border = "1px solid blue";
+		dv_source.appendChild(dv_b);
+		DragAndDrop.registerDragable(dv_b, null, "dz_multiOne");	
+
+		// Group 2
+		var dv_b = document.createElement("div");
+		dv_b.innerHTML = "Group 2";
+		dv_b.style.border = "1px solid blue";
+		dv_source.appendChild(dv_b);
+		DragAndDrop.registerDragable(dv_b, null, "dz_multiTwo");
+
+		// Create dropzone 1
+		var dv_drop = document.createElement("div");
+		dv_drop.style.border = "1px solid black";
+		dv_drop.style.width = "100px";
+		dv_drop.style.height = "100px";
+		main_con.appendChild(dv_drop);
+		DragAndDrop.registerDropzone(dv_drop, "dz_multiOne");
+		dv_drop.onDragEnter = function (e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid red");
+		}
+		dv_drop.onDragExit = function (e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+		dv_drop.onDragDrop = function (e)
+		{
+			e.innerHTML = "Deleted!";
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+
+		// Create dropzone 2
+		var dv_drop = document.createElement("div");
+		dv_drop.style.border = "1px solid black";
+		dv_drop.style.width = "100px";
+		dv_drop.style.height = "100px";
+		main_con.appendChild(dv_drop);
+		DragAndDrop.registerDropzone(dv_drop, "dz_multiTwo");
+		dv_drop.onDragEnter = function(e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid red");
+		}
+		dv_drop.onDragExit = function(e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+		dv_drop.onDragDrop = function(e)
+		{
+			e.innerHTML = "Deleted!";
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+		*/
+	}
+	</script>
+</head>
+<body onload='appmain()'>
+	<div id='maincon'>
+	</div>
+</body>
+</html>

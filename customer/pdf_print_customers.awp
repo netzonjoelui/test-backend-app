@@ -1,0 +1,444 @@
+<?php
+	// ***********************************************************************************
+	//	TODO: Depricated - object print now used
+	// ***********************************************************************************
+	require_once("../validate_user.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("../users/user_functions.php");
+	require_once('../lib/pdf/class.ezpdf.php'); 
+	require_once("../lib/AntConfig.php");
+	require_once("../lib/CDatabase.awp");
+	require_once("customer_functions.awp");
+	
+	ini_set("max_execution_time", "7200");	
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+				  
+	$pdf =& new Cezpdf();
+	$pdf->selectFont('../lib/pdf/fonts/Helvetica.afm');
+	$pdf->ezSetMargins(50,45,40,40);
+	
+	// Create Header
+	$all = $pdf->openObject();
+	$pdf->saveState();
+	$pdf->setStrokeColor(0,0,0,1);
+	$pdf->line(40,805,550, 805);
+	$pdf->addText(40,810,12, $title);
+	$pdf->restoreState();
+	$pdf->closeObject();
+	$pdf->addObject($all,'all');
+	
+	// Create Footer
+	$all = $pdf->openObject();
+	$pdf->saveState();
+	$pdf->setStrokeColor(0,0,0,1);
+	$pdf->line(40,40,550, 40);
+	$foot = "Customer Reports - ".date("l, F d, Y");
+	$pdf->addText(40,30,8, $foot);
+	$pdf->restoreState();
+	$pdf->closeObject();
+	$pdf->addObject($all,'all');
+	
+	// Start numbering pages
+	$pdf->ezStartPageNumbers(520+30,810,10,'','',1);
+	
+	
+	$title = "Customer Report";
+	
+	if (is_numeric($_GET['label']))
+	{
+		$title = "Group: ".CustGetLabelName($dbh, $_GET['label']);
+	}
+	
+	if (is_array($_POST['customers']))
+	{
+		foreach($_POST['customers'] as $cid)
+		{
+			$cust_query .= ($cust_query) ? " or " : '';
+			$cust_query .= "customers.id='$cid'";
+		}
+		$sel_cond = " and ($cust_query) ";
+	}
+	
+	$query = stripslashes($_POST["query"]);
+	$query = substr($query, strpos($query, " from "));
+	
+	if ($sel_cond)
+	{
+		$orderpos = strpos($query, " order by");
+		if ($orderpos)
+		{
+			$part_1 = substr($query, 0, $orderpos);
+			$part_2 = substr($query, $orderpos);
+			
+			$query = $part_1.$sel_cond.$part_2;
+		}
+		else
+		{
+			$query .= $sel_cond;
+		}
+	}
+
+	if ($_GET['custid'])
+	{
+		$title = "Customer: ".CustGetName($dbh, $_GET['custid']);
+		$query = " from customers where id='".$_GET['custid']."'";
+	}
+	
+	$query = "select customers.id, customers.first_name, customers.nick_name, customers.company, customers.birthday,
+								customers.last_name, customers.spouse_name, customers.street, customers.city, customers.email,
+								customers.state, customers.zip, customers.business_street, customers.business_city,
+								customers.business_state, customers.business_zip, phone_home, phone_work, phone_cell,
+								to_char(time_entered, 'MM/D/YYYY') as time_entered, 
+								to_char(time_changed, 'MM/D/YYYY') as time_changed, customers.notes ".$query;
+	$result = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$CID = $row['id'];
+		if (!$row["first_name"] && !$row["last_name"])
+		{
+			if ($row['nick_name'])
+				$name = $row["nick_name"];
+			else if ($row['company'])
+				$name = $row["company"];
+		}
+		else
+		{
+			$name = $row["first_name"];
+			if ($row["spouse_name"])
+				$name .= " & ".$row["spouse_name"];
+				
+			$name .= " ".$row["last_name"];
+		}
+			
+		
+		
+		$street = $row['street'];
+		$street2 = $row['street2'];
+		$city = $row['city'];
+		$state = $row['state'];
+		$zip = $row['zip'];
+		
+		if (!$street || !$zip)
+		{
+			$street = $row['business_street'];
+			$street2 = $row['business_street2'];
+			$city = $row['business_city'];
+			$state = $row['business_state'];
+			$zip = $row['business_zip'];
+		}
+		
+		$docCurY = $pdf->ezText("<b>$name</b>", 12);
+		$pdf->setStrokeColor(.9,.9,.9,1);
+		$pdf->setLineStyle(1);
+		$pdf->line(41,$docCurY-2,549, $docCurY-2);
+		if (isset($_POST['print_general']))
+		{
+			$data = array(
+							array($street, "Home:", $row['phone_home'], "Entered:", $row['time_changed']),
+							array("$city, $state $zip", "Work:", $row['phone_work'], "Changed:", $row['time_changed']),
+							array($row['email'], "Mobile:", $row['phone_cell'], ($_POST['print_birthday'])?"Birthday:":'', ($_POST['print_birthday'])?$row['birthday']:'')
+							);
+			$docCurY = $pdf->ezTable($data, NULL, NULL, 
+										array('showHeadings'=>0, 'shaded'=>0, 'showLines'=>0, 
+											'fontSize' => 10, 'width' => 550, 'xPos' => 40,
+											'xOrientation' => 'right', 'rowGap' => 0,
+											'cols'=>array('0'=>array('width'=> 200),
+															'1'=>array('width'=> 40),
+															'2'=>array('width'=> 125),
+															'3'=>array('width'=> 55))));
+			// Get List of labels
+			$labels = CustGetLabelsString($dbh, $CID);
+			$data = array(array("<b>Groups</b>", $labels));
+			$docCurY = $pdf->ezTable($data, NULL, NULL, 
+										array('showHeadings'=>0, 'shaded'=>0, 'showLines'=>0, 
+											'fontSize' => 10, 'width' => 550, 'xPos' => 40,
+											'xOrientation' => 'right', 'rowGap' => 0,
+											'cols'=>array('0'=>array('width'=> 60))));
+		}
+		
+		if (isset($_POST['print_notes']) && $row['notes'])
+		{
+			$data = array(array("<b>Notes</b>", $row['notes']));
+			$docCurY = $pdf->ezTable($data, NULL, NULL, 
+										array('showHeadings'=>0, 'shaded'=>0, 'showLines'=>0, 
+											'fontSize' => 10, 'width' => 550, 'xPos' => 40,
+											'xOrientation' => 'right', 'rowGap' => 0,
+											'cols'=>array('0'=>array('width'=> 60))));
+		}
+		
+		if (isset($_POST['print_activity']))
+		{
+			unset($data);
+			$query_2 = "select customer_activity.name, 
+						customer_activity.user_name,
+						customer_activity.notes,
+						to_char(time_entered, 'MM/DD/YYYY') as date,
+						to_char(time_entered, 'HH12:MI AM') as time,
+						customer_activity_types.name as type
+						from customer_activity, customer_activity_types where customer_id='$CID'
+						and (customer_activity.user_id = '$USERID' OR customer_activity.public = 't')
+						and customer_activity_types.id = customer_activity.type_id 
+						order by time_entered DESC limit 200";
+							
+			$result_2 = $dbh->Query($query_2);
+			$num_2 = $dbh->GetNumberRows($result_2);
+			for ($j=0; $j<$num_2; $j++)
+			{
+				$row_2 = $dbh->GetNextRow($result_2, $j);
+				$id = $row_2['id'];
+				$name = $row_2['name'];
+				if (!$name) $name = "Untitled";
+				$date = $row_2["date"]."&nbsp;";
+				$type = $row_2["type"];
+				
+				$tmprow = array();
+				
+				if ($j == 0)
+					$tmprow[0] = "<b>Activity</b>:";
+				else
+					$tmprow[0] = "";
+					
+				$tmprow[1] = $row_2["date"];
+				$tmprow[2] = $row_2["time"];
+				$tmprow[3] = $row_2["notes"];
+				
+				$data[] = $tmprow;
+				unset($tmprow);
+			}
+			$dbh->FreeResults($result_2);
+			
+			$docCurY = $pdf->ezTable($data, NULL, NULL, 
+										array('showHeadings'=>0, 'shaded'=>0, 'showLines'=>0, 
+											'fontSize' => 10, 'width' => 550, 'xPos' => 40,
+											'xOrientation' => 'right', 'rowGap' => 0,
+											'cols'=>array('0'=>array('width'=> 60),
+											   				'1'=>array('width'=> 70),
+															'2'=>array('width'=> 60))));
+		}
+
+
+		if (isset($_POST['print_events']))
+		{
+			unset($data);
+			$tev = "calendar_events_recurring"; // main events table
+			$query_2 = "select $tev.id, $tev.date_start, $tev.date_end, $tev.start_block, $tev.end_block, $tev.location, $tev.name,
+						$tev.all_day, $tev.user_id
+			 			from calendars, $tev
+			 			where $tev.id in (select event_recur_id from calendar_event_associations where customer_id='$CID')
+						and $tev.calendar=calendars.id  
+			  			order by $tev.all_day DESC, $tev.date_start, $tev.date_end DESC, $tev.start_block, $tev.end_block";
+							
+			$result_2 = $dbh->Query($query_2);
+			$num_2 = $dbh->GetNumberRows($result_2);
+			for ($j=0; $j<$num_2; $j++)
+			{
+				$row_2 = $dbh->GetNextRow($result_2, $j);
+				$id = $row_2['id'];
+				$name = $row_2['name'];
+				if (!$name) $name = "Untitled";
+				
+				$tmprow = array();
+				
+				if ($j == 0)
+					$tmprow[0] = "<b>Events</b>:";
+				else
+					$tmprow[0] = "";
+					
+				$tmprow[1] = $name;
+				$tmprow[2] = date("m/d/Y", strtotime($row['date_start']));
+				
+				$data[] = $tmprow;
+				unset($tmprow);
+			}
+			$dbh->FreeResults($result_2);
+			
+			$docCurY = $pdf->ezTable($data, NULL, NULL, 
+										array('showHeadings'=>0, 'shaded'=>0, 'showLines'=>0, 
+											'fontSize' => 10, 'width' => 550, 'xPos' => 40,
+											'xOrientation' => 'right', 'rowGap' => 0,
+											'cols'=>array('0'=>array('width'=> 60),
+											   				'1'=>array('width'=> 250))));
+		}
+		
+		$pdf->ezText("\n");
+	}
+	$dbh->FreeResults($result);
+	/*
+	$customers = array();
+	
+	if ($_GET['custid'])
+	{
+		$title = "Customer: ".CustGetName($dbh, $_GET['custid']);
+		$customers[0] = $_GET['custid'];
+	}
+	else if ($_GET['label'])
+	{
+		$title = "Group: ".CustGetLabelName($dbh, $_GET['label']);
+		$result = $dbh->Query("select customers.id from customers, customer_labels, customer_label_mem where 
+								customer_label_mem.customer_id=customers.id and 
+								customer_label_mem.label_id = customer_labels.id and
+								customer_labels.id='".$_GET['label']."'");
+		$num = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			$customers[] = $row['id'];
+		}
+	}
+	else
+	{
+		$title = "Customer Report";
+		foreach($_POST['customers'] as $CID)
+		{
+			$customers[] = $CID;
+		}
+	}
+	
+	foreach($customers as $CID)
+	{
+		$result = $dbh->Query("select customers.first_name, customers.nick_name, customers.company,
+								customers.last_name, customers.spouse_name, customers.street, customers.city,
+								customers.state, customers.zip, customers.business_street, customers.business_city,
+								customers.business_state, customers.business_zip, phone_home, phone_work,
+								to_char(time_entered, 'MM/D/YYYY') as time_entered, 
+								to_char(time_changed, 'MM/D/YYYY') as time_changed, customers.notes
+								from customers
+								where customers.id = '$CID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			
+			if (!$row["first_name"] && !$row["last_name"])
+			{
+				if ($row['nick_name'])
+					$name = $row["nick_name"];
+				else if ($row['company'])
+					$name = $row["company"];
+			}
+			else
+			{
+				$name = $row["first_name"];
+				if ($row["spouse_name"])
+					$name .= " & ".$row["spouse_name"];
+					
+				$name .= " ".$row["last_name"];
+			}
+				
+			
+			
+			$street = $row['street'];
+			$street2 = $row['street2'];
+			$city = $row['city'];
+			$state = $row['state'];
+			$zip = $row['zip'];
+			
+			if (!$street || !$zip)
+			{
+				$street = $row['business_street'];
+				$street2 = $row['business_street2'];
+				$city = $row['business_city'];
+				$state = $row['business_state'];
+				$zip = $row['business_zip'];
+			}
+			
+			$docCurY = $pdf->ezText("<b>$name</b>", 12);
+			$pdf->setStrokeColor(.9,.9,.9,1);
+			$pdf->setLineStyle(1);
+			$pdf->line(41,$docCurY-2,549, $docCurY-2);
+			if (isset($_POST['print_general']))
+			{
+				$data = array(
+								array($street, "Home:", $row['phone_home'], "Entered:", $row['time_changed']),
+								array("$city, $state $zip", "Work:", $row['phone_work'], "Changed:", $row['time_changed'])
+							  );
+				$docCurY = $pdf->ezTable($data, NULL, NULL, 
+										 array('showHeadings'=>0, 'shaded'=>0, 'showLines'=>0, 
+											   'fontSize' => 10, 'width' => 550, 'xPos' => 40,
+											   'xOrientation' => 'right', 'rowGap' => 0,
+											   'cols'=>array('0'=>array('width'=> 200),
+															 '1'=>array('width'=> 40),
+															 '2'=>array('width'=> 125),
+															 '3'=>array('width'=> 55))));
+				// Get List of labels
+				$labels = CustGetLabelsString($dbh, $CID);
+				$data = array(array("<b>Groups</b>", $labels));
+				$docCurY = $pdf->ezTable($data, NULL, NULL, 
+										 array('showHeadings'=>0, 'shaded'=>0, 'showLines'=>0, 
+											   'fontSize' => 10, 'width' => 550, 'xPos' => 40,
+											   'xOrientation' => 'right', 'rowGap' => 0,
+											   'cols'=>array('0'=>array('width'=> 60))));
+			}
+			
+			if (isset($_POST['print_notes']) && $row['notes'])
+			{
+				$data = array(array("<b>Notes</b>", $row['notes']));
+				$docCurY = $pdf->ezTable($data, NULL, NULL, 
+										 array('showHeadings'=>0, 'shaded'=>0, 'showLines'=>0, 
+											   'fontSize' => 10, 'width' => 550, 'xPos' => 40,
+											   'xOrientation' => 'right', 'rowGap' => 0,
+											   'cols'=>array('0'=>array('width'=> 60))));
+			}
+			
+			if (isset($_POST['print_activity']))
+			{
+				unset($data);
+				$query = "select customer_activity.name, 
+							customer_activity.user_name,
+							customer_activity.notes,
+							to_char(time_entered, 'MM/DD/YYYY') as date,
+							to_char(time_entered, 'HH12:MI AM') as time,
+							customer_activity_types.name as type
+							from customer_activity, customer_activity_types where customer_id='$CID'
+							and (customer_activity.user_id = '$USERID' OR customer_activity.public = 't')
+							and customer_activity_types.id = customer_activity.type_id 
+							order by date DESC limit 200";
+							  
+				$result = $dbh->Query($query);
+				$num = $dbh->GetNumberRows($result);
+				for ($i=0; $i<$num; $i++)
+				{
+					$row = $dbh->GetNextRow($result, $i);
+					$id = $row['id'];
+					$name = $row['name'];
+					if (!$name) $name = "Untitled";
+					$date = $row["date"]."&nbsp;";
+					$type = $row["type"];
+					
+					$tmprow = array();
+					
+					if ($i == 0)
+						$tmprow[0] = "<b>Activity</b>:";
+					else
+						$tmprow[0] = "";
+						
+					$tmprow[1] = $row["date"];
+					$tmprow[2] = $row["time"];
+					$tmprow[3] = $row["notes"];
+					
+					$data[] = $tmprow;
+					unset($tmprow);
+				}
+				$dbh->FreeResults($result);
+				
+				$docCurY = $pdf->ezTable($data, NULL, NULL, 
+										 array('showHeadings'=>0, 'shaded'=>0, 'showLines'=>0, 
+											   'fontSize' => 10, 'width' => 550, 'xPos' => 40,
+											   'xOrientation' => 'right', 'rowGap' => 0,
+											   'cols'=>array('0'=>array('width'=> 60),
+											   				 '1'=>array('width'=> 70),
+															 '2'=>array('width'=> 60))));
+			}
+			
+			$pdf->ezText("\n");
+		}
+	}
+	*/
+	$pdf->ezStream();
+?>

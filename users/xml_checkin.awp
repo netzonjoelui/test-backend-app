@@ -1,0 +1,64 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+	$process = true;
+	
+	$dbh->Query("update users set checkin_timestamp='now' where id='$USERID'");
+	
+	header("Content-type: text/xml");			// Returns XML document
+	echo '<?xml version="1.0" encoding="UTF-8"
+	  standalone="yes"?>'; 
+	echo "<response>\n";
+	
+	if ($_SESSION['CHAT_HANDLER'])
+	{
+		if ($_GET['appname'] == $_SESSION['CHAT_HANDLER'])
+			$process = true;
+		else
+			$process = false;
+	}
+	else
+	{
+		$process = true;
+	}
+	
+	if ($process)
+	{
+		// Look for any chats
+		$result = $dbh->Query("select chat_sessions.id as sid, chat_friends.id from chat_sessions left outer join chat_friends 
+								on (chat_friends.session_id=chat_sessions.id) where 
+								chat_sessions.user_id='$USERID' and chat_sessions.f_read is false");
+		$num = $dbh->GetNumberRows($result);		
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			echo "<chat_msg><fid>".$row['id']."</fid><sid>".$row['sid']."</sid></chat_msg>";
+		}
+		$dbh->FreeResults($result);
+
+		if ($_GET['registeractive'])
+			$dbh->Query("update users set active_timestamp='now' where id='$USERID'");
+	}
+
+	// Now make sure we have not logged in anywhere else
+	/*
+	if ($_SERVER['REMOTE_ADDR'])
+	{
+		$result = $dbh->Query("select id from users where last_login_from!='".$_SERVER['REMOTE_ADDR']."' 
+							   and last_login_from is not null and id='$USERID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			echo "<action>logout_another_location</action>";
+		}
+		$dbh->FreeResults($result);
+	}
+	 */
+	
+	echo "</response>";
+?>

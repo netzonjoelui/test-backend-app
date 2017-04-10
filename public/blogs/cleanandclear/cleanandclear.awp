@@ -1,0 +1,304 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>MyaBlog - Autumn</title>
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=iso-8859-1" />
+<style type="text/css">
+/* CSS Document */
+html, body { 
+margin: 0px;
+padding: 0px;
+font-family: arial,verdana,sans-serif;
+background-color: #FFF;
+}
+
+img {border: 0px;}
+
+.myablogTitle { 
+font-size: 30px;
+font-weight: bold;
+font-family: arial, times new roman, serif;
+text-align: left;
+letter-spacing: 10px;
+color: #222;
+position: absolute;
+padding: 0px;
+width: 90%;
+left: 4px;
+top: 5px;
+z-index: 1;}
+
+.myablogMenu {
+position: absolute;
+margin-left: 5px;
+padding-right: 10px;
+left:0px;
+top:60px;
+width:200px;
+background-color: #EEEEEE;
+border:1px solid #B8B8B8;
+}
+
+.myablogPost {
+color: #777;
+font-size: 12px;
+font-family: Arial, Verdana, Helvetica, sans-serif;
+letter-spacing: 1px;
+line-height: 20px;
+text-align: justify;
+border:1px solid #B8B8B8;
+background-color: #FFF;
+padding: 10px;
+margin-bottom: 10px;
+}
+
+.outside {
+position: absolute;
+top: 60px;
+left: 220px;
+z-index: 2;
+}
+
+.myablogGutter { 
+color: #666;
+font-size: 11px;
+font-family: times new roman, serif;
+letter-spacing: 2px;
+line-height: 20px; 
+text-align: left;
+margin-left:10px;
+margin-top:5px;
+}
+
+h4 { 
+font-size: 16px;
+font-family: arial,verdana,sans-serif;
+color: #444;
+letter-spacing: 1px;
+padding-left:0px;
+padding-top:0px;
+padding-bottom:8px;
+margin:0px;
+z-index: 6;}
+
+h5 { 
+font-size: 12px;
+font-family: arial,verdana,sans-serif;
+letter-spacing: 3px;
+color: #222;
+z-index: 6;
+margin: 0px;}
+
+h6 { 
+font-size: 11px;
+font-family: arial,verdana,sans-serif;
+font-weight:normal;
+letter-spacing: 2px;
+color: #333;
+z-index: 6;
+margin: 0px;}
+
+i { color: #222; 
+font-weight: bold;}
+
+.divider{
+text-align: left;
+padding-top:5px;
+padding-bottom:5px;
+font-size: 10px;
+font-family:arial,verdana,sans-serif; }
+
+blockquote {
+align: center; 
+line-height: 16px;
+text-align: justify;
+padding: 15px;
+color: #AAA;
+font-family: arial,verdana,sans-serif;
+font-size: 10px;
+letter-spacing: 1px; 
+background-color: #EEEEEE;
+}
+
+li{
+list-style-type:square; 
+color: #1E1F23;
+padding: 0px;
+margin: 0px 0px 0px 15px;}
+
+ul{ 
+margin: 0px;
+padding: 0px;
+font-size: 11px;
+font-weight: normal;
+font-family: Arial, Helvetica, sans-serif;
+letter-spacing: 1px;
+margin-bottom: 20px;
+margin-top:10px;
+}
+
+input,textarea,select { 
+background-color: #FFF;
+border: 1px solid #B8B8B8;
+color: #B8B8B8;
+padding:5px; }
+
+a:link { 
+color:#777;
+font-family: arial,verdana,sans-serif;
+font-size: 11px;
+letter-spacing: 1px;
+text-decoration: none; }
+
+a:visited { 
+color:#777;
+font-family: arial,verdana,sans-serif;
+font-size: 11px;
+letter-spacing: 1px;
+text-decoration: none; }
+
+a:hover { 
+color:#777;
+font-family: arial,verdana,sans-serif;
+font-size: 11px;
+letter-spacing: 1px;
+text-decoration: underline; }
+
+.post_comment_container
+{
+border-bottom:1px dotted #B8B8B8;
+border-right:1px dotted #B8B8B8;
+border-left:1px dotted #B8B8B8;
+}
+
+.post_comment
+{
+border-top:1px dotted #B8B8B8;
+text-align:left;
+padding:10px;
+}
+
+.post_comment_add
+{
+border-top:1px dotted #B8B8B8;
+padding-top:10px;
+text-align:left;
+padding:10px;
+}
+</style>
+<script language="javascript" type="text/javascript">
+<!--
+function ToggleComments(id)
+{
+	var dv = document.getElementById('cmts_' + id);
+	if (dv && dv.style.display == 'block')
+		dv.style.display = 'none';
+	else
+		dv.style.display = 'block';
+}
+-->
+</script>
+</head>
+
+<body>
+
+<div class="myablogTitle">Blog Title</div>
+
+<div class="outside">
+	<div class="myablogPost"> 	
+		<i>October 13, 2005</i>
+		<h4>Welcome to my blog!</h4>
+		Lorem ipsum dolor sit amet, <a href="##">test link name here</a> adipiscing elit. Pellentesque elementum consectetuer ligula. Integer mauris. Duis nec nisi. Curabitur euismod tincidunt tellus. Suspendisse diam lectus, sagittis sit amet, pulvinar eu, commodo in, quam. Proin placerat, massa non vestibulum malesuada, nulla ipsum tempus nulla, ac convallis orci erat eu erat. Praesent vel dui eget sapien dapibus tristique. Donec turpis sem, mollis in, pulvinar ac, pretium quis, urna. Fusce ut ligula. Sed pellentesque quam. Ut lobortis sagittis odio. Pellentesque eleifend. Quisque augue. Ut fermentum euismod tellus. Quisque nisi ligula, fermentum in, sollicitudin in, auctor viverra, sem.
+		<blockquote> Erat sit vero quis aliquip ex, te ullamcorper ad qui ea vel luptatum accumsan vel nulla, at ex tincidunt consequat in dignissim. Delenit eros ex ut, qui iusto ad dolore iusto nonummy, euismod, vulputate dolor praesent nulla facilisi vel augue dignissim consequat. </blockquote>	
+		Quisque porta malesuada est. Fusce suscipit semper neque. Aenean dapibus lorem vitae urna. Nulla vitae nulla. Maecenas sollicitudin augue ac odio. Aenean viverra venenatis purus. Etiam nisl felis, consectetuer non, faucibus a, ultricies in, turpis. Donec sodales. Vivamus gravida erat ac orci. Nulla sapien nibh, semper nec, dictum nec, porta sed, neque. Sed ipsum. Nam vel diam eget ligula iaculis congue. Maecenas justo augue, pretium sed, pretium eget, rhoncus in, tellus. Vestibulum pretium felis vel urna. Proin dapibus enim non ante. Maecenas at elit. Curabitur dolor odio, congue id, laoreet in, laoreet quis, turpis. Nam tempor. Morbi nibh nibh, mattis a, rutrum et, bibendum eu, nulla. Vestibulum lacus.
+		
+			<div class="divider">
+				<a href="##">08:21:56 PM</a> :: <a href="##">Kris Carter</a> :: <a href="javascript:ToggleComments('1');">Comments</a>
+
+				<div class='post_comment_container' id='cmts_1' style='display:none;'>
+				
+					<div class='post_comment'>
+						<strong>Stangebrew22</strong>
+						<br />LAME!
+					</div>
+					
+					<div class='post_comment_add'>
+						<strong>Add Comment</strong><br />
+						<form name='form_cmt1' method='post' action='read.awp?mornth=10&year=2005&blg=creed'>
+						<input type='hidden' name='aid' value='1' />
+						Your Name:<br />
+						<input type='text' name='username' value='' /><br />
+						Comments:<br />
+						<textarea rows='5' style='width:90%' name='body'></textarea><br /><br />
+						<input type='submit' name='add_comment' value='Post Comment' /> 
+						<input type='button' onclick="ToggleComments('1');" value='Cancel' />
+						</form > 
+					</div>
+				</div>
+				
+			</div>
+	</div>
+
+
+
+	<div class="myablogPost"> 
+
+		<h4>Welcome to my blog!</h4>
+		<i>October 13, 2005</i>
+		<br />
+		
+		<br />
+		Lorem ipsum dolor sit amet, <a href="##">test link name here</a> adipiscing elit. Pellentesque elementum consectetuer ligula. Integer mauris. Duis nec nisi. Curabitur euismod tincidunt tellus. Suspendisse diam lectus, sagittis sit amet, pulvinar eu, commodo in, quam. Proin placerat, massa non vestibulum malesuada, nulla ipsum tempus nulla, ac convallis orci erat eu erat. Praesent vel dui eget sapien dapibus tristique. Donec turpis sem, mollis in, pulvinar ac, pretium quis, urna. Fusce ut ligula. Sed pellentesque quam. Ut lobortis sagittis odio. Pellentesque eleifend. Quisque augue. Ut fermentum euismod tellus. Quisque nisi ligula, fermentum in, sollicitudin in, auctor viverra, sem.
+		<blockquote> Erat sit vero quis aliquip ex, te ullamcorper ad qui ea vel luptatum accumsan vel nulla, at ex tincidunt consequat in dignissim. Delenit eros ex ut, qui iusto ad dolore iusto nonummy, euismod, vulputate dolor praesent nulla facilisi vel augue dignissim consequat. </blockquote>	
+		Quisque porta malesuada est. Fusce suscipit semper neque. Aenean dapibus lorem vitae urna. Nulla vitae nulla. Maecenas sollicitudin augue ac odio. Aenean viverra venenatis purus. Etiam nisl felis, consectetuer non, faucibus a, ultricies in, turpis. Donec sodales. Vivamus gravida erat ac orci. Nulla sapien nibh, semper nec, dictum nec, porta sed, neque. Sed ipsum. Nam vel diam eget ligula iaculis congue. Maecenas justo augue, pretium sed, pretium eget, rhoncus in, tellus. Vestibulum pretium felis vel urna. Proin dapibus enim non ante. Maecenas at elit. Curabitur dolor odio, congue id, laoreet in, laoreet quis, turpis. Nam tempor. Morbi nibh nibh, mattis a, rutrum et, bibendum eu, nulla. Vestibulum lacus.
+
+			<div class="divider">
+
+				<a href="##">08:21:56 PM</a> :: <a href="##">Kris Carter</a> :: <a href="javascript:ToggleComments('7');">Comments</a>
+
+				<div class='post_comment_container' id='cmts_7' style='display:none;'>
+				
+					<div class='post_comment'>
+						<strong>Stangebrew22</strong>
+						<br />LAME!
+					</div>
+					
+					<div class='post_comment_add'>
+						<strong>Add Comment</strong><br />
+						<form name='form_cmt7' method='post' action='read.awp?mornth=10&year=2005&blg=creed'>
+						<input type='hidden' name='aid' value='7' />
+						Your Name:<br />
+						<input type='text' name='username' value='' /><br />
+						Comments:<br />
+						<textarea rows='5' style='width:90%' name='body'></textarea><br /><br />
+						<input type='submit' name='add_comment' value='Post Comment' /> 
+						<input type='button' onclick="ToggleComments('7');" value='Cancel' />
+						</form >  
+					</div>
+				</div>
+				
+			</div>
+	</div>
+	<br />
+
+</div>
+
+<div class="myablogMenu"> 
+	<div class="myablogGutter"> 
+		<h5>About the author</h5>
+		<h6>Name: Kris Carter</h6>
+		<ul>
+		<li><a href="##">View Profile</a></li>
+		<li>ANT: kris.carter</li>
+		</ul>
+		
+		<h5>Archive</h5>
+		<ul>
+		<li><a href="##">Archive 1</a> </li>
+		<li><a href="##">Archive 2</a> </li>
+		</ul>
+	</div>
+</div>
+
+</body>
+</html>

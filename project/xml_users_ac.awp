@@ -1,0 +1,46 @@
+<?php
+	// ANT
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("lib/CDatabase.awp");
+	require_once("users/user_functions.php");
+	require_once("email/email_functions.awp");
+	// ALIB
+	require_once("lib/aereus.lib.php/CCache.php");
+	//require_once("lib/aereus.lib.php/CSessions.php");
+
+	header("Content-type: text/xml");			// Returns XML document
+	
+	$dbh = $ANT->dbh;
+									  
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$ACCOUNT = $_SESSION["ACCOUNT"];
+
+	echo '<?xml version="1.0" encoding="iso-8859-1"?>';
+	echo "\n<tnode>\n";
+	$name = base64_decode($_GET['data']);
+	//$name = $_GET['data'];
+	
+	//echo "<item>".$_GET['data']."</item>\n";
+	// Look for delimiter
+	$testpos = strrpos($name, ',');
+	if ($testpos)
+		$name = str_replace(' ', '', substr($name, $testpos + 1));
+	if ($name != "")
+	{
+		$query = "select email_address from email_users where user_id is not null and email_address like lower('$name%')";
+			
+		$result = $dbh->Query($query);
+		$num = $dbh->GetNumberRows($result);
+		//echo "<item>$query: $num</item>\n";
+		for ($i=0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			
+			echo "<item>". base64_encode($row['email_address'])."</item>\n";
+		}
+		$dbh->FreeResults($result);
+	}
+	echo "\n</tnode>";
+?>

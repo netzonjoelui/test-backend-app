@@ -1,0 +1,446 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/content_table.awp");
+	require_once("../lib/Button.awp");
+	require_once("../users/user_functions.php");
+	require_once("datacenter_functions.awp");
+
+	$dbh = new CDatabase();
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$TABLE = $_GET['table'];
+	$DBID = $_GET['dbid'];
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+	<title>Table Properties</title>
+	<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme($dbh, $USERID, 'css'); ?>">
+	<?php
+		include("../lib/aereus.lib.js/js_lib.php");
+	?>
+	<script language='javascript' type='text/javascript'>
+	var g_table = "<?php print($TABLE); ?>";
+	var g_dbid = <?php print($DBID); ?>;
+	var g_theme = "<?php echo UserGetTheme($dbh, $USERID, 'name'); ?>";
+	// Update database
+	var dbh = new CAdcClient("/datacenter/xml_query.awp", g_dbid);
+	var g_newrowData = null;
+
+	// Add table
+	var g_datasheet = null;
+	var g_numrows = 1;
+	var g_cols = null;
+	var g_coldefs = null;
+	var g_pkey = null;
+	
+	function main()
+	{
+		var tb = new CToolbar();
+		var btn = new CButton("Save & Close", "window.close();", null, "b2");
+		tb.AddItem(btn.getButton(), "left");
+		var btn = new CButton("Refresh", "clearTable(document.getElementById('bdy'));");
+		tb.AddItem(btn.getButton(), "left");
+		tb.print(document.getElementById('toolbar'));
+
+		var con = document.getElementById("bdy");
+		getCols(con);
+	}
+
+
+	function getCols(con)
+	{
+		var ajax = new CAjax();
+		ajax.onload = function(root)
+		{
+			g_coldefs = new Array();
+
+			var num = root.getNumChildren();
+			for (i = 0; i < num; i++)
+			{
+				var constraint = "";
+				var primary = "";
+				var name = "";
+				var type = "";
+				var notes = "";
+
+				var child = root.getChildNode(i);
+				if (child.m_name == "column")
+				{
+					var num_vars = child.getNumChildren();
+					for (j = 0; j < num_vars; j++)
+					{
+						var dbattr = child.getChildNode(j);
+						switch (dbattr.m_name)
+						{
+						case "name":
+							name = (dbattr.m_text) ? unescape(dbattr.m_text) : "";
+							break;
+						case "type":
+							type = (dbattr.m_text) ? unescape(dbattr.m_text) : "";
+							break;
+						case "notes":
+							notes = (dbattr.m_text) ? unescape(dbattr.m_text) : "";
+							break;
+						case "constraint":
+							constraint = (dbattr.m_text) ? unescape(dbattr.m_text) : "";
+							break;
+						case "primary":
+							primary = (dbattr.m_text) ? unescape(dbattr.m_text) : "";
+							break;
+						}
+					}
+				}
+
+				var ind = g_coldefs.length;
+				g_coldefs[ind] = new Object();
+				g_coldefs[ind].name = name;
+				g_coldefs[ind].notes = notes;
+				g_coldefs[ind].data_type = type;
+				g_coldefs[ind].constraint = constraint;
+				g_coldefs[ind].primary = primary;
+
+				if (primary == 't')
+					g_pkey = name;
+			}
+
+			loadTable(con);
+		};
+
+		var url = "/datacenter/xml_getcols.awp?table="+g_table+"&dbid="+g_dbid;
+		ajax.exec(url);
+
+	}
+	
+	function loadTable(con)
+	{	
+		g_numrows = 1;
+		g_datasheet = null;
+
+		g_datasheet = new CDatasheet("100%");
+		
+		g_datasheet.clicksToEdit = "single";	// Single click to edit
+		
+		g_datasheet.onCellChange = function(row_id, col_id)
+		{
+			if (row_id == "new")
+			{
+				// Get value
+				if (g_pkey)
+				{
+					var val = g_datasheet.getValue(row_id, col_id);
+					g_newrowData.m_cols[col_id] = val;
+				}
+			}
+			else
+			{
+				if (g_pkey)
+				{
+					// Get value
+					var val = g_datasheet.getValue(row_id, col_id);
+					// Get Col name
+					var colname = g_cols[col_id].name;
+
+					if (val)
+						dbh.query("UPDATE "+g_table+" set "+colname+"='"+dbh.escape(val)+"' where "+g_pkey+"='"+row_id+"'");
+					else
+						dbh.query("UPDATE "+g_table+" set "+colname+"=NULL where "+g_pkey+"='"+row_id+"'");
+				}
+			}
+		}
+
+		dbh.onload = function()
+		{
+			g_cols = new Array();
+
+			var num = this.getNumCols();
+			for (var i = 0; i < num; i++)
+			{
+				var col = this.getCol(i);
+				var colname = col.name;
+
+				var ind = g_cols.length;
+				g_cols[ind] = new Object();
+				g_cols[ind].name = col.name;
+
+				// get column definition
+				for (var j = 0; j < g_coldefs.length; j++)
+				{
+					if (g_coldefs[j].name == col.name)
+					{
+						g_cols[ind].notes = g_coldefs[j].notes;
+						g_cols[ind].data_type = g_coldefs[j].data_type;
+						g_cols[ind].primary = g_coldefs[j].primary;
+					}
+				}
+					
+				if (g_cols[ind].primary)
+					colname += " [PK]";
+				g_datasheet.addHeader(colname);
+			}
+
+			var num = null;
+				
+			if (g_pkey)
+				g_datasheet.addHeader("Delete", "center", "20px");
+
+			num = this.getNumRows();
+			for (var i = 0; i < num; i++)
+			{
+				if (g_pkey)
+					var id = this.getNamedValue(i, g_pkey);
+				else
+					var id = "";
+
+				var rw = g_datasheet.addRow(id, g_numrows++);
+
+				// Loop through cols (skip id, start with 1)
+				for (var j = 0; j < g_cols.length; j++)
+				{
+					var col = g_cols[j];
+					
+					// Subtract 1 for the id col
+					switch (col.data_type)
+					{
+					case 'serial': // Auto Number (readonly)
+						rw.addCell(unescape(this.getValue(i, j)), "left", null, null, true);
+						break;
+					/*
+					case 'integer':
+						if (col.notes == "ANTFS:FOLDER")
+						{
+							var del_dv = ALib.m_document.createElement("div");
+							rw.addCell(del_dv, "center", null, null, true);
+
+							del_dv.innerHTML = "<img border='0' src='/images/themes/" + g_theme + "/icons/managefilesfolder_small.gif' />";
+							alib.dom.styleSet(del_dv, "cursor", "pointer");
+							del_dv.m_fid = this.getValue(i, j);
+							del_dv.onclick = function()
+							{
+								alert("Open Dir: " + this.m_fid);
+							}
+						}
+						else
+						{
+							rw.addCell(unescape(this.getValue(i, j)), "left", null, null, true);
+						}
+						break;
+					 */
+					case 'boolean': // bool (readonly)
+						var chk = ALib.m_document.createElement("input");
+						chk.type = "checkbox";
+						chk.m_id = id;
+						chk.m_col = col;
+						chk.onchange = function()
+						{
+							var val = (this.checked) ? 't' : 'f';
+							dbh.query("UPDATE "+g_table+" set "+this.m_col.name+"='"+dbh.escape(val)+"' where "+g_pkey+"='"+this.m_id+"'");
+						}
+						
+						chk.checked = (this.getValue(i, j) == 't') ? true :  false;
+
+						rw.addCell(chk, "center", null, null, true);
+						break;
+					default:
+						rw.addCell(unescape(this.getValue(i, j)));
+						break;
+					}
+				}
+
+				// Add delete if there is a primary key
+				if (g_pkey)
+				{
+					var del_dv = ALib.m_document.createElement("div");
+					rw.addCell(del_dv, "center", null, null, true);
+					del_dv.innerHTML = "<img border='0' src='/images/themes/" + g_theme + "/icons/deleteTask.gif' />";
+					alib.dom.styleSet(del_dv, "cursor", "pointer");
+					del_dv.m_id = id;
+					del_dv.m_row = rw;
+					del_dv.onclick = function()
+					{
+						if (confirm("Are you sure you want to delete this record?"))
+						{
+							dbh.query("DELETE from "+g_table+" where "+g_pkey+"='"+this.m_id+"'");
+							this.m_row.deleteRow();
+						}
+					}
+				}
+			}
+
+			// clear onload
+			this.onload = function() {}
+			g_datasheet.print(con);
+			
+			if (g_pkey)
+				AddInsertRow();
+		}
+
+		dbh.query("SELECT * FROM "+g_table+"");
+	}
+	function clearTable(con)
+	{	
+		g_datasheet = null;
+		con.innerHTML = "";
+		loadTable(con);
+	}
+	function AddInsertRow()
+	{
+		// Initialize global newrow object
+		g_newrowData = new Object();
+		g_newrowData.m_cols = new Array();
+
+		// Create insert row form
+		rw = g_datasheet.addRow("new", "*");
+		for (var i = 0; i < g_cols.length; i++)
+		{
+			switch (g_cols[i].data_type)
+			{
+			case 'serial': // Auto Number (readonly)
+				rw.addCell("auto", "left", null, null, true);
+				break;
+			case 'boolean': // bool (readonly)
+				g_newrowData.m_cols[i] = 'f'; // Set default
+				var chk = ALib.m_document.createElement("input");
+				chk.type = "checkbox";
+				chk.m_col = i;
+				chk.onchange = function()
+				{
+					var val = (this.checked) ? 't' : 'f';
+					g_newrowData.m_cols[this.m_col] = val;
+				}
+				rw.addCell(chk, "center", null, null, true);
+				break;
+			default:
+				rw.addCell("");
+				break;
+			}
+		}
+		// Add add row
+		var dv = ALib.m_document.createElement("div");
+		dv.m_rw = rw;
+		alib.dom.styleSet(dv, "cursor", "pointer");
+		dv.innerHTML = "[insert]";
+		dv.onclick = function()
+		{
+			dbh.onload = function()
+			{
+				if (this.getNumRows())
+					var id = this.getValue(0, 0);
+
+				if (g_pkey)
+				{
+					g_datasheet.rows("new").setTitle(g_numrows);
+					g_datasheet.rows("new").cols(0).setTitle("");
+					g_datasheet.rows("new").setName(id);
+					g_numrows++;
+					
+					// Set Delete button		
+					var del_dv = ALib.m_document.createElement("div");
+					g_datasheet.rows(id).cols(g_cols.length).setTitle(del_dv);
+					del_dv.innerHTML = "<img border='0' src='/images/themes/" + g_theme + "/icons/deleteTask.gif' />";
+					alib.dom.styleSet(del_dv, "cursor", "pointer");
+					del_dv.m_id = id;
+					del_dv.m_row = rw;
+					del_dv.onclick = function()
+					{
+						if (confirm("Are you sure you want to delete this record?"))
+						{
+							dbh.query("DELETE from "+g_table+" where id='"+this.m_id+"'");
+							this.m_row.deleteRow();
+						}
+					}
+
+					// clear onload
+					this.onload = function() {}
+					AddInsertRow();
+				}
+				else
+					alert("There was a problem inserting your new row. Please check the data and your connection and try again");
+			}
+
+			var ins_col = "";
+			var ins_val = "";
+			for (var i = 0; i < g_cols.length; i++)
+			{
+				switch (g_cols[i].data_type)
+				{
+				case 'serial': // Auto Number (no need to update)
+					break;
+				case 'integer':
+				case 'int4':
+				case 'int8':
+				case 'float4':
+				case 'double precision':
+				case 'double':
+					if (g_newrowData) // Only populate if not null
+					{
+						ins_col += (ins_col) ? ", " : "";
+						ins_col += g_cols[i].name + "";
+
+						ins_val += (ins_val) ? ", " : "";
+						ins_val += (g_newrowData.m_cols[i]) ? "'"+g_newrowData.m_cols[i]+"'" : 'NULL';
+					}
+					break;
+				case 'date':
+					if (g_newrowData) // Only populate if not null
+					{
+						ins_col += (ins_col) ? ", " : "";
+						ins_col += g_cols[i].name + "";
+
+						ins_val += (ins_val) ? ", " : "";
+						ins_val += (g_newrowData.m_cols[i]) ? "'"+g_newrowData.m_cols[i]+"'" : 'NULL';
+					}
+					break;
+				default:
+					if (g_newrowData)
+					{
+						ins_col += (ins_col) ? ", " : "";
+						ins_col += g_cols[i].name + "";
+
+						ins_val += (ins_val) ? ", " : "";
+						var buf = g_newrowData.m_cols[i];
+						
+						ins_val += (buf) ? "'"+dbh.escape(buf)+"'" : "''";
+					}
+					break;
+				}
+			}
+
+			var query = "insert into "+g_table+"("+ins_col+") values("+ins_val+");";
+			// Get pkey data type
+			for (var i = 0; i < g_cols.length; i++)
+			{
+				if (g_cols[i].primary)
+				{
+					if (g_cols[i].data_type == "serial")
+					{
+						query += "select currval('zudb_"+g_dbid+"."+g_table+"_"+g_pkey+"_seq') as id;";
+					}
+					else
+					{
+						query += "select '"+g_datasheet.getValue('new', i)+"' as id;";
+					}
+				}
+			}
+
+			var dv = ALib.m_document.createElement("div");
+			dbh.query(query);
+			// Clear new row data object
+			g_newrowData = null;
+		}
+		rw.addCell(dv, "center", null, null, true);
+	}
+	</script>
+</head>
+
+<body onload='main()' class='popup'>
+<div id='toolbar' class='popup_toolbar'></div>
+<div id='bdy' class='popup_body'></div>
+</body>
+</html>
+

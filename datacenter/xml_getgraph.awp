@@ -1,0 +1,37 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../users/user_functions.php");
+
+	$dbh = new CDatabase();
+
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$DBID = $_GET['dbid'];
+	$GID = $_GET['gid'];
+
+	header("Content-type: text/xml");			// Returns XML document
+	echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'; 
+
+	echo "<graph>";
+
+	$result = $dbh->Query("select * from dc_database_report_graphs where id='$GID'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		// Get name
+		echo "<id>".rawurlencode($row['id'])."</id>";
+		echo "<name>".rawurlencode(stripslashes($row['name']))."</name>";
+		echo "<query>".rawurlencode(stripslashes($row['query']))."</query>";
+		echo "<caption>".rawurlencode($row['caption'])."</caption>";
+		echo "<subcaption>".rawurlencode($row['subcaption'])."</subcaption>";
+		echo "<xaxisname>".rawurlencode($row['xaxisname'])."</xaxisname>";
+		echo "<yaxisname>".rawurlencode($row['yaxisname'])."</yaxisname>";
+		echo "<number_prefix>".rawurlencode($row['number_prefix'])."</number_prefix>";
+		echo "<decimal_precision>".rawurlencode($row['decimal_precision'])."</decimal_precision>";
+		echo "<graph_name>".rawurlencode($row['graph_name'])."</graph_name>";
+	}
+	echo "</graph>";
+?>

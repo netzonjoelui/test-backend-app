@@ -1,0 +1,100 @@
+<?php
+	if ($_POST['save_changes'] && $_POST['title'])
+	{
+		$dbh->Query("update blogs set title='".$dbh->Escape($_POST['title'])."', 
+						show_author='".(($_POST['show_author']) ? 't' : 'f')."', 
+						show_time='".(($_POST['show_time']) ? 't' : 'f')."',
+						show_comments='".(($_POST['show_comments']) ? 't' : 'f')."',
+						show_profile='".(($_POST['show_profile']) ? 't' : 'f')."',
+						show_one_article='".(($_POST['show_one_article']) ? 't' : 'f')."'
+						where id='$BID'");
+		$status_message = "Changes have been saved!";
+	}
+	
+	$result = $dbh->Query("select name, title, show_author, show_time, show_comments,
+							show_profile, show_one_article from blogs where id='$BID'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		$dbh->FreeResults($result);
+		
+		$title = $row['title'];
+		$name = $row['name'];
+		$show_author = ($row['show_author'] == 'f') ? false : true;
+		$show_time = ($row['show_time'] == 'f') ? false : true;
+		$show_comments = ($row['show_comments'] == 'f') ? false : true;
+		$show_profile = ($row['show_profile'] == 'f') ? false : true;
+		$show_one_article = ($row['show_one_article'] == 't') ? true : false;
+	}
+	
+	echo "<form name='editblog' method='post' action='blog_edit.awp?bid=$BID&tabnav=$TABNAV'>";
+					 
+	WindowFrameToolbarStart("100%");
+	echo ButtonCreate("Save Changes", "SUBMIT:editblog:save_changes", "b2");
+	echo ButtonCreate("Delete Blog", "DeleteBlog();", "b3");
+	echo ButtonCreate("View Blog", "window.open('http://".BlogGetURL(&$dbh, $BID)."')");
+	echo "<div style='float:right;padding-right:3px;font-weight:bold;font-size:14px;' id='div_status'>
+			$status_message
+			<script language='script' type='text/javascript'>
+				window.setTimeout(function ClearStatus() { document.getElementById('div_status').innerHTML=''; }, 10000);
+			</script>
+		  </div>";
+	WindowFrameToolbarEnd();
+	
+	echo "<div style='padding-top:0px;'>";
+	
+	$padding='padding-left:5px; padding-right:5px; padding-top:3px; padding-bottom:3px;';
+	
+	// Create new tool table
+	$tbl = new CToolTable;	
+	
+	$tbl->StartHeaders();
+	$tbl->AddHeader("Options");
+	$tbl->AddHeader("Actions");
+	$tbl->EndHeaders();
+
+	$tbl->StartRow();
+	$tbl->AddCell("Location/URL:", false, 'left', $padding, '100px');
+	$tbl->AddCell("http://".$name.".myablog.com");
+	$tbl->EndRow();
+	
+	$tbl->StartRow();
+	$tbl->AddCell("Blog Title:");
+	$tbl->AddCell("<input type='text' name='title' value=\"$title\">");
+	$tbl->EndRow();
+	
+	$tbl->StartRow();
+	$tbl->AddCell("Display Mini-Profile");
+	$tbl->AddCell("<input type='checkbox' name='show_profile' value=\"1\" ".(($show_profile) ? 'checked' : '')."> 
+					(Show a mini-profile with link to your full profile)");
+	$tbl->EndRow();
+	
+	$tbl->StartRow();
+	$tbl->AddCell("Display Author");
+	$tbl->AddCell("<input type='checkbox' name='show_author' value=\"1\" ".(($show_author) ? 'checked' : '')."> (Display author under each post)");
+	$tbl->EndRow();
+	
+	$tbl->StartRow();
+	$tbl->AddCell("Display Time");
+	$tbl->AddCell("<input type='checkbox' name='show_time' value=\"1\" ".(($show_time) ? 'checked' : '')."> (Display time of each post)");
+	$tbl->EndRow();
+	
+	$tbl->StartRow();
+	$tbl->AddCell("Allow Comments");
+	$tbl->AddCell("<input type='checkbox' name='show_comments' value=\"1\" ".(($show_comments) ? 'checked' : '')."> 
+					(This will allow people to comment on your post)");
+	$tbl->EndRow();
+	
+	$tbl->StartRow();
+	$tbl->AddCell("Show Single Articles");
+	$tbl->AddCell("<input type='checkbox' name='show_one_article' value=\"1\" ".(($show_one_article) ? 'checked' : '')."> 
+					(Show one article at a time, rather than the entire month.)");
+	$tbl->EndRow();
+	
+	$tbl->PrintTable();
+	
+	echo "</div>";
+	
+	echo "</form>";
+	
+?>

@@ -1,0 +1,98 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("datacenter_functions.awp");
+
+	$dbh = new CDatabase();
+
+	$USERNAME = $_SESSION["USER_NAME"];
+
+	$dbid = rawurldecode($_GET['dbid']);
+	$page = rawurldecode($_GET['page']);
+	$referrer = rawurldecode($_GET['referrer']);
+	$logvisit = rawurldecode($_GET['logvisit']); // Visits should only be logged once
+	$visit_type = rawurldecode($_GET['visit_type']); // New or returning
+	$ns = "zudb_".$dbid;
+
+	$year = date("Y");
+	$month = date("m");
+	$day = date("d");
+
+	if ($dbid && $page)
+	{
+		// Update page view count
+		$result = $dbh->Query("select id, count from $ns.page_views where page='".$dbh->Escape($page)."' 
+								and date='$year-$month-$day'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$count = $row["count"];
+			$dbh->Query("update $ns.page_views set 
+						 count='".($count+1)."' 
+						 where id='".$row['id']."'");
+		}
+		else
+		{
+			$dbh->Query("insert into $ns.page_views(date, page, count)
+						 values('now', '".$dbh->Escape($page)."', '1')");
+		}
+		
+		// Log visit
+		if ($logvisit)
+		{
+			// Update page view count
+			$result = $dbh->Query("select id, count from $ns.visits where
+									date='$year-$month-$day' 
+									and type_id='$visit_type'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$count = $row["count"];
+				$dbh->Query("update $ns.visits set 
+							 count='".($count+1)."' 
+							 where id='".$row['id']."'");
+			}
+			else
+			{
+				$dbh->Query("insert into $ns.visits(date, type_id, count)
+							 values('$year-$month-$day', '$visit_type', '1')");
+			}
+		}
+		
+		// Log referrer
+		if ($referrer)
+		{
+			$site = str_replace("http://", '', $referrer);
+			$site = str_replace("https://", '', $site);
+			$variables = $referrer;
+
+			$result = $dbh->Query("select id, count from $ns.referrers
+								  where date='$year-$month-$day
+								  and site='".$dbh->Escape($site)."'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$count = $row["count"];
+				$dbh->Query("update $ns.referrers set 
+							 count='".($count+1)."' 
+							 where id='".$row['id']."'");
+			}
+			else
+			{
+				$dbh->Query("insert into $ns.referrers(date, site, variables, count)
+							 values('now', '".$dbh->Escape($site)."', '".$dbh->Escape($variables)."', '1')");
+			}
+		}
+		$retval = $dbid;
+	}
+
+	$res = "<retval>" . rawurlencode($retval) . "</retval>";
+	$res .= "<cb_function>".$_GET['cb_function']."</cb_function>";
+
+	header("Content-type: text/xml");			// Returns XML document
+	echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+
+	echo "<response>$res</response>";
+?>
+

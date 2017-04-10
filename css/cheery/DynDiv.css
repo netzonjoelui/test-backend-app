@@ -1,0 +1,202 @@
+/**************************************************************************************
+*	Page:		Dynamically Generated Contact Pages edit_contact.awp
+***************************************************************************************/
+
+.ConDivTop
+{
+	border-top-width:1px;
+	border-top-style:solid;
+	border-top-color:#808080;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#808080;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#808080;
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#808080;
+	
+	background-color:#E7E7E7;
+}
+
+.ConDivBottom
+{
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#808080;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#808080;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#808080;
+}
+
+
+/**************************************************************************************
+*	Page:		Dynamically Generated List Pages message_list.awp
+***************************************************************************************/
+.DynDivAct
+{
+	cursor:pointer;
+	background-color:#0194BE;
+	color:#FFFFFF;
+}
+
+.DynDivAct > td
+{
+	border-bottom-color:#808080; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+}
+
+.DynDivAct td
+{
+	color:#FFFFFF;
+}
+
+.DynDivInact
+{
+	color:#000000;
+	cursor:pointer;
+	background-color:#FFFFFF;
+}
+
+.DynDivInact > td
+{
+	border-bottom-color:#808080; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+}
+
+.DynDivAlert
+{
+	cursor:pointer;
+	background-color:#E2D397;
+	color: #481800;
+}
+
+.DynDivAlert > td
+{
+	border-bottom-color:#808080; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+}
+
+.DynDivAlert td
+{
+	color:#481800;
+}
+
+.DynDivBold
+{
+	color:#666666;
+	font-weight:bold;
+}
+
+.DynDivAct span
+{
+	color:#FFFFFF;
+}
+
+.DynDivTopLeft
+{
+	color:#003366;
+	font-size:11px;
+}
+
+.DynDivTopRight
+{
+	color:#336699;
+	font-size:11px;
+}
+
+.DynDivMain
+{
+	border-top-color:#808080; 
+	border-top-style:solid; 
+	border-top-width:1px;
+	
+	border-left-color:#808080; 
+	border-left-style:solid; 
+	border-left-width:1px;
+
+	border-right-color:#808080; 
+	border-right-style:solid; 
+	border-right-width:1px;
+}
+
+.orderdiv
+{
+	border-bottom-color:#808080; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	
+	border-left-color:#808080; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#808080; 
+	border-right-style:solid; 
+	border-right-width:1px;
+	
+	width:auto;
+	padding:4px;
+	background-color:#D4D0C8;
+	background-image:url(/images/themes/ant_os/antOsHeaderBGThree.png);
+	background-position:top left;
+	background-repeat:repeat-x;
+}
+
+.MessageListSearch
+{
+	border-bottom-color:#808080; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	
+	border-left-color:#808080; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#808080; 
+	border-right-style:solid; 
+	border-right-width:1px;
+
+	color:#000000;	
+	background-color:#D4D0C8;
+}
+
+.DynDivPaginate
+{
+	border-left-color:#808080; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#808080; 
+	border-right-style:solid; 
+	border-right-width:1px;
+}
+
+.DynDivPage
+{
+	border-top-color:#808080; 
+	border-top-style:solid; 
+	border-top-width:1px;
+	
+	border-bottom-color:#808080; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	
+	border-left-color:#808080; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#808080; 
+	border-right-style:solid; 
+	border-right-width:1px;
+	
+	width:auto;
+	
+	background-color:#D4D0C8;
+}

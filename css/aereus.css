@@ -1,0 +1,189 @@
+<?php header("Content-type: text/css"); ?>
+/* CSS Document */
+
+body {
+font-family : Arial, Helvetica, sans-serif; 
+font-size : 12px; 
+color : #666666; 
+margin-left : 0; 
+margin-top : 0; 
+margin-bottom : 0; 
+margin-right : 0; 
+} 
+.homePage {
+background-color : #ffffff;
+background-image : url('../images/left_nav_bg.gif');
+background-position:0 0;
+background-repeat:repeat-y;
+}
+a:link {
+text-decoration : underline; 
+color : #000066; 
+} 
+a:hover {
+text-decoration : none; 
+color : #ff0000; 
+} 
+a.linkHeader {
+text-decoration: none;
+font-family : Arial, Helvetica, sans-serif; 
+font-weight : bold; 
+font-size : 11px; 
+color : #010B54; 
+}
+a.linkHeader:hover {
+text-decoration: underline;
+font-family : Arial, Helvetica, sans-serif; 
+font-weight : bold; 
+font-size : 11px; 
+color : #ffffff; 
+}
+a.linkOne {
+text-decoration : none; 
+color : #242424; 
+font-family : Arial, Helvetica, sans-serif; 
+font-size : 11px; 
+} 
+a.linkOne:hover {
+text-decoration : underline; 
+color : #434343; 
+} 
+a.linkTwo {
+text-decoration : none; 
+color : #666666; 
+font-family : Arial, Helvetica, sans-serif; 
+font-size : 10px; 
+} 
+a.linkTwo:hover {
+text-decoration : underline; 
+color : #666666; 
+} 
+a.linkThree {
+text-decoration : none; 
+color : #333333; 
+font-family : Arial, Helvetica, sans-serif; 
+font-size : 10px; 
+background : #f7f7f7; 
+border : 1px solid #f7f7f7; 
+padding : 2px; 
+} 
+a.linkThree:hover {
+color : #000000; 
+background : #eeeeee; 
+border : 1px solid #b1b1b1; 
+padding : 2px; 
+} 
+table {
+font-family : Arial, Helvetica, sans-serif; 
+font-size : 11px; 
+color : #666666; 
+} 
+.navBack {
+background-color : #F7F7F7;
+} 
+.earthMap {
+background-image : url('../images/earth2.gif'); 
+background-position : 0 0; 
+background-repeat : no-repeat; 
+}
+.exampleText {
+font-family : Arial, Helvetica, sans-serif; 
+font-size : 11px; 
+color : #666666; 
+} 
+.servicesHeader {
+color : #990000; 
+font-size : 16px; 
+font-weight : bold;
+} 
+.servicesInfo {
+color : #333333; 
+font-size : 12px; 
+line-height : 18px; 
+padding : 5px;
+} 
+.headerOne {
+font-family : Arial, Helvetica, sans-serif; 
+font-weight : bold; 
+color : #333333; 
+} 
+.headerTwo {
+font-family : Arial, Helvetica, sans-serif; 
+font-weight : bold; 
+font-size : 14px; 
+color : #660000; 
+} 
+.ant_services_header {
+background-color: #C8D7E3;
+background-image : url('../images/ant_services_header.gif'); 
+background-position : 0 0; 
+background-repeat : no-repeat;
+padding:0 0 0 0; 
+} 
+.nav_header {
+background-image : url('../images/nav_header.gif'); 
+background-position : 0 0; 
+background-repeat : no-repeat; 
+} 
+.texta {
+font-size : 10px; 
+background-color : #f7f7f7; 
+border : 1px solid #b1b1b1; 
+width : 70px; 
+} 
+.logonTxt {
+font-size : 10px; 
+color : #666666; 
+} 
+.loginButton {
+font-size : 10px; 
+background-color : #f7f7f7; 
+border : 1px solid #b1b1b1; 
+width : 25px; 
+height : 16px; 
+} 
+
+/* ms related styles */
+
+.msGradientMain { 
+filter:progid:DXImageTransform.Microsoft.Gradient(endColorstr='#FFFFFF', startColorstr='#FFFFCC', gradientType='0');
+}
+.msGradientSub { 
+filter:progid:DXImageTransform.Microsoft.Gradient(endColorstr='#FFFFCC', startColorstr='#F7F7F7', gradientType='0'); 
+}
+
+/* global id tags */
+
+#leftcontent {
+float:left;
+width:67%;
+margin-right:15px;
+padding:5px;
+}
+
+#rightcontentBox {
+margin-top:20px;
+border-width:1px; 
+border-style:solid; 
+border-color:#B1B1B1; 
+width:150px; padding:4px;
+}
+
+
+h1 {
+font-size:14px;
+padding-top:10px;
+}
+
+#rightcontent p {
+font-size:10px;
+margin-left:0px;
+}
+
+
+
+
+
+
+
+

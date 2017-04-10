@@ -1,0 +1,278 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/content_table.awp");
+	require_once("../lib/Button.awp");
+	require_once("../users/user_functions.php");
+	require_once("datacenter_functions.awp");
+
+	$dbh = new CDatabase();
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$TABLE = $_GET['table'];
+	$DBID = $_GET['dbid'];
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+	<title>Table Properties</title>
+	<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme($dbh, $USERID, 'css'); ?>">
+	<?php
+		include("../lib/aereus.lib.js/js_lib.php");
+	?>
+	<script language='javascript' type='text/javascript'>
+	<?php
+		echo "var coltypes = [";
+		$cols = "";
+		for ($i = 0; $i < count($dc_coltypes); $i++)
+		{
+			if ($i) echo ",";
+
+			echo "[".$dc_coltypes[$i][0].",\"".$dc_coltypes[$i][1]."\", \"".$dc_coltypes[$i][2]."\"]";
+		}
+		echo "];\n";
+	?>
+		
+	var frmObj = new Object();
+	var g_table = "<?php print($TABLE); ?>";
+	var g_dbid = <?php print($DBID); ?>;
+	var g_theme = "<?php echo UserGetTheme($dbh, $USERID, 'name'); ?>";
+
+	// Add table
+	var g_tbl = new CToolTable("100%");
+	
+	function main()
+	{
+		var con = document.getElementById("bdy");
+
+		var tb = new CToolbar();
+		var btn = new CButton("Save & Close", "window.close();", null, "b2");
+		tb.AddItem(btn.getButton(), "left");
+		tb.print(document.getElementById('toolbar'));
+
+		// Create add table frame
+		var frm1 = new CWindowFrame("Add New Column", null, "3px");
+		var frmcon = frm1.getCon();
+		buildNewColForm(frmcon);
+		frm1.print(con);
+
+		// Create cols table
+		var frm2 = new CWindowFrame("Columns");
+		var frmcon2 = frm2.getCon();
+		loadColumns(frmcon2);
+		frm2.print(con);
+	}
+
+	function buildNewColForm(con)
+	{
+		var tbl = ALib.m_document.createElement("table");
+		con.appendChild(tbl);
+		var tbl_bdy = ALib.m_document.createElement("tbody");
+		tbl.appendChild(tbl_bdy);
+		var row = null;
+		var td = null;
+
+		// Add column name
+		row = ALib.m_document.createElement("tr");
+		tbl_bdy.appendChild(row);
+		td = ALib.m_document.createElement("td");
+		row.appendChild(td);
+		td.innerHTML = "Column Name";
+		td = ALib.m_document.createElement("td");
+		row.appendChild(td);
+		frmObj.m_colname = ALib.m_document.createElement("input");
+		td.appendChild(frmObj.m_colname);
+		// Add col type
+		td = ALib.m_document.createElement("td");
+		row.appendChild(td);
+		td.innerHTML = "Type";
+		td = ALib.m_document.createElement("td");
+		row.appendChild(td);
+		frmObj.m_coltype = ALib.m_document.createElement("select");
+		td.appendChild(frmObj.m_coltype);
+		var opt = null;
+		for (var i = 0; i < coltypes.length; i++)
+		{
+			frmObj.m_coltype[frmObj.m_coltype.length] = new Option(coltypes[i][1], coltypes[i][2]);
+		}
+
+		// Add description
+		row = ALib.m_document.createElement("tr");
+		tbl_bdy.appendChild(row);
+		td = ALib.m_document.createElement("td");
+		row.appendChild(td);
+		td.innerHTML = "Description";
+		td = ALib.m_document.createElement("td");
+		row.appendChild(td);
+		td.colspan = "3";
+		td.setAttribute("colspan", "3");
+		frmObj.m_colnotes = ALib.m_document.createElement("input");
+		alib.dom.styleSet(frmObj.m_colnotes, "width", "100%");
+		td.appendChild(frmObj.m_colnotes);
+
+		// Add Constraint
+		row = ALib.m_document.createElement("tr");
+		tbl_bdy.appendChild(row);
+		td = ALib.m_document.createElement("td");
+		row.appendChild(td);
+		td.innerHTML = "Constraint";
+		td = ALib.m_document.createElement("td");
+		row.appendChild(td);
+		frmObj.m_colConstraint = ALib.m_document.createElement("select");
+		td.appendChild(frmObj.m_colConstraint);
+		frmObj.m_colConstraint[0] = new Option("None", "");
+		var constraints = [["Primary Key", "pkey"]];
+		for (var i = 0; i < constraints.length; i++)
+		{
+			frmObj.m_colConstraint[frmObj.m_colConstraint.length] = new Option(constraints[i][0], constraints[i][1]);
+		}
+
+		// Add button
+		row = ALib.m_document.createElement("tr");
+		tbl_bdy.appendChild(row);
+		td = ALib.m_document.createElement("td");
+		row.appendChild(td);
+		td.innerHTML = "&nbsp;";
+		td = ALib.m_document.createElement("td");
+		row.appendChild(td);
+		var btn = new CButton("Add Column", createCol);
+		td.appendChild(btn.getButton());
+	}
+
+	function createCol()
+	{
+		var name = frmObj.m_colname.value;
+		var notes = frmObj.m_colnotes.value;
+		var type = frmObj.m_coltype.value;
+		var constraint = (frmObj.m_colConstraint) ? frmObj.m_colConstraint.value : "";
+		if (name && type)
+		{
+			var cb_fun = function(res)
+			{
+				addCol(name, type, notes);
+			};
+			var args = [["tname", g_table], ["type", frmObj.m_coltype.value], 
+						["dbid", g_dbid], ["cname", name], ["notes", frmObj.m_colnotes.value],
+						["constraint", constraint]];
+			var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "create_column", args, cb_fun);
+		}
+	}
+
+	function addCol(name, type, notes)
+	{
+		if (name && type)
+		{
+			var rw = g_tbl.addRow();
+			// Add name
+			rw.addCell(name);
+			// Add type
+			rw.addCell(type);
+			// Add desc
+			rw.addCell(notes);
+			// Add delete
+			var del_dv = ALib.m_document.createElement("div");
+			rw.addCell(del_dv, true, "center");
+			del_dv.innerHTML = "<img border='0' src='/images/themes/" + g_theme + "/icons/deleteTask.gif' />";
+			alib.dom.styleSet(del_dv, "cursor", "pointer");
+			del_dv.m_rw = rw;
+			del_dv.m_name = name;
+			del_dv.onclick = function()
+			{
+				if (confirm("Are you sure you want to delete "+this.m_name+"?"))
+				{
+					deleteCol(this.m_name, this.m_rw);
+				}
+			}
+
+			// Clear form vars
+			frmObj.m_colname.value = "";
+			frmObj.m_colnotes.value = "";
+		}
+	}
+
+	function deleteCol(cname, row)
+	{
+		if (cname && row)
+		{
+			var cb_fun = function(res)
+			{
+				row.deleteRow();
+			};
+
+			var args = [["dbid",g_dbid], ["tname",g_table], ["cname", cname]];
+			var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "delete_column", args, cb_fun);
+		}
+	}
+
+	function loadColumns(con)
+	{
+		g_tbl.print(con);
+		// Add headers
+		g_tbl.addHeader("Column Name");
+		g_tbl.addHeader("Column Type");
+		g_tbl.addHeader("Description");
+		g_tbl.addHeader("Delete", "center", "50px");
+
+		var ajax = new CAjax();
+		ajax.onload = function(root)
+		{
+			var num = root.getNumChildren();
+			for (i = 0; i < num; i++)
+			{
+				var id = "";
+				var name = "";
+				var type = "";
+				var notes = "";
+
+				var child = root.getChildNode(i);
+				if (child.m_name == "column")
+				{
+					var num_vars = child.getNumChildren();
+					for (j = 0; j < num_vars; j++)
+					{
+						var dbattr = child.getChildNode(j);
+						switch (dbattr.m_name)
+						{
+						case "name":
+							name = (dbattr.m_text) ? unescape(dbattr.m_text) : "";
+							break;
+						case "type":
+							type = (dbattr.m_text) ? unescape(dbattr.m_text) : "";
+							break;
+						case "notes":
+							notes = (dbattr.m_text) ? unescape(dbattr.m_text) : "";
+							break;
+						}
+					}
+				}
+
+				addCol(name, type, notes);
+			}
+		};
+
+		var url = "/datacenter/xml_getcols.awp?table="+g_table+"&dbid="+g_dbid;
+		ajax.exec(url);
+	}
+
+	function getColNameFromId(colarr, id)
+	{
+		for (var i = 0; i < colarr.length; i++)
+		{
+			if (colarr[i][0] == id)
+				return colarr[i][1];
+		}
+
+		return "";
+	}
+	</script>
+</head>
+
+<body onload='main()' class='popup'>
+<div id='toolbar' class='popup_toolbar'></div>
+<div id='bdy' class='popup_body'></div>
+</body>
+</html>

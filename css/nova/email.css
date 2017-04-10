@@ -1,0 +1,352 @@
+a.EmailThreadTitleBoxLinks
+{
+	text-decoration:none;
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	font-weight:bold;
+	color:#000000;
+}
+
+a.EmailThreadTitleBoxLinks:hover
+{
+	text-decoration:none;
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	font-weight:bold;
+	color:#CC0000;
+}
+
+a.EmailThreadTitleBoxLinks:visited
+{
+	text-decoration:none;
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	font-weight:bold;
+	color:#000000;
+}
+
+/**************************************************************************************
+*	Pages:		For Email Specific Classes
+***************************************************************************************/
+
+.FromToData
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	color:#000099;
+}
+
+.EmailSingleMessageBody
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	color:#000000;
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#FFFFFF;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#FFFFFF;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#FFFFFF;
+	background-color:#FFFFFF;
+	width:auto;
+	padding:3px;
+}
+
+.EmailSingleMessageBody a
+{
+	color:#000066;
+}
+
+.EmailSingleMessageBody table
+{
+	color:#000066;
+}
+
+.EmailMainBodyText
+{
+	padding:5px;
+	color: black;
+}
+
+.EmailMainBodyText a
+{
+	color:#000066;
+}
+
+.EmailMainBodyText table 
+{
+	color:#000000;
+}
+
+.EmailCollapsedMessage
+{
+	border-top-width:1px;
+	border-top-style:solid;
+	border-top-color:#fff;
+	/*
+	background-color:#FFFFFF;
+	border-top-width:1px;
+	border-top-style:solid;
+	border-top-color:#666;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#666;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#666;
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#ccc;
+	*/
+	cursor:pointer;
+	padding: 5px;
+	margin-left: 3px;
+	margin-right: 3px;
+}
+
+.EmaiThreadMessageBody
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	line-height:20px;
+	color:#000000;
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#666;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#666;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#666;
+	background-color:#FFFFFF;
+	width:auto;
+	margin-bottom: 5px;
+	padding: 3px 3px 0px 3px;
+
+	-moz-border-radius-bottomright: 5px;
+	-moz-border-radius-bottomleft: 5px;
+	-webkit-border-bottom-right-radius: 5px;
+	-webkit-border-bottom-left-radius: 5px;
+}
+/* form contianer between the header and the body */
+.EmaiThreadMessageForm
+{
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#666;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#666;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#666;
+
+	margin: 0;
+	padding: 3px;
+	background-color: white;
+	color: black;
+}
+.EmaiThreadMessageForm a
+{
+	color: black;
+}
+.EmailThreadMessageHeader
+{
+	border-top-width:1px;
+	border-top-style:solid;
+	border-top-color:#666;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#666;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#666;
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#666;
+	width:auto;
+	padding-left:3px;
+	padding-top:3px;
+	margin-top: 10px;
+
+	-moz-border-radius-topright: 5px;
+	-moz-border-radius-topleft: 5px;
+	-webkit-border-top-right-radius: 5px;
+	-webkit-border-top-left-radius: 5px;
+
+	font-weight: bold;
+}
+.EmailThreadTitleBox
+{
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:12px;
+	font-weight:bold;
+	color:#000000;
+	padding-left:5px;
+	padding-top:5px;
+	padding-bottom:5px;
+	border:1px solid #666;
+	width:auto;
+	margin-top:3px;
+	background-color:#FFF;
+}
+.EmailThreadSenderExp /* Sender */
+{
+	color:#990000;
+	background-color:#D0E8FF;
+}
+.EmailThreadSenderCol
+{
+	/*color:#E9DFCC;*/
+	color:#fff;
+	border-left: 1px solid #E9DFCC;
+	border-right: 1px solid #E9DFCC;
+}
+.EmailThreadRand1Exp /* Rand */
+{
+	color:#000000;
+	/*background-color:#E8FFD0;*/
+	background-color:#E9DFCC;
+}
+.EmailThreadRand1Col
+{
+	color:#fff;
+	border-left: 1px solid #E9DFCC;
+	border-right: 1px solid #E9DFCC;
+}
+.EmailThreadRand2Exp /* Rand */
+{
+	color:#fff;
+	/*background-color:#FFE773;*/
+	background-color:#F3A36B;
+}
+.EmailThreadRand2Col
+{
+	color:#fff;
+	border-left: 1px solid #F3A36B;
+	border-right: 1px solid #F3A36B;
+}
+.EmailThreadRand3Exp /* Rand */
+{
+	color:#fff;
+	background-color:#AB432E;
+}
+.EmailThreadRand3Col
+{
+	color:#fff;
+	border-left: 1px solid #AB432E;
+	border-right: 1px solid #AB432E;
+}
+.EmailThreadRand4Exp /* Rand */
+{
+	color:#fff;
+	background-color:#554865;
+}
+.EmailThreadRand4Col
+{
+	color:#fff;
+	border-left: 1px solid #554865;
+	border-right: 1px solid #554865;
+}
+.EmailThreadRand5Exp /* Rand */
+{
+	color:#fff;
+	background-color:#352630;
+}
+.EmailThreadRand5Col
+{
+	color:#fff;
+	border-left: 1px solid #352630;
+	border-right: 1px solid #352630;
+}
+.EmailThreadRand6Exp /* Rand */
+{
+	color:#09818A;
+	background-color:#EDDCC0;
+}
+.EmailThreadRand6Col
+{
+	color:#fff;
+	border-left: 1px solid #EDDCC0;
+	border-right: 1px solid #EDDCC0;
+}
+.EmailThreadRand7Exp /* Rand */
+{
+	color:#EDDCC0;
+	background-color:#8AABAA;
+}
+.EmailThreadRand7Col
+{
+	color:#fff;
+	border-left: 1px solid #8AABAA;
+	border-right: 1px solid #8AABAA;
+}
+.EmailThreadRand8Exp /* Rand */
+{
+	color:#fff;
+	background-color:#3B3A38;
+}
+.EmailThreadRand8Col
+{
+	color:#fff;
+	border-left: 1px solid #3B3A38;
+	border-right: 1px solid #3B3A38;
+}
+.EmailThreadRand9Exp /* Rand */
+{
+	color:#fff;
+	background-color:#CD5B51;
+}
+.EmailThreadRand9Col
+{
+	color:#fff;
+	border-left: 1px solid #CD5B51;
+	border-right: 1px solid #CD5B51;
+}
+.EmailThreadRand10Exp /* Rand */
+{
+	color:#2042A6;
+	background-color:#CCBEA9;
+}
+.EmailThreadRand10Col
+{
+	color:#fff;
+	border-left: 1px solid #CCBEA9;
+	border-right: 1px solid #CCBEA9;
+}
+
+.EmailHeaderDivLinkPadding
+{
+	padding-left:1px;
+	padding-bottom:3px;
+	margin-left:54px;
+	margin-top:1px;
+}
+
+.EmailHeaderDivLink
+{
+	float:left;
+	cursor: pointer;
+	margin-right: 3px;
+	height: 18px;
+	vertical-align: middle;
+}
+
+.EmailHeaderValue
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+	color:#000000;
+	float:left;
+}
+
+.EmailHeaderMoreInfo
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+	font-weight:bold;
+	color:#000000;
+}
+

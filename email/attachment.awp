@@ -1,0 +1,88 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("lib/CToolMenu.awp");
+	require_once("lib/WindowFrame.awp");
+	require_once('lib/CDropdownMenu.awp');
+	require_once("email_functions.awp");
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+
+	$BOX = ($_GET['box']) ? $_GET['box'] : EmailGetSpecialBoxId($dbh, $USERID, "Inbox");
+	$BOXNAME = EmailGetBoxName($dbh, $BOX);
+	
+	$ATTID = $_GET['attid'];
+	$DISP = ($_GET['disposition'])?$_GET['disposition']:"attachment";
+	
+	if (is_numeric($ATTID))
+	{
+		$query = "select content_type, encoding, disposition, filename, attached_data, name, parent_id, message_id from 
+				  email_message_attachments where id = '$ATTID'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			if ($row['encoding'] == 'base64')
+				$content = base64_decode($row['attached_data']);
+			else
+				$content = $row['attached_data'];
+			
+			if($row['content_type'] == "application/ms-tnef" && $_GET['tnefatt'])
+			{
+				$attachment = &new TnefAttachment(false);
+				$fresult = $attachment->decodeTnef($content);
+				$tnef_files = $attachment->getFilesNested();
+				//print_r($tnef_files); // See the format of the returned array
+				for ($m = 0; $m < count($tnef_files); $m++)
+				{
+					$file = $tnef_files[$m];
+
+					if ($m == $_GET['tnefatt'])
+					{
+						header("Content-Disposition: attachment; filename=\"".$file->getName()."\"");
+						header("Content-Type: ".$file->getType());
+						header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+						header("Content-Length: " . $file->getSize());
+
+						$content = $file->getContent();
+					}
+				}
+			}
+			else
+			{
+				// Get Name
+				if (strlen($row['filename']))
+					$attname = $row['filename'];
+				else
+					$attname = $row['name'];
+				
+				if (!$attname && !$row['parent_id'])
+				{
+					$attname = EmailGetAttBodyDesc($dbh, $row['message_id']);
+					header("Content-Disposition: attachment; filename=\"".$attname."\"");
+				}
+				else if (!$attname)
+				{
+					$attname = "Untitiled";
+					header("Content-Disposition: attachment; filename=\"".$attname."\"");
+				}
+				else
+				{
+					if ($DISP == "attachment")
+						header("Content-Disposition: attachment; filename=\"".$attname."\"");
+				}
+					
+				header("Content-Type: ".$row['content_type']);
+				header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+				header("Content-Length: " . strlen($content));
+			}
+			
+			echo $content;
+		}
+		$dbh->FreeResults($result);
+	}
+?>

@@ -1,0 +1,147 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");
+	require_once("../lib/content_table.awp");
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/CToolTabs.awp");
+	require_once("../lib/WindowFrame.awp");
+	require_once("../users/user_functions.php");
+	require_once("../lib/CToolTable.awp");
+	require_once("../lib/CDropdownMenu.awp");
+	require_once("../lib/Button.awp");
+	require_once("blog_functions.awp");
+	require_once("feed_functions.awp");
+	
+	$dbh = new CDatabase();
+									  
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$THNAME  = UserGetTheme(&$dbh, $USERID, 'name');
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme(&$dbh, $USERID, 'css'); ?>" />
+<title>Community Home</title>
+</head>
+
+<body <?php if ($_GET['refresh']) echo "onload=\"window.parent.leftnav.document.location.reload();\""; ?>>
+<div class='appTopSpacer'></div>
+<?php
+	if ($SETTINGS['app_webcontent_blogs'])
+	{
+		TableContentOpen('100%', "My Blogs");
+
+		echo "<div style='padding-top:1px;padding-bottom:10px;'>";
+
+		// Create new tool table
+		$tbl = new CToolTable;
+		
+		// Create table headers
+		$tbl->StartHeaders();
+		$tbl->AddHeader("#", 'center', '25px');
+		$tbl->AddHeader("Action", 'center', '78px');
+		$tbl->AddHeader("My Blog Title");
+		$tbl->AddHeader("My Blog URL");
+		$tbl->AddHeader("Last Post", 'center', '140px');;
+		$tbl->AddHeader("Posts", 'center', '80px');
+		$tbl->EndHeaders();
+		
+		$result = $dbh->Query("select id, name, title from blogs where user_id='$USERID'
+								order by title DESC");
+		$num = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			$id = $row['id'];
+			$title = $row['title'];
+
+			$tbl->StartRow();
+			$tbl->AddCell($i+1, NULL, 'center');
+			$tbl->AddCell(
+							ButtonCreate("view", "window.open('http://".$row['name'].".myablog.com')", "b2").
+							ButtonCreate("edit", "document.location='blog_edit.awp?bid=$id'", "b3")
+						  );
+			$tbl->AddCell($title);
+			$tbl->AddCell("http://".$row['name'].".myablog.com");
+			$tbl->AddCell(BlogGetLastPostDate(&$dbh, $row['id']), NULL, 'center');
+			$tbl->AddCell(BlogGetNumPosts(&$dbh, $row['id']), NULL, 'center');
+
+			
+			$tbl->EndRow();
+		}
+		$dbh->FreeResults($result);
+		
+		$tbl->PrintTable();
+		
+
+		echo "</div>";
+		
+		TableContentClose();
+	}
+
+	if (!$settings_mya)
+	{	
+		// Add simple spacer
+		echo "<div></div>";
+
+		TableContentOpen('100%', "My Content Feeds");
+
+		echo "<div style='padding-top:1px;'>";
+
+		// Create new tool table
+		$tbl = new CToolTable;
+		
+		// Create table headers
+		$tbl->StartHeaders();
+		$tbl->AddHeader("#", 'center', '25px');
+		$tbl->AddHeader("Action", 'center', '78px');
+		$tbl->AddHeader("Feed Name");
+		$tbl->AddHeader("Feed URL");
+		$tbl->AddHeader("Last Post", 'center', '140px');;
+		$tbl->AddHeader("Posts", 'center', '80px');
+		$tbl->EndHeaders();
+		
+		$result = $dbh->Query("select id, title from xml_feeds where 
+								user_id='$USERID'
+								union all
+								select xml_feeds.id, xml_feeds.title from xml_feeds, xml_feed_members
+								where xml_feeds.user_id != '$USERID'
+								and xml_feed_members.feed_id=xml_feeds.id
+								and xml_feed_members.user_id = '$USERID'
+								order by title DESC");
+		$num = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			$id = $row['id'];
+			$title = $row['title'];
+
+			$tbl->StartRow();
+			$tbl->AddCell($i+1, NULL, 'center');
+			$tbl->AddCell(
+							ButtonCreate("view", "window.open('http://".FeedGetURL(&$dbh, $row['id'])."')", "b2").
+							ButtonCreate("edit", "document.location='feed_edit.awp?fid=$id'", "b3")
+						  );
+			$tbl->AddCell($title);
+			$tbl->AddCell("http://".FeedGetURL(&$dbh, $row['id']));
+			$tbl->AddCell(FeedGetLastPostDate(&$dbh, $row['id']), NULL, 'center');
+			$tbl->AddCell(FeedGetNumPosts(&$dbh, $row['id']), NULL, 'center');
+
+			
+			$tbl->EndRow();
+		}
+		$dbh->FreeResults($result);
+		
+		$tbl->PrintTable();
+		
+
+		echo "</div>";
+
+		TableContentClose();
+	}
+?>
+</body>
+</html>

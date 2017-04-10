@@ -1,0 +1,85 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");
+	require_once("../lib/content_table.awp");
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/CToolTabs.awp");
+	require_once("../lib/WindowFrame.awp");
+	require_once("../users/user_functions.php");
+	require_once("../lib/CToolTable.awp");
+	require_once("../lib/CDropdownMenu.awp");
+	require_once("../lib/Button.awp");
+	require_once("blog_functions.awp");
+	
+	$dbh = new CDatabase();
+									  
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$THNAME  = UserGetTheme(&$dbh, $USERID, 'name');
+	
+	$BID = $_GET['bid'];
+	$TABNAV = ($_GET['tabnav']) ? $_GET['tabnav']: 'posts';
+	
+	// Check if this blog has been deleted
+	if ($_GET['deleteme'])
+	{
+		BlogDelPublicInterface(BlogGetName(&$dbh, $BID));
+		$dbh->Query("delete from blogs where id='$BID' and user_id='$USERID'");
+		header("Location: chome.awp?refresh=1");
+	}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Edit Blog</title>
+	<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme(&$dbh, $USERID, 'css'); ?>" />
+	<script type="text/javascript">
+	<!--
+	function DeleteBlog()
+	{
+		if (confirm("Are you sure you want to permanantly delete this blog and all of the posts?"))
+		{
+			document.location = "blog_edit.awp?tabnav=posts&bid=<?php print($BID); ?>&deleteme=1";
+		}
+	}
+	-->
+	</script>
+	<style type="text/css">
+	</style>
+</head>
+<body <?php if ($_GET['new']) echo "onload=\"window.parent.leftnav.document.location.reload();\""; ?> class='appTopSpacer'>
+<?php
+	TableContentOpen('100%', "Blog: ".BlogGetTitle(&$dbh, $BID));
+		
+	/******************************************************************************
+	*	Create top navigation
+	*******************************************************************************/
+	$tabNav = new CToolTabs("blog_edit.awp", "bid=$BID");
+	$tabNav->AddTab("Posts", "posts");
+	$tabNav->AddTab("Settings", "settings");
+	$tabNav->AddTab("Theme", "theme");
+	$tabNav->PrintTabs();
+	
+	switch($TABNAV)
+	{
+	/******************************************************************************
+	*	Print Specifications
+	*******************************************************************************/
+	case 'posts':
+		include("blog_posts.awp");
+		break;
+	case 'settings':
+		include("blog_settings.awp");
+		break;
+	case 'theme':
+		include("blog_theme.awp");
+		break;
+	default:
+		break;
+	}
+	
+	TableContentClose();
+?>
+</body>
+</html>

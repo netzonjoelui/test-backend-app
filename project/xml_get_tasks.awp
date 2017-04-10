@@ -1,0 +1,367 @@
+<?php
+	// ANT
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("../email/email_functions.awp");
+	require_once("../project/project_functions.awp");
+	require_once("../userfiles/file_functions.awp");
+	require_once("../customer/customer_functions.awp");
+	require_once("../contacts/contact_functions.awp");
+	require_once("../calendar/calendar_functions.awp");
+	// ALIB
+	require_once("lib/aereus.lib.php/CCache.php");
+	//require_once("lib/aereus.lib.php/CSessions.php");
+
+	header("Content-type: text/xml");			// Returns XML document
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+	
+	if ($_GET['group_by'])
+	{
+		if ($_GET['group_by'] == 'none')
+			UserDeletePref(&$dbh, $USERID, '/home/tasks/group_by');
+		else
+			UserSetPref(&$dbh, $USERID, "/home/tasks/group_by", $_GET['group_by']);
+	}
+	
+	if ($_GET['show_for'])
+	{
+		if ($_GET['show_for'] == '1')
+			UserDeletePref(&$dbh, $USERID, '/home/tasks/show_for');
+		else
+			UserSetPref(&$dbh, $USERID, "/home/tasks/show_for", $_GET['show_for']);
+	}
+
+	// Get show for
+	$show_for = UserGetPref(&$dbh, $USERID, "/home/tasks/show_for");
+
+	$curtime = strtotime(date("m/d/Y"));
+	for ($i = 1; $i < $show_for; $i++)
+	{
+		ProjRecurringTaskCreateLinks(&$dbh, $USERID, date("m", $curtime), date("d", $curtime), date("Y", $curtime));
+		$curtime = strtotime("+ 1 day", $curtime);
+	}
+		
+	// Get group by
+	$group_by = UserGetPref(&$dbh, $USERID, "/home/tasks/group_by");
+	$last_header = "";
+	switch ($group_by)
+	{
+	case 'project':
+		$ORDER = "project, date_completed DESC, deadline, date_entered";
+		break;
+	case 'contact':
+		$ORDER = "customer_id, contact_id, date_completed DESC, deadline, date_entered";
+		break;
+	case 'priority':
+		$ORDER = "priority, date_completed DESC, deadline, date_entered";
+		break;
+	case 'deadline':
+		$ORDER = "deadline, date_completed DESC, start_date";
+		break;
+	case 'start_date':
+		$ORDER = "start_date, deadline, date_completed DESC";
+		break;
+	default:
+		$ORDER = "date_completed DESC, deadline, date_entered";
+		break;
+	}
+	
+	switch($show_for)
+	{
+	case 7:
+		$INTERVAL = " + INTERVAL '1 week'";
+		$COMPLETED_COND = "date_completed>=current_date and date_completed<=current_date $INTERVAL";
+		break;
+	case 14:
+		$INTERVAL = " + INTERVAL '2 weeks'";
+		$COMPLETED_COND = "date_completed>=current_date and date_completed<=current_date $INTERVAL";
+		break;
+	case 21:
+		$INTERVAL = " + INTERVAL '3 weeks'";
+		$COMPLETED_COND = "date_completed>=current_date and date_completed<=current_date $INTERVAL";
+		break;
+	case 30:
+		$INTERVAL = " + INTERVAL '1 month'";
+		$COMPLETED_COND = "date_completed>=current_date and date_completed<=current_date $INTERVAL";
+		break;
+	default:
+		$INTERVAL = "";
+		$COMPLETED_COND = "date_completed=current_date";
+		break;
+	}
+	
+	echo '<?xml version="1.0" encoding="iso-8859-1"?>';
+
+	print("\n<tasklist>\n");
+	print("<settings>");
+	print("<group_by>$group_by</group_by>");
+	print("<show_for>$show_for</show_for>");
+	print("</settings>");
+
+	print("<tasks>");
+	if ("overview" == $group_by)
+	{
+		$query = "select * from (
+					select project_tasks.id, deadline, name, date_completed, project, -age(deadline::DATE) as retdate,
+					type, customer_id, contact_id, priority, start_date, '$group_by'::text as grouping
+					from project_tasks
+					where user_id='$USERID' and f_deleted is not true and 
+					(date_completed is null or $COMPLETED_COND) 
+					and (start_date is null or start_date<=current_date $INTERVAL) ".(($TASKPRI) ? " and priority='$TASKPRI'" : '')."
+					order by deadline NULLS FIRST, date_completed DESC, start_date LIMIT 100
+					) as tblset1
+				  UNION ALL
+				  select * from (
+				  select project_tasks.id, deadline, name, date_completed, project, -age(deadline::DATE) as retdate,
+					type, customer_id, contact_id, priority, start_date, 'project'::text as grouping
+					from project_tasks
+					where user_id='$USERID' and f_deleted is not true and 
+					(date_completed is null or $COMPLETED_COND) 
+					and (start_date is null or start_date<=current_date $INTERVAL) ".(($TASKPRI) ? " and priority='$TASKPRI'" : '')."
+					order by project, date_completed DESC, deadline, date_entered LIMIT 100
+					) as tblset2
+				  UNION ALL
+				  select * from (
+				   select project_tasks.id, deadline, name, date_completed, project, -age(deadline::DATE) as retdate,
+					type, customer_id, contact_id, priority, start_date, 'contact'::text as grouping
+					from project_tasks
+					where user_id='$USERID' and f_deleted is not true and 
+					(date_completed is null or $COMPLETED_COND) 
+					and (start_date is null or start_date<=current_date $INTERVAL) ".(($TASKPRI) ? " and priority='$TASKPRI'" : '')."
+					order by customer_id, contact_id, date_completed DESC, deadline, date_entered LIMIT 100
+					) as tblset3";
+	}
+	else
+	{
+		$query = "select project_tasks.id, deadline, name, date_completed, project, -age(deadline::DATE) as retdate,
+					type, customer_id, contact_id, priority, start_date, '$group_by'::text as grouping
+					from project_tasks
+					where user_id='$USERID' and f_deleted is not true and 
+					(date_completed is null or $COMPLETED_COND) 
+					and (start_date is null or start_date<=current_date $INTERVAL) ".(($TASKPRI) ? " and priority='$TASKPRI'" : '')."
+					order by $ORDER LIMIT 200";
+	}
+	$result = $dbh->Query($query);
+	$numrows = $dbh->GetNumberRows($result);
+	for ($i = 0, $j = 1; $i < $numrows; $i++, $j++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+
+		$id = $row["id"];
+		$task_name = $row["name"];
+		if ($row['type'] == 1)
+			$f_icon = "adf_small.png";
+		else if ($row['type'] == 2)
+			$f_icon = "emt_small.png";
+		else
+			$f_icon = "";
+		$project_name = ($row['project']) ? GetProjectName(&$dbh, $row['project']).": " : '';
+		$priority_name = ProjGetPriorityName(&$dbh, $row['priority']);
+		
+		$contact_name = "";
+		
+		if ($row['project'])
+		{
+			$row['customer_id'] = GetProjectCustId(&$dbh, $row['project']);
+			$task_name = $project_name.": ".$task_name;
+		}
+		else if ($row['contact_id'])
+		{
+			$contact_name = ContactGetName(&$dbh, $row['contact_id']);
+			$task_name = $contact_name.": ".$task_name;
+		}
+		else if ($row['customer_id'])
+		{
+			$contact_name = CustGetName(&$dbh, $row['customer_id']);
+			$task_name = $contact_name.": ".$task_name;
+		}
+		else if ($row['lead_id'])
+		{
+			$contact_name = CustLeadGetName(&$dbh, $row['lead_id']);
+			$task_name = $contact_name.": ".$task_name;
+		}
+		
+		$date_completed = $row["date_completed"];
+		if ($row['deadline'] && !$date_completed)
+		{
+			$due_in = ($row['retdate'] == "00:00:00") ? '' :  " (".str_replace("@ ", '', $row['retdate']).")";
+			$task_name .= ($due_in == " (0)") ? " (today)" : $due_in;
+		}
+		else
+			$age = "";
+		$done = ($date_completed) ? '1' : '0';
+
+		switch ($row['grouping'])
+		{
+		case 'project':
+			if ($row['project'])
+			{
+				if ($last_header != $project_name)
+				{
+					print("<task>");
+					print("<task_id >0</task_id><task_name>".rawurlencode($project_name)."</task_name>");
+					print("<task_done >0</task_done><task_ficon ></task_ficon>");
+					print("<state>".(("overview" == $group_by)?'col':'exp')."</state>");
+					print("</task>");
+					$last_header = $project_name;
+				}
+				
+			}
+			else
+			{
+				if ("overview" == $group_by) // Skip tasks with no projects, they will be added on the first pass
+				{
+					continue 2;
+				}
+				else if ($last_header != "None")
+				{
+					print("<task>");
+					print("<task_id >0</task_id>");
+					print("<task_name >None</task_name>");
+					print("<task_done >0</task_done>");
+					print("<task_ficon ></task_ficon>");
+					print("</task>");
+					$last_header = "None";
+				}
+			}
+			break;
+		case 'contact':
+			if ($contact_name)
+			{
+				if ($last_header != $contact_name)
+				{
+					print("<task>");
+					print("<task_id >0</task_id><task_name >".rawurlencode($contact_name)."</task_name>");
+					print("<task_done >0</task_done><task_ficon ></task_ficon>");
+					print("<state>".(("overview" == $group_by)?'col':'exp')."</state>");
+					print("</task>");
+					$last_header = $contact_name;
+				}
+				
+			}
+			else
+			{
+				if ("overview" == $group_by) // Skip tasks with no contacts, they will be added on the first pass
+				{
+					continue 2;
+				}
+				else if ($last_header != "None")
+				{
+					print("<task>");
+					print("<task_id >0</task_id><task_name >None</task_name>");
+					print("<task_done >0</task_done><task_ficon ></task_ficon>");
+					print("</task>");
+					$last_header = "None";
+				}
+			}
+			break;
+		case 'priority':
+			// Priority is required so we do not need to account for none
+			if ($last_header != $priority_name)
+			{
+				print("<task>");
+				print("<task_id >0</task_id><task_name >$priority_name</task_name>");
+				print("<task_done >0</task_done><task_ficon ></task_ficon>");
+				print("</task>");
+				$last_header = $priority_name;
+			}
+			break;
+		case 'deadline':
+			if ($row['deadline'])
+			{
+				if ($last_header != $row['deadline'])
+				{
+					print("<task>");
+					print("<task_id >0</task_id><task_name >".date("m/d/Y", strtotime($row['deadline']))."</task_name>");
+					print("<task_done >0</task_done><task_ficon ></task_ficon>");
+					print("</task>");
+					$last_header = $row['deadline'];
+				}
+			}
+			else
+			{
+				if ($last_header != "No Deadline")
+				{
+					print("<task>");
+					print("<task_id >0</task_id><task_name >No Deadline</task_name>");
+					print("<task_done >0</task_done><task_ficon ></task_ficon>");
+					print("</task>");
+					$last_header = "No Deadline";
+				}
+			}
+			
+			break;
+		case 'start_date':
+			if ($row['start_date'])
+			{
+				if ($last_header != $row['start_date'])
+				{
+					print("<task>");
+					print("<task_id >0</task_id><task_name >".date("m/d/Y", strtotime($row['start_date']))."</task_name>");
+					print("<task_done >0</task_done><task_ficon ></task_ficon>");
+					print("</task>");
+					$last_header = $row['start_date'];
+				}
+			}
+			else
+			{
+				if ($last_header != "No Start Date")
+				{
+					print("<task>");
+					print("<task_id >0</task_id><task_name >No Start Date</task_name>");
+					print("<task_done >0</task_done><task_ficon ></task_ficon>");
+					print("</task>");
+					$last_header = "No Start Date";
+				}
+			}
+			
+			break;
+		case 'overview':
+			if ($row['deadline'])
+			{
+				if (strtotime($row['deadline']) <= time())
+					$row['deadline'] = "Today's Tasks";
+				else if (strtotime($row['deadline']) > time())
+					$row['deadline'] = "Upcoming Tasks";
+	
+				if ($last_header != $row['deadline'])
+				{
+					print("<task>");
+					print("<task_id >0</task_id><task_name >".$row['deadline']."</task_name>");
+					print("<task_done >0</task_done><task_ficon ></task_ficon>");
+					print("</task>");
+					$last_header = $row['deadline'];
+				}
+			}
+			else
+			{
+				if ($last_header != "Today's Tasks")
+				{
+					print("<task>");
+					print("<task_id >0</task_id><task_name >Today's Tasks</task_name>");
+					print("<task_done >0</task_done><task_ficon ></task_ficon>");
+					print("</task>");
+					$last_header = "Today's Tasks";
+				}
+			}
+			
+			break;
+		
+		}
+		print("<task>");
+		print("<task_id>$id</task_id>");
+		print("<task_name>".rawurlencode($task_name)."</task_name>");
+		print("<task_done>$done</task_done>");
+		print("<task_ficon>$f_icon</task_ficon>");
+		print("</task>");
+	}
+	$dbh->FreeResults($result);
+
+	print("</tasks>");
+	
+	print("\n</tasklist>");

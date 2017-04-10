@@ -1,0 +1,7 @@
+RewriteEngine on 
+
+RewriteRule images/([0-9]+)$ /public/antfs/stream_image.php?fid=$1 [QSA]
+RewriteRule images/([0-9]+)/([0-9]+)$ /public/antfs/stream_image.php?fid=$1&w=$2 [QSA]
+RewriteRule images/([0-9]+)/([0-9]+)/([0-9]+)$ /public/antfs/stream_image.php?fid=$1&w=$2&h=$3 [QSA]
+RewriteRule ([0-9]+)$ /public/antfs/file_download.php?fid=$1 [QSA]
+RewriteRule ([0-9]+)/(.*)$ /public/antfs/file_download.php?fid=$1&fname=$2 [QSA]

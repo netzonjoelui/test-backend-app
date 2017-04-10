@@ -1,0 +1,628 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("calendar/calendar_functions.awp");
+	require_once("contacts/contact_functions.awp");
+	require_once("customer/customer_functions.awp");
+	require_once("lib/CAntObject.php");
+	require_once("datacenter_functions.awp");
+	require_once("lib/aereus.lib.php/CChart.php");
+
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID = $USER->id;
+	$ACCOUNT = $USER->accountId;
+	$FUNCTION = $_GET['function'];
+
+	switch ($FUNCTION)
+	{
+	// Home page column widths
+	//-----------------------------------------------------
+	case "create_database":
+		$name = rawurldecode($_GET['dbname']);
+		$sys_template = rawurldecode($_GET['sys_template']);
+		if ($name && $USERID)
+		{
+			$result = $dbh->Query("insert into dc_databases(name, user_id) values('".$dbh->Escape($name)."', '$USERID');
+							  	   select currval('dc_databases_id_seq') as id;");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+
+				$dbh->Query("CREATE SCHEMA zudb_".$row['id'].";");
+				$retval = $row['id'];
+				
+				if ($sys_template)
+				{
+					$DBID = $retval;
+
+					include("templates_system.awp");
+
+					foreach ($ADC_TEMPLATES[$sys_template] as $query)
+						$dbh->Query($query);
+				}
+			}
+		}
+		break;
+	// Save changes to a database
+	//-----------------------------------------------------
+	case "save_database":
+		$dbid = rawurldecode($_GET['dbid']);
+		$name = rawurldecode($_GET['name']);
+		$scope = rawurldecode($_GET['scope']);
+		$f_publish = rawurldecode($_GET['f_publish']);
+		if ($dbid)
+		{
+			$dbh->Query("update dc_databases set f_publish='".(($f_publish=='t')?'t':'f')."', 
+							name='".$dbh->Escape($name)."', scope='".(($scope)?$scope:'user')."' where id='$dbid'");
+
+			if ($_GET['folders_add'] && is_array($_GET['folders_add']))
+			{
+				foreach ($_GET['folders_add'] as $fldid)
+					$dbh->Query("insert into dc_database_folders(database_id, folder_id, name) values('$dbid', '$fldid', '$fldid');");
+			}
+
+			if ($_GET['folders_remove'] && is_array($_GET['folders_remove']))
+			{
+				foreach ($_GET['folders_remove'] as $fldid)
+					$dbh->Query("delete from dc_database_folders where database_id='$dbid' and folder_id='$fldid';");
+			}
+
+			if ($_GET['calendars_remove'] && is_array($_GET['calendars_remove']))
+			{
+				foreach ($_GET['calendars_remove'] as $calid)
+				{
+					$dbh->Query("delete from calendars where id='$calid';");
+					$dbh->Query("delete from dc_database_calendars where database_id='$dbid' and calendar_id='$calid';");
+				}
+			}
+
+			$retval = 1;
+		}
+		break;
+	case "delete_database":
+		$dbid = rawurldecode($_GET['dbid']);
+		if ($dbid && $USERID)
+		{
+			// TODO: Security
+			$dbh->Query("delete from dc_databases where id='$dbid' and user_id='$USERID'");
+			$dbh->Query("DROP SCHEMA zudb_".$dbid." cascade;");
+			$retval = $dbid;
+		}
+		break;
+	case "create_calendar":
+		$retval = -1;
+		$dbid = rawurldecode($_GET['dbid']);
+		$name = rawurldecode($_GET['name']);
+		if ($dbid && $name && $USERID)
+		{
+			$result = $dbh->Query("insert into calendars(name, def_cal, date_created, global_share) 
+									values('".rawurldecode($name)."', 'f', 'now', 't');
+									select currval('calendars_id_seq') as id;");
+			if ($dbh->GetNumberRows($result))
+			{
+				$calid = $dbh->GetValue($result, 0, "id");
+
+				if ($calid)
+				{
+					$dbh->Query("insert into dc_database_calendars(database_id, calendar_id) values('$dbid', '$calid');");
+					$retval = $calid;
+				}
+			}
+		}
+		break;
+	case "create_table":
+		$dbid = rawurldecode($_GET['dbid']);
+		$name = rawurldecode($_GET['tblname']);
+		if ($dbid && $USERID)
+		{
+			// TODO: Security
+			$dbh->Query("CREATE TABLE zudb_".$dbid.".$name () WITH OIDS");
+			$retval = $name;
+		}
+		break;
+	case "create_object":
+		$dbid = rawurldecode($_GET['dbid']);
+		$name = rawurldecode($_GET['oname']);
+		if ($dbid && $USERID && $name)
+		{
+			// TODO: Security
+			$tname = "zudb_".$dbid.".".$name."s";
+			$dbh->Query("insert into dc_database_objects(name, database_id) values('$name', '".$dbid."');");
+			$dbh->Query("CREATE TABLE $tname (id serial, CONSTRAINT ".$name."s_pkey PRIMARY KEY (id)) WITH OIDS");
+			$dbh->Query("insert into  app_object_types(name, title, object_table) values('".$dbid.".".$name."', '$name', '".$tname."');");
+			$retval = 1;
+		}
+		break;
+	case "table_get_pkey":
+		$dbid = rawurldecode($_GET['dbid']);
+		$table = rawurldecode($_GET['tname']);
+		if ($dbid && $table)
+		{
+			$col = $dbh->IsPrimaryKey($table, null, "zudb_".$dbid);
+			$retval = $col;
+		}
+		break;
+	case "delete_table":
+		$tname = rawurldecode($_GET['tname']);
+		$dbid = $_GET['dbid'];
+		if ($tname && $dbid)
+		{
+			$dbh->Query("DROP TABLE zudb_".$dbid.".".$tname);
+			$retval = $tname;
+		}
+		break;
+	case "delete_object":
+		$oname = rawurldecode($_GET['oname']);
+		$dbid = $_GET['dbid'];
+		if ($oname && $dbid)
+		{
+			$tname = "zudb_".$dbid.".".$oname."s";
+			$dbh->Query("delete from dc_database_objects where name='$oname' and database_id='$dbid'");
+			$dbh->Query("DROP TABLE $tname cascade");
+			$dbh->Query("delete from app_object_types where name='".$dbid.".".$oname."'");
+			$retval = 1;
+		}
+		break;
+	case "create_column":
+		$dbid = rawurldecode($_GET['dbid']);
+		$tname = rawurldecode($_GET['tname']);
+		$type = rawurldecode($_GET['type']);
+		$cname = rawurldecode($_GET['cname']);
+		$notes = rawurldecode($_GET['notes']);
+		$constraint = rawurldecode($_GET['constraint']);
+		if ($dbid && $USERID && $tname && $type && $tname)
+		{
+			// Create col in table under datacenter schema
+			$dbh->Query("alter table zudb_".$dbid.".$tname add column ".$cname." ".$type.";");
+			if ($notes)
+				$dbh->AddColumnComment("zudb_".$dbid.".".$tname, $cname, $notes);
+
+			if ("pkey" == $constraint)
+				$dbh->Query("alter table zudb_".$dbid.".$tname add CONSTRAINT ".$tname."_pkey PRIMARY KEY (".$cname.")");
+
+		}
+		break;
+	case "delete_column":
+		$colname = rawurldecode($_GET['cname']);
+		$tablename = rawurldecode($_GET['tname']);
+		$dbid = rawurldecode($_GET['dbid']);
+		if ($dbid && $tablename && $colname)
+		{
+			$dbh->Query("alter table zudb_".$dbid.".".$tablename." drop column ".$colname);
+			$retval = $dbid;
+		}
+		break;
+	case "save_query":
+		$dbid = $_GET['dbid'];
+		$query = rawurldecode($_GET['query']);
+		$name = rawurldecode($_GET['name']);
+		if ($dbid)
+		{
+			$result = $dbh->Query("insert into dc_database_queries(name, query, database_id) 
+								   values('".$dbh->Escape($name)."', '".$dbh->Escape($query)."', '$dbid');
+							  	   select currval('dc_database_queries_id_seq') as id;");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$retval = $row['id'];
+			}
+			$dbh->FreeResults($result);
+		}
+		break;
+	case "save_query_changes":
+		$qid = $_GET['qid'];
+		$dbid = $_GET['dbid'];
+		$query = rawurldecode($_GET['query']);
+		$name = rawurldecode($_GET['name']);
+		if ($dbid)
+		{
+			$result = $dbh->Query("update dc_database_queries set name='".$dbh->Escape($name)."', 
+									query='".$dbh->Escape($query)."' where id = '$qid'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$retval = $qid;
+			}
+			$dbh->FreeResults($result);
+		}
+		break;
+	case "delete_query":
+		$qid = $_GET['qid'];
+		if ($qid)
+		{
+			$dbh->Query("delete from dc_database_queries where id='$qid'");
+			$retval = $qid;
+		}
+		break;
+	case 'create_user':
+		$uname = rawurldecode($_GET['name']);
+		$upass = rawurldecode($_GET['password']);
+		$dbid = $_GET['dbid'];
+
+		if ($dbid && $uname && $upass)
+		{
+			$result = $dbh->Query("insert into dc_database_users(name, password, database_id) 
+								   values('".$dbh->Escape($uname)."', '".$dbh->Escape($upass)."', '$dbid');
+								   select currval('dc_database_users_id_seq') as id;");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$retval = $row['id'];
+			}
+		}
+		break;
+	case "delete_user":
+		$uid = $_GET['uid'];
+		if ($uid)
+		{
+			$dbh->Query("delete from dc_database_users where id='$uid'");
+			$retval = $uid;
+		}
+		break;
+	case "change_user_password":
+		$uid = $_GET['uid'];
+		$upass = rawurldecode($_GET['password']);
+		if ($uid && $upass)
+		{
+			$dbh->Query("update dc_database_users set password='".$dbh->Escape($upass)."' where id='$uid'");
+			$retval = $uid;
+		}
+		break;
+	case "report_creat_tmp_graph":
+		$dbid = $_GET['dbid'];
+		if ($dbid)
+		{
+			$dbh->Query("delete from dc_database_report_graphs where database_id='$dbid' and name='~tmpgraph'");
+
+			$result = $dbh->Query("insert into dc_database_report_graphs(database_id, name, caption, subcaption, xaxisname, yaxisname) 
+								   values('$dbid', '~tmpgraph', 'My graph', 'My subcaption', 'Series', 'Data');
+								   select currval('dc_database_report_graphs_id_seq') as id;");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$retval = $row['id'];
+			}
+		}
+		break;
+	case "report_graph_save_query":
+		$dbid = $_GET['dbid'];
+		$gid = $_GET['gid'];
+		$query = rawurldecode($_GET['query']);
+		if ($dbid && $gid)
+		{
+			// Clear saved columns
+			$dbh->Query("delete from dc_database_report_graph_cols where graph_id='$gid'");
+			$result = $dbh->Query("update dc_database_report_graphs 
+									set query='".$dbh->Escape($query)."' 
+									where id='$gid' and database_id='$dbid';");
+			$retval = $gid;
+		}
+		break;
+	case "report_graph_ucol":
+		$dbid = $_GET['dbid'];
+		$gid = $_GET['gid'];
+		$colname = rawurldecode($_GET['colname']);
+		$type = rawurldecode($_GET['type']);
+		if ($type && $gid && $colname)
+		{
+			$tbl = "dc_database_report_graph_cols";
+
+			$dbh->Query("delete from $tbl where 
+						 name='".$dbh->Escape($colname)."' and graph_id='$gid'");
+			
+			// Try to get a unique color
+			$color = "";
+			if ($type == 2)
+			{
+				foreach ($dc_graphcolors as $cname=>$ccode)
+				{
+					if (!($dbh->GetNumberRows($dbh->Query("select color from $tbl where type='2' and graph_id='$gid' and color='$ccode'"))))
+						$color = $ccode;
+				}
+				
+				if ($color == "")
+					$color == $dc_graphcolors[0];
+			}
+			$result = $dbh->Query("insert into $tbl(graph_id, name, type, color)
+								   values('$gid', '".$dbh->Escape($colname)."', '$type', '$color')");
+
+			$retval = $gid;
+		}
+		break;
+	case "report_graph_get_obj":
+		$gid = $_GET['gid'];
+		$width = $_GET['width'];
+		$height = $_GET['height'];
+		if ($width || $height)
+			$retval = dc_getGetObj($dbh, $gid, $width, $height);
+		else
+			$retval = dc_getGetObj($dbh, $gid);
+
+		break;
+	case "report_graph_save_caption":
+		$dbid = $_GET['dbid'];
+		$gid = $_GET['gid'];
+		$caption = rawurldecode($_GET['caption']);
+		$subcaption = rawurldecode($_GET['subcaption']);
+		$xaxisname = rawurldecode($_GET['xaxisname']);
+		$yaxisname = rawurldecode($_GET['yaxisname']);
+		$numberPrefix = rawurldecode($_GET['numberPrefix']);
+		$decimalPrecision = is_numeric($_GET['decimalPrecision']) ? $_GET['decimalPrecision'] : 0;
+		if ($dbid && $gid)
+		{
+			$result = $dbh->Query("update dc_database_report_graphs set 
+									caption='".$dbh->Escape($caption)."',
+									subcaption='".$dbh->Escape($subcaption)."',
+									xaxisname='".$dbh->Escape($xaxisname)."',
+									yaxisname='".$dbh->Escape($yaxisname)."',
+									number_prefix='".$dbh->Escape($numberPrefix)."',
+									decimal_precision='$decimalPrecision'
+									where id='$gid' and database_id='$dbid';");
+			$retval = $gid;
+		}
+	case "report_graph_set":
+		$dbid = $_GET['dbid'];
+		$gid = $_GET['gid'];
+		$graph = rawurldecode($_GET['graph']);
+		if ($dbid && $gid && $graph)
+		{
+			$result = $dbh->Query("update dc_database_report_graphs set 
+									graph_name='".$dbh->Escape($graph)."'
+									where id='$gid' and database_id='$dbid';");
+			$retval = $gid;
+		}
+		break;
+
+	case "report_get_graph_types":
+		if ($_GET['gtype'])
+		{
+			$chart = new CChart();
+			$retval = "";
+
+			$graphs = $chart->getListOfGraphs($_GET['gtype']);
+			$lastCat = "";
+			$num = count($graphs);
+			for ($i = 0; $i < $num; $i++)
+			{
+				$graph = $graphs[$i];
+
+				if ($retval) $retval .= ", ";
+				$retval .= "[\"".$graph['name']."\", \"".$graph['title']."\", \"".$graph['category']."\"]";
+			}
+
+			$retval = "[".$retval."]";
+		}
+		else
+		{
+			$retval = "-1";
+		}
+		break;
+	case "report_delete_graph":
+		$gid = $_GET['rid'];
+		if ($gid)
+		{
+			$result = $dbh->Query("delete from dc_database_report_graphs where id='$gid'"); 
+			$retval = $gid;
+		}
+		break;
+	case "report_rename_graph":
+		$dbid = $_GET['dbid'];
+		$gid = $_GET['gid'];
+		$name = rawurldecode($_GET['name']);
+		if ($dbid && $gid && $name)
+		{
+			$result = $dbh->Query("update dc_database_report_graphs set 
+									name='".$dbh->Escape($name)."'
+									where id='$gid' and database_id='$dbid';");
+			$retval = $gid;
+		}
+		break;
+	case "report_set_single_color":
+		$dbid = $_GET['dbid'];
+		$gid = $_GET['gid'];
+		$index = $_GET['index'];
+		$color = rawurldecode($_GET['color']);
+		if ($dbid && $gid && $color && is_numeric($index))
+		{
+			$dbh->Query("update dc_database_report_graphs set series_colors[$index] = '$color' where id='$gid'");
+			$retval = $gid;
+		}
+		break;
+	case "report_set_ms_color":
+		$dbid = $_GET['dbid'];
+		$gid = $_GET['gid'];
+		$colname = $_GET['colname'];
+		$color = rawurldecode($_GET['color']);
+		if ($dbid && $gid && $color && $colname)
+		{
+			$dbh->Query("update dc_database_report_graph_cols set 
+						 color='$color' where graph_id='$gid' and name='".$dbh->Escape($colname)."'");
+			$retval = $gid;
+		}
+		break;
+	case "report_save":
+		$ant_obj = new CAntObject($dbh, "report", $_POST['rid']);
+		$ofields = $ant_obj->fields->getFields();
+		foreach ($ofields as $fname=>$field)
+		{
+			if ($field['type']!='fkey_multi')
+			{
+				$ant_obj->setValue($fname, $_POST[$fname]);
+			}
+		}
+		$ant_obj->setValue("owner_id", $USERID);
+		$retval = $ant_obj->save();
+		break;
+	case "report_graph_get_colors":
+		$dbid = $_GET['dbid'];
+		$gid = $_GET['gid'];
+		if ($dbid && $gid)
+		{
+			if (dc_graphIsMultiSeries($dbh, $gid))
+			{
+				$retval = "[";
+				// Select data columns
+				$result = $dbh->Query("select name, color from dc_database_report_graph_cols where graph_id='$gid' and type='2'");
+				$num = $dbh->GetNumberRows($result);
+				for ($i = 0; $i < $num; $i++)
+				{
+					$row = $dbh->GetNextRow($result, $i);
+					
+					if ($i > 0)
+						$retval .= ", ";
+
+					$retval .= "[\"".$row['name']."\", \"".$row['color']."\", 'report_set_ms_color']";
+				}
+				$dbh->FreeResults($result);
+
+				$retval .= "];";
+			}
+			else
+			{
+				$retval = "[";
+				// Select data columns
+				$result = $dbh->Query("select series_num from dc_database_report_graphs where id='$gid'");
+				if ($dbh->GetNumberRows($result))
+				{
+					$row = $dbh->GetNextRow($result, 0);
+					$num = $row['series_num'];
+					$dbh->FreeResults($result);
+					
+					for ($i = 0; $i < $num; $i++)
+					{
+						$color = dc_graphGetSeriesIndexColor($dbh, $gid, $i);
+						if (!$color)
+						{
+							$color = dc_graphGetNextColor();
+							$dbh->Query("update dc_database_report_graphs set series_colors[$i] = '$color' where id='$gid'");
+						}
+
+						if ($i > 0)
+							$retval .= ", ";
+
+						$retval .= "[\"Series ".($i+1)."\", \"".$color."\", 'report_set_single_color']";
+					}
+				}
+
+				$retval .= "];";
+
+			}
+		}
+		break;
+	case "report_graph_get_options":
+		$dbid = $_GET['dbid'];
+		$gid = $_GET['gid'];
+		if ($dbid && $gid)
+		{
+			$result = $dbh->Query("select graph_name from dc_database_report_graphs where id='$gid'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+
+				$chart = new CChart();
+				$options = $chart->getGraphOptions($row['graph_name']);
+				
+				$buf = "";
+				foreach ($options as $opt)
+				{
+					$val = dc_graphGetOption($dbh, $gid, $opt[0]);
+
+					if ($buf) $buf .= ", ";
+					$buf .= "[\"".$opt[0]."\", \"".$opt[1]."\", \"".$val."\", \"".$opt[2]."\", ";
+					if (is_array($opt[3]) && count($opt[3]))
+					{
+						$ovals = "";
+						foreach ($opt[3] as $valoptname=>$valoptval)
+						{
+							if ($ovals) $ovals .= ",";
+							$ovals .= "[\"$valoptname\", \"$valoptval\"]";
+						}
+						$buf .= "[$ovals]";
+					}
+					else
+						$buf .= "[]";
+					$buf .= "]";
+				}
+			}
+			$dbh->FreeResults($result);
+			$retval = "[$buf]";
+		}
+		break;
+	case "report_graph_set_option":
+		$dbid = $_GET['dbid'];
+		$gid = $_GET['gid'];
+		$name = rawurldecode($_GET['name']);
+		$value = rawurldecode($_GET['value']);
+		if ($dbid && $gid)
+		{
+			dc_graphSetOption($dbh, $gid, $name, $value);
+		}
+		break;	
+	case "dashboard_add_rpt_graph":
+		$rid = $_GET['rid'];
+		if ($rid)
+		{
+			$result = $dbh->Query("select indx from dc_dashboard where col='0' and user_id='$USERID'
+								   order by indx DESC limit 1");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$indx = $row['indx'];
+			}
+			$dbh->Query("insert into dc_dashboard(user_id, indx, graph_id, col) values('$USERID', '".($indx + 1)."', '$rid', '0');");
+			
+			$retval = $rid;
+		}	
+	case "dashboard_del_rpt_graph":
+
+		$eid = $_GET['eid'];
+		if ($eid)
+		{
+			$result = $dbh->Query("delete from dc_dashboard where id='$eid' and user_id='$USERID'");
+			$retval = $eid;
+		}
+		break;
+	case "dashboard_save_layout":
+		$num = rawurldecode($_GET['num_cols']);
+		if ($num)
+		{
+			for ($i = 0; $i < $num; $i++)
+			{
+				$items = rawurldecode($_GET['col_'.$i]);
+				if ($items)
+				{
+					$widgets = explode(":", $items);
+
+					if (is_array($widgets))
+					{
+						for ($j = 0; $j < count($widgets); $j++)
+						{
+							$dbh->Query("update dc_dashboard set indx='$j', col='$i' where user_id='$USERID' and id='".$widgets[$j]."';");
+						}
+					}
+				}
+			}
+		}
+		$retval = "done";
+		break;
+	case "dashboard_save_layout_resize":
+		$num = rawurldecode($_GET['num_cols']);
+		if ($num)
+		{
+			for ($i = 0; $i < $num; $i++)
+				UserSetPref($dbh, $USERID, "datacenter/dashboard/col".$i."_width", rawurldecode($_GET["col_".$i]));
+		}
+		$retval = "done";
+		break;
+	}
+
+	$res = "<retval>" . rawurlencode($retval) . "</retval>";
+	$res .= "<cb_function>".$_GET['cb_function']."</cb_function>";
+
+	header("Content-type: text/xml");			// Returns XML document
+	echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+
+	echo "<response>$res</response>";
+?>

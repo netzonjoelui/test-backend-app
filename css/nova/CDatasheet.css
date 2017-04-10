@@ -1,0 +1,76 @@
+/**************************************************************************
+ *	CDataset.js
+ **************************************************************************/
+.CDatasheetMainTable
+{
+	border-left: 1px solid #E3E3E3;
+	border-bottom: 1px solid #E3E3E3;
+}
+.CDatasheetHeaderCell
+{
+	background-color: #ccc;
+	padding: 5px;
+	font-weight: bold;
+}
+.CDatasheetRowTitle
+{
+	background-color: #ccc;
+	padding: 3px 5px 3px 5px;
+	/* Set default width */
+	width: 10px;
+}
+.CDatasheetCell
+{
+	border-right: 1px solid #E3E3E3;
+	border-top: 1px solid #E3E3E3;
+	padding: 3px 5px 3px 5px;
+	background-color: none;
+	font-family: times, serif;
+	font-size: 11px;
+	color: black;
+}
+.CDatasheetCellRO 
+{
+	/* Read only */
+	border-right: 1px solid #E3E3E3;
+	border-top: 1px solid #E3E3E3;
+	padding: 3px 5px 3px 5px;
+	background-color: #eee;
+	font-family: times, serif;
+	font-size: 11px;
+	color: black;
+}
+.CDatasheetCellEdit
+{
+	border-right: 1px solid #E3E3E3;
+	border-top: 1px solid #E3E3E3;
+	padding: 3px 5px 3px 5px;
+}
+
+.CDatasheetCellEdit input
+{
+	border: 0px;
+	font-family: times, serif;
+	font-size: 11px;
+	padding: 0px;
+	margin: 0px;
+}
+
+.CDatasheetCellSelected
+{
+	border-right: 1px solid #000000;
+	border-top: 1px solid #000000;
+	padding: 3px 5px 3px 5px;
+	background-color: blue;
+	color: white;
+	font-family: times, serif;
+}
+.CDatasheetRow
+{
+	background-color: white;
+}
+.CDatasheetRowSelected
+{
+	background-color: blue;
+}
+

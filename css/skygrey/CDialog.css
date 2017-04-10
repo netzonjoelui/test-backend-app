@@ -1,0 +1,46 @@
+/**************************************************************************
+ *	CDialog.js
+ **************************************************************************/
+/* Div that covers the entire page when dialog is open */
+#CDialogOverlay
+{
+	/*background-image: url(/lib/aereus.lib.js/images/CDialog/overlay.png);*/
+	background-color: #000000;
+	filter:progid:DXImageTransform.Microsoft.Alpha( Opacity=60 )
+	-moz-opacity: 0.6;
+	opacity: 0.6;
+}
+
+/* Outer dialog container */
+.CDialogCon
+{
+	background-color:#eee; 
+	border-top: 1px solid #eee;
+	border-left:2px outset #666;
+	border-right:2px outset #666;
+	border-bottom:2px outset #666;
+}
+
+
+/* Body container */
+.CDialogBody
+{
+	padding: 5px 5px 5px 5px; 
+}
+
+/* Title container */
+.CDialogTitle
+{
+	background-color: gray; 
+	font-weight: bold;
+	color: white;
+	padding: 3px;
+}
+/* Title container close */
+.CDialogTitleClose
+{
+	background-image: url(/images/closex.gif);
+	width: 12px;
+	height: 12px;
+	cursor: pointer;
+}

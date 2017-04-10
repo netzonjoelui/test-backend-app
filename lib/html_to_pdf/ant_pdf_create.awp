@@ -1,0 +1,632 @@
+<?php
+// $Header: /var/cvs/ant.aereus.com/lib/html_to_pdf/ant_pdf_create.awp,v 1.2 2006/01/30 00:39:18 administrator Exp $
+
+// Works only with safe mode off; in safe mode it generates a warning message
+@set_time_limit(600);
+
+define('EPSILON',0.001);
+
+require('utils_array.php');
+require('utils_graphic.php');
+require('utils_url.php');
+require('utils_text.php');
+require('utils_units.php');
+require('utils_number.php');
+
+require('color.php');
+
+require('config.inc.php');
+require('systemcheck.php');
+
+require('flow_context.class.inc.php');
+require('flow_viewport.class.inc.php');
+
+require('viewport.generic.php');
+require('viewport.ps.php');
+require('viewport.pdflib.php');
+require('viewport.fpdf.php');
+require('viewport.fastps.php');
+
+require('stubs.common.inc.php');
+
+require('media.layout.inc.php');
+
+require('box.php');
+require('box.generic.php');
+require('box.container.php');
+require('box.generic.inline.php');
+require('box.inline.php');
+
+require('font.pdf.inc.php');
+require('font.class.php');
+
+require('box.br.php');
+require('box.block.php');
+require('box.block.inline.php');
+require('box.button.php');
+require('box.checkbutton.php');
+require('box.frame.php');
+require('box.iframe.php');
+require('box.img.php');
+require('box.input.text.php');
+require('box.legend.php');
+require('box.list-item.php');
+require('box.null.php');
+require('box.radiobutton.php');
+require('box.select.php');
+require('box.table.php');
+require('box.table.cell.php');
+require('box.table.row.php');
+require('box.table.section.php');
+require('box.text.php');
+require('box.whitespace.php');
+
+require('box.utils.text-align.inc.php');
+
+require('encoding.inc.php');
+require('encoding.entities.inc.php');
+require('encoding.iso-8859-1.inc.php');
+require('encoding.iso-8859-2.inc.php');
+require('encoding.iso-8859-3.inc.php');
+require('encoding.iso-8859-4.inc.php');
+require('encoding.iso-8859-5.inc.php');
+require('encoding.iso-8859-7.inc.php');
+require('encoding.iso-8859-9.inc.php');
+require('encoding.iso-8859-10.inc.php');
+require('encoding.iso-8859-11.inc.php');
+require('encoding.iso-8859-13.inc.php');
+require('encoding.iso-8859-14.inc.php');
+require('encoding.iso-8859-15.inc.php');
+require('encoding.koi8-r.inc.php');
+require('encoding.cp866.inc.php');
+require('encoding.windows-1250.inc.php');
+require('encoding.windows-1251.inc.php');
+require('encoding.windows-1252.inc.php');
+require('encoding.dingbats.inc.php');
+require('encoding.symbol.inc.php');
+
+require('ps.unicode.inc.php');
+require('ps.utils.inc.php');
+require('ps.whitespace.inc.php');
+require('ps.text.inc.php');
+
+require('ps.image.encoder.inc.php');
+require('ps.image.encoder.simple.inc.php');
+require('ps.image.encoder.stream.inc.php');
+require('ps.image.encoder.imagemagick.inc.php');
+
+require('tag.body.inc.php');
+require('tag.font.inc.php');
+require('tag.frame.inc.php');
+require('tag.input.inc.php');
+require('tag.img.inc.php');
+require('tag.select.inc.php');
+require('tag.span.inc.php');
+require('tag.table.inc.php');
+require('tag.td.inc.php');
+require('tag.utils.inc.php');
+require('tag.ulol.inc.php');
+
+require('tree.navigation.inc.php');
+
+require('html.attrs.inc.php');
+require('html.list.inc.php');
+
+require('xhtml.autoclose.inc.php');
+require('xhtml.utils.inc.php');
+require('xhtml.tables.inc.php');
+require('xhtml.p.inc.php');
+require('xhtml.lists.inc.php');
+require('xhtml.deflist.inc.php');
+require('xhtml.script.inc.php');
+require('xhtml.entities.inc.php');
+require('xhtml.comments.inc.php');
+require('xhtml.style.inc.php');
+require('xhtml.selects.inc.php');
+
+require('background.php');
+require('background.image.php');
+require('background.position.php');
+
+require('height.php');
+require('width.php');
+
+require('css.inc.php');
+require('css.utils.inc.php');
+require('css.parse.inc.php');
+require('css.parse.media.inc.php');
+require('css.apply.inc.php');
+
+require('css.background.color.inc.php');
+require('css.background.image.inc.php');
+require('css.background.repeat.inc.php');
+require('css.background.position.inc.php');
+require('css.background.inc.php');
+
+require('css.border.inc.php');
+require('css.border.style.inc.php');
+require('css.border.collapse.inc.php');
+require('css.bottom.inc.php');
+require('css.clear.inc.php');
+require('css.color.inc.php');
+require('css.colors.inc.php');
+require('css.content.inc.php');
+require('css.display.inc.php');
+require('css.float.inc.php');
+require('css.font.inc.php');
+require('css.height.inc.php');
+require('css.left.inc.php');
+require('css.line-height.inc.php');
+
+require('css.list-style-image.inc.php');
+require('css.list-style-position.inc.php');
+require('css.list-style-type.inc.php');
+require('css.list-style.inc.php');
+
+require('css.margin.inc.php');
+require('css.overflow.inc.php');
+require('css.padding.inc.php');
+
+require('css.page-break.inc.php');
+require('css.page-break-after.inc.php');
+
+require('css.position.inc.php');
+require('css.right.inc.php');
+require('css.rules.inc.php');
+require('css.selectors.inc.php');
+require('css.text-align.inc.php');
+require('css.text-decoration.inc.php');
+require('css.text-indent.inc.php');
+require('css.top.inc.php');
+require('css.vertical-align.inc.php');
+require('css.visibility.inc.php');
+require('css.white-space.inc.php');
+require('css.width.inc.php');
+require('css.z-index.inc.php');
+
+require('css.pseudo.add.margin.inc.php');
+require('css.pseudo.cellspacing.inc.php');
+require('css.pseudo.cellpadding.inc.php');
+require('css.pseudo.localalign.inc.php');
+require('css.pseudo.align.inc.php');
+require('css.pseudo.nowrap.inc.php');
+require('css.pseudo.link.destination.inc.php');
+require('css.pseudo.link.target.inc.php');
+require('css.pseudo.listcounter.inc.php');
+
+// After all CSS utilities and constants have been initialized, load the default (precomiled) CSS stylesheet
+require('css.defaults.inc.php');
+
+require('localalign.inc.php');
+
+require('output.class.php');
+require('converter.class.php');
+require('fetcher.class.php');
+
+require('writer.factory.class.php');
+
+require('writer.class.php');
+require('writer.fpdf.class.php');
+require('writer.fastps.class.php');
+
+require('treebuilder.class.php');
+require('image.class.php');
+
+require('anchor.inc.php');
+
+check_requirements();
+
+function push_table_border($border) {
+  global $g_table_border;
+  array_unshift($g_table_border, $border);
+}
+
+function pop_table_border() {
+  global $g_table_border;
+  array_shift($g_table_border);
+}
+
+function get_table_border() {
+  global $g_table_border;
+  return $g_table_border[0];
+}
+
+function traverse_dom_tree_pdf(&$data, &$root) {
+  switch ($root->node_type()) {
+  case XML_DOCUMENT_NODE:
+    $child = $root->first_child();
+    while($child) {
+      $body = traverse_dom_tree_pdf($data, $child);
+      if ($body) { return $body; }
+      $child = $child->next_sibling();
+    };
+    break;
+  case XML_ELEMENT_NODE:    
+    if (strtolower($root->tagname()) == "head") { traverse_head($data, $root); };
+    if (strtolower($root->tagname()) == "body") { return $root; }
+
+    $child = $root->first_child(); 
+    while ($child) {
+      $body = traverse_dom_tree_pdf($data, $child);
+      if ($body) { return $body; }
+      $child = $child->next_sibling();
+    };
+    
+    return null;
+  default:
+    return null;
+  }
+};
+
+// FIXME: avoid using globals; refactory it to class, incapsulating this var
+// FIXME: check for malcious use of URL
+// FIXME: check for absence of this parameter
+$g_border           = array(default_border());
+$g_font_size        = array(default_font_size());
+$g_table_border     = array(default_border());
+$g_baseurl          = trim($_REQUEST['URL']);
+
+// Add HTTP protoclo if none specified
+if (!preg_match("/^https?:/",$g_baseurl)) {
+  $g_baseurl = 'http://'.$g_baseurl;
+}
+
+$g_css_index        = 0;
+$g_font_weight      = array(WEIGHT_NORMAL);
+$g_font_style       = array(FS_NORMAL);
+$g_font_family      = array("times");
+
+$g_image_encoder = new PSImageEncoderStream();
+
+// Title of styleshee to use (empty if no preferences are set)
+$g_stylesheet_title = "";
+
+
+// ANT: Changed default margins from 0 to 15
+$g_config = array(
+                  'cssmedia'      => isset($_REQUEST['cssmedia']) ? $_REQUEST['cssmedia'] : "screen",
+                  'convert'       => isset($_REQUEST['convert']),
+                  'media'         => isset($_REQUEST['media']) ? $_REQUEST['media'] : "A4",
+                  'scalepoints'   => isset($_REQUEST['scalepoints']),
+                  'renderimages'  => isset($_REQUEST['renderimages']),
+                  'renderlinks'   => isset($_REQUEST['renderlinks']),
+                  'pagewidth'     => (int)$_REQUEST['pixels'],
+                  'landscape'     => isset($_REQUEST['landscape']),
+                  'method'        => isset($_REQUEST['method']) ? $_REQUEST['method'] : "ps" ,
+                  'margins'       => array(
+                                           'left'   => isset($_REQUEST['leftmargin'])   ? (int)$_REQUEST['leftmargin']   : 15,
+                                           'right'  => isset($_REQUEST['rightmargin'])  ? (int)$_REQUEST['rightmargin']  : 15,
+                                           'top'    => isset($_REQUEST['topmargin'])    ? (int)$_REQUEST['topmargin']    : 15,
+                                           'bottom' => isset($_REQUEST['bottommargin']) ? (int)$_REQUEST['bottommargin'] : 15
+                                           ),
+                  'encoding'      => isset($_REQUEST['encoding']) ? $_REQUEST['encoding'] : "",
+                  'compress'      => isset($_REQUEST['compress']) ? $_REQUEST['compress'] : 1,
+                  'output'        => isset($_REQUEST['output']) ? $_REQUEST['output'] : 0,
+                  'pdfversion'    => isset($_REQUEST['pdfversion']) ? $_REQUEST['pdfversion'] : "1.2",
+                  'transparency_workaround' => isset($_REQUEST['transparency_workaround']),
+                  'imagequality_workaround' => isset($_REQUEST['imagequality_workaround']),
+                  'draw_page_border' => isset($_REQUEST['pageborder']),
+                  'debugbox'      => isset($_REQUEST['debugbox']),
+                  'html2xhtml'    => !isset($_REQUEST['html2xhtml'])
+                  );
+
+                  // ========== Entry point
+                  parse_config_file('./.html2ps.config');
+
+                  switch ($g_config['output']) {
+                  case 0:
+                    $sink = new BrowserInlineOutput;
+                    break;
+                  case 1:
+                    $sink = new BrowserAttachmentOutput;
+                    break;
+                  case 2:
+                    $sink = new FileOutput;
+                    break;
+                  }
+
+$sink->set_filename($g_baseurl);
+
+$psdata = WriterFactory::create($g_config['method'], $g_config['compress'], $g_config['pdfversion']);
+
+$psdata->set_output($sink);
+// Default filename is equal to the escaped url
+
+// Delete old temporary files in the local temporary directory
+$psdata->cleanup_temp();
+
+$g_media = Media::predefined($g_config['media']);
+$g_media->set_landscape($g_config['landscape']);
+$g_media->set_margins($g_config['margins']);
+$g_media->set_pixels($g_config['pagewidth']);
+
+$g_framepos = array(array('left' => 0,
+                          'top'  => 0,
+                          'rows' => array($g_media->height() - $g_media->margins['top']  - $g_media->margins['bottom']), 
+                          'cols' => array($g_media->width()  - $g_media->margins['left'] - $g_media->margins['right']),
+                          'current_row' => 0, 
+                          'current_col' => 0));
+
+
+$header = file_get_contents("./header.ps");
+$header = preg_replace("/##PAGE##/",$g_media->to_ps(),$header);
+$g_px_scale = mm2pt($g_media->width() - $g_media->margins['left'] - $g_media->margins['right']) / $g_media->pixels;
+
+if ($g_config['scalepoints']) {
+  $header = preg_replace("/##PT##/","/pt {px 1.4 mul} def",$header);
+  //  $header = preg_replace("/##PT##/","/pt 1 px 1.4 mul /mul cvx 2 array astore cvx def",$header);
+  $g_pt_scale = $g_px_scale * 1.4;
+} else {
+  $header = preg_replace("/##PT##/","/pt {} def",$header);
+  $g_pt_scale = 1.0;
+};
+
+$header = preg_replace("/##PS2PDF##/",
+                       ($g_config['method'] === "ps2pdf" && $g_config['transparency_workaround']) ? "/ps2pdf-transparency-hack true def" : "/ps2pdf-transparency-hack false def",$header);
+$header = preg_replace("/##TRANSPARENCY##/",($g_config['transparency_workaround']) ? "/no-transparency-output true def" : "/no-transparency-output false def",$header);
+
+if ($g_config['imagequality_workaround']) {
+  $header = preg_replace("/##IMAGEQUALITY##/", "<< /ColorACSImageDict << /QFactor 0.2 /Blend 1 /HSamples [1 1 1 1] /VSamples [1 1 1 1] >> >> setdistillerparams", $header);
+} else {
+  $header = preg_replace("/##IMAGEQUALITY##/", "", $header);
+};
+
+$header = preg_replace("/##PAGEBORDER##/",($g_config['draw_page_border']) ? "true" : "false",$header);
+$header = preg_replace("/##DEBUGBOX##/",($g_config['debugbox']) ? "true" : "false",$header);
+
+$psdata->write( $header ); $psdata->write("\n");
+$psdata->write(file_get_contents('array.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('background.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('background.image.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('border.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.block.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.block.inline.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.break.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.button.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.checkbutton.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.container.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.frame.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.generic.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.generic.inline.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.iframe.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.image.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.inline.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.input.check.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.input.radio.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.input.text.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.inline.whitespace.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.list-item.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.radiobutton.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.select.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.span.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.table.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.table.row.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.table.cell.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.table.cell.fake.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.text.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('box.whitespace.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('cellspan.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('class.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('color.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('containing_block.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('context.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('flow.block.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('flow.box.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('flow.float.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('flow.inline.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('flow.inline.block.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('flow.legend.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('flow.table.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('flow_viewport.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('font.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('geometry.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('height.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('image.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('position.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('predicates.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('table.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('table.row.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('text-align.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('vertical-align.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('viewport.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('width.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.iso-8859-2.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.iso-8859-3.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.iso-8859-4.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.iso-8859-5.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.iso-8859-7.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.iso-8859-9.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.iso-8859-10.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.iso-8859-11.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.iso-8859-13.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.iso-8859-14.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.iso-8859-15.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.windows-1250.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.windows-1251.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.windows-1252.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.koi8-r.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.dingbats.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('encoding.symbol.ps')); $psdata->write("\n");
+$psdata->write(file_get_contents('init.ps')); $psdata->write("\n");
+
+// ANT: Connect page fetcher (post html)
+
+/*
+// Fetch the page now
+$fetcher = new Fetcher();
+if ($fetcher->fetch($g_baseurl)) {
+  if ($fetcher->code != HTTP_OK) {
+    $_server_response = $fetcher->headers;
+    $_http_error = $fetcher->code;
+    include('templates/http_error.html');
+    error_log("Cannot open $g_baseurl, HTTP result code is: ".$fetcher->code);
+    die();
+  };
+
+  $html = $fetcher->content;
+  // Possilby we have been redirected somewhere; update baseurl
+  $g_baseurl = $fetcher->url;
+} else {
+  die("Cannot open $g_baseurl");
+}
+*/
+//$g_baseurl = "http://ant.aereus.com/";
+$html = stripslashes($_POST['printbody']);
+
+// Check if we've set the 'autodetect' encoding for conversion.
+// In this case the encoding sholb be determined using the
+// fetcher object
+//
+//if ($g_config['encoding'] === "") {
+//  $g_config['encoding'] = $fetcher->encoding;
+//};
+
+// ANT: Manual encoding
+$g_config['encoding'] = "iso-8859-1";
+
+// Remove control symbols if any
+$html = preg_replace('/[\x00-\x07]/', "", $html);
+
+$converter = Converter::create();
+$html = $converter->to_utf8($html, $g_config['encoding']);
+
+// Convert HTML to XHTML
+if ($g_config['html2xhtml']) {
+  $html = html2xhtml($html);
+} else {
+  // Do some addditional processing - character references, comments, etc.
+  $html = xhtml2xhtml($html);
+}
+
+// Run the XML parser on the XHTML we've prepared
+$dom_tree = TreeBuilder::build($html);
+
+// Check if parser returned valid document
+if (!$dom_tree) {
+  readfile('templates/cannot_parse.html');
+  error_log("Cannot parse document: $g_baseurl");
+  die();
+}
+
+scan_styles($dom_tree);
+// Temporary hack: convert CSS rule array to CSS object
+$g_css_obj = new CSSObject;
+foreach ($g_css as $rule) {
+  $g_css_obj->add_rule($rule);
+}
+
+$body = traverse_dom_tree_pdf($psdata, $dom_tree);
+
+// Create output driver
+$viewport = $psdata->get_viewport($g_media);
+
+$box =& create_pdf_box($viewport, $body);
+
+// As BODY generated box have zero calculated width at the very moment,
+// and we need some box to use as a parameter to _calc_percentage_margins, 
+// we'll create a fake box having with equal to the viewport width.
+$media_box = new BlockBoxPDF($viewport);
+$media_box->width = mm2pt($g_media->width() - $g_media->margins['left'] - $g_media->margins['right']);
+
+// Calculate actual margin values 
+$box->_calc_percentage_margins($media_box);
+
+$box->width = mm2pt($g_media->width() - $g_media->margins['left'] - $g_media->margins['right']) - 
+$box->_get_hor_extra();
+
+$box->height = mm2pt($g_media->height() - $g_media->margins['top'] - $g_media->margins['bottom']) -
+$box->_get_vert_extra();
+
+$box->put_top(mm2pt($g_media->height() - 
+                    $g_media->margins['top']) - 
+              $box->get_extra_top());
+
+$box->put_left(mm2pt($g_media->margins['left']) + 
+               $box->get_extra_left());
+
+// Set leading whitespace width to zero 
+// We cannot do it in 'reflow', as get_min/get_max_width function 
+// can use child raw width value before we call this child's reflow method.
+$flag = false; 
+$whitespace_flag = false;
+$box->reflow_whitespace($flag, $whitespace_flag);
+
+if ($g_config['method'] === "ps" || $g_config['method'] === "ps2pdf") {
+  $box->to_ps($psdata);
+} else {
+  $box->pre_reflow_images();
+
+  $fake_parent = null;
+  $context = new FlowContext;
+  $context->push_viewport(new FlowViewport($box));
+
+  $box->reflow($fake_parent, $context);
+  $box->reflow_inline();
+
+  // Flow absolute-positioned box
+  for ($i=0; $i<count($context->absolute_positioned); $i++) {
+    $context->push();
+    $context->absolute_positioned[$i]->reflow_absolute($context);
+    $context->pop();
+  };
+         
+  // Flow fixed-positioned box
+  for ($i=0; $i<count($context->fixed_positioned); $i++) {
+    $context->push();
+    $context->fixed_positioned[$i]->reflow_fixed($context);
+    $context->pop();
+  };
+
+  // TODO: possibly extend the box height to fit all absolute positioned boxes
+
+  // Make the top-level box competely fill the last page
+  $page_real_height = mm2pt($g_media->height() - $g_media->margins['top'] - $g_media->margins['bottom']);
+
+  // Note we cannot have less than 1 page in our doc; max() call
+  // is required as we, in general, CAN have the content height strictly equal to 0.
+  // In this case wi still render the very first page
+  $pages = max(1,ceil($box->get_full_height() / $page_real_height));
+
+  $box->height = $pages * $page_real_height;
+
+  $viewport->anchors = array();
+  $box->reflow_anchors($viewport, $viewport->anchors);
+
+  // Output PDF pages using chosen PDF driver
+  for ($i=0; $i<$pages; $i++) {
+    $viewport->save();
+    $viewport->setup_clip();
+
+    $box->show($viewport); 
+
+    // Absolute positioned boxes should be shown after all other boxes, because 
+    // they're placed higher in the stack-order
+    for ($j=0; $j<count($context->absolute_positioned); $j++) {
+      if ($context->absolute_positioned[$j]->visibility === VISIBILITY_VISIBLE) {
+        $context->absolute_positioned[$j]->show($viewport);
+      };
+    };
+
+    $viewport->restore();
+
+    for ($j=0; $j<count($context->fixed_positioned); $j++) {
+      if ($context->fixed_positioned[$j]->visibility === VISIBILITY_VISIBLE) {
+        $context->fixed_positioned[$j]->show_fixed($viewport);
+      };
+    };
+
+    if ($g_config['draw_page_border']) { $viewport->draw_page_border(); };
+    // Add page if currently rendered page is not last
+    if ($i<$pages-1) { $viewport->next_page(); }
+  }
+}
+
+$psdata->write( file_get_contents("./footer.ps") );
+$psdata->release();
+
+// Non HTML-specific cleanup
+//
+Image::clear_cache();
+
+?>

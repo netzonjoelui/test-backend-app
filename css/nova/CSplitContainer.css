@@ -1,0 +1,24 @@
+/**************************************************************************
+ *	CSplitContainer.js
+ **************************************************************************/
+.CSplitContainerHorizResizeBar
+{
+	height: 5px;	
+}
+.CSplitContainerHorizResizeBarOver
+{
+	height: 5px;
+	background-color: blue;
+	cursor: row-resize;
+}
+
+.CSplitContainerVertResizeBar
+{
+	width: 5px;	
+}
+.CSplitContainerVertResizeBarOver
+{
+	width: 5px;
+	background-color: blue;
+	cursor: col-resize;
+}

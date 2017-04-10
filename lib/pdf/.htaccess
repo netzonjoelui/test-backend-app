@@ -1,0 +1,2 @@
+php_value max_execution_time 7200 
+php_value memory_limit 800M

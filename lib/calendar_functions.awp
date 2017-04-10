@@ -1,0 +1,832 @@
+<?php
+function GetBlockName($block, $toget = 'all')
+{
+	// Get whole hour and remaining minutes
+	if ($block < 60)
+	{
+		if ($block == 0)
+			$remain = 0;
+		else
+			$remain = 60 - $block;
+		$hour = 0;
+	}
+	else
+	{
+		$remain = $block % 60;
+		$hour = ($remain) ? (($block-$remain)/60) : $block / 60;
+	}
+	// Now set min
+	if ($remain && $remain < 10)
+		$min = "0".$remain;
+	else if ($remain && $remain >= 10)
+		$min = $remain;
+	else
+		$min = "00";
+	
+	// Create AM-PM string
+	if ($hour < 12 || $hour == 24)
+	{
+		if ($hour == 0 || $hour == 24) 
+			$hour = 12;
+		$ante = "AM";
+		//$res .= ":$min AM";
+	}
+	else if ($hour == 12)
+	{
+		//$res = $res.":$min PM";
+		$ante = "PM";
+	}
+	else if ($hour >= 12)
+	{
+		//$res = ($res-12).":$min PM";
+		$hour = ($hour-12);
+		$ante = "PM";
+	}
+	
+	switch ($toget)
+	{
+	case 'all':
+		return "$hour:$min $ante";
+		//return $block;
+		break;
+	case 'hour':
+		return $hour;
+		break;
+	case 'ante':
+		return $ante;
+		break;
+	case 'minute':
+		return $min;
+		break;
+	}
+}
+
+function GetBlockName24($block)
+{
+	// Get whole hour and remaining minutes
+	$remain = $block % 60;
+	$res = ($remain) ? (($block-$remain)/60) : $block / 60;
+	
+	// Now set min
+	if ($remain && $remain < 10)
+		$min = "0".$remain;
+	else if ($remain && $remain >= 10)
+		$min = $remain;
+	else
+		$min = "00";
+	
+	$res = $res.":".$min;
+	
+	return $res;
+}
+
+function GetBlockHour($block)
+{
+	// Get whole hour and remaining minutes
+	$remain = $block % 60;
+	$res = ($remain) ? (($block-$remain)/60) : $block / 60;
+	
+	return $res;
+}
+
+function GetBlockMin($block)
+{
+	// Get whole hour and remaining minutes
+	$remain = $block % 60;
+	
+	return $remain;
+}
+
+function GetNextMonth($curmonth)
+{
+	if ($curmonth == 12)
+		return 1;
+	else
+		return $curmonth + 1;
+}
+
+function GetPreviousMonth($curmonth)
+{
+	if ($curmonth == 1)
+		return 12;
+	else
+		return $curmonth - 1;
+}
+
+function GetNextWeek($month, $day, $year)
+{
+	$update = date("Y-m-d", strtotime("+ 1 week", strtotime("$year-$month-$day")));
+	return $update;
+}
+
+function GetPreviousWeek($month, $day, $year)
+{
+	$update = date("Y-m-d", strtotime("-1 week", strtotime("$year-$month-$day")));
+	return $update;
+}
+
+function GetNextWeekString($month, $day, $year)
+{
+	$nextweek = GetNextWeek($month, $day, $year);
+	$res = "month=".date("m", strtotime($nextweek));
+	$res .= "&year=".date("Y", strtotime($nextweek));
+	$res .= "&day=".date("d", strtotime($nextweek));
+
+		
+	return $res;
+}
+
+function GetPreviousWeekString($month, $day, $year)
+{
+	$prevweek = GetPreviousWeek($month, $day, $year);
+	$res = "month=".date("m", strtotime($prevweek));
+	$res .= "&year=".date("Y", strtotime($prevweek));
+	$res .= "&day=".date("d", strtotime($prevweek));
+		
+	return $res;
+}
+
+
+function GetNextMonthString($curmonth, $curyear)
+{
+	$nextmon = GetNextMonth($curmonth);
+	if ($nextmon == 1)
+		$res = "month=$nextmon&year=".($curyear+1);
+	else
+		$res = "month=$nextmon&year=$curyear";
+		
+	return $res;
+}
+
+function GetPreviousMonthString($curmonth, $curyear)
+{
+	$prevmon = GetPreviousMonth($curmonth);
+	if ($prevmon == 12)
+		$res = "month=$prevmon&year=".($curyear-1);
+	else
+		$res = "month=$prevmon&year=$curyear";
+		
+	return $res;
+}
+
+function GetNextDayString($month, $day, $year)
+{
+	$res = "month=".date("m", strtotime("+1 day", strtotime("$year-$month-$day")));;
+	$res .= "&year=".date("Y", strtotime("+1 day", strtotime("$year-$month-$day")));;
+	$res .= "&day=".date("d", strtotime("+1 day", strtotime("$year-$month-$day")));;
+
+		
+	return $res;
+}
+
+function GetPreviousDayString($month, $day, $year)
+{
+	$res = "month=".date("m", strtotime("-1 day", strtotime("$year-$month-$day")));;
+	$res .= "&year=".date("Y", strtotime("-1 day", strtotime("$year-$month-$day")));;
+	$res .= "&day=".date("d", strtotime("-1 day", strtotime("$year-$month-$day")));;
+
+		
+	return $res;
+}
+
+function GetDayNumberCols(&$dbh, $stime, $etime, $timeint, $year, $month, $day)
+{
+	global $CALID;
+	
+	// Set default number of columns
+	$numcols = 1;
+	
+	// Find out how many columns we need
+	for ($i=($stime/$timeint); $i<=($etime/$timeint); $i++)
+	{
+		$curblock = $i*$timeint;
+		// Look for events taking place during this period
+		$tev = "calendar_events"; // main events table
+		$query = "select $tev.id from $tev, calendars
+				  where $tev.date_start ='$year-$month-$day' and $tev.date_end='$year-$month-$day'
+				  and ($tev.start_block <='".(($curblock+$timeint)-1)."') 
+				  and $tev.end_block >'".($curblock)."'
+				  and all_day!='t'
+				  and $tev.calendar=calendars.id and calendars.id='$CALID'";
+		
+		$res = $dbh->Query($query);
+		$num = $dbh->GetNumberRows($res);
+		$numcols = ($num > $numcols) ? $num : $numcols;
+		$dbh->FreeResults($res);
+	}
+	return $numcols;
+}
+
+function GetEvCol($evid, $numcols)
+{
+	$res = 0;
+	$bFound = false;
+	global $COLS;
+	
+	if (is_array($COLS))
+	{
+		for($i=0; $i<count($COLS); $i++)
+		{
+			if ($COLS[$i] == $evid)
+			{
+				$bFound = true;
+				$res = $i;
+			}
+		}
+		// Find empty column if not already entered
+		if ($bFound == false)
+		{
+			for($i=0; $i<$numcols; $i++)
+			{
+				if ($COLS[$i] == 0 && $bFound == false)
+				{
+					$res = $i;
+					$COLS[$i] = $evid;
+					$bFound = true;
+				}
+			}
+		}
+	}
+	else
+	{
+		$COLS[0] = $evid;
+	}
+	
+	return $res;
+}
+
+function GetWeekFirstDay($month, $day, $year)
+{
+	$days = array('Sun'=>1, 'Mon'=>2, 'Tue'=>3, 'Wed'=>4, 'Thu'=>5, 'Fri'=>6, 'Sat'=>7);
+	// Get the day of selected date
+	$today = date("D", strtotime("$year-$month-$day"));
+	
+	if ($today != 'Sun')
+	{
+		foreach($days as $dname=>$dnum)
+		{
+			if ($dname == $today)
+				$first = ($day - $dnum) + 1;
+		}
+	}
+	else
+		$first = $day;
+	
+	return $first;
+}
+
+function GetDefaultCalendar(&$dbh, $userid)
+{
+	$query = "select id from calendars where user_id='$userid' and def_cal='t'";
+	$result = $dbh->Query($query);
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result);
+		$id = $row['id'];
+		$dbh->FreeResults($result);
+	}
+	else
+	{
+		$dbh->Query("insert into calendars(name, user_id, def_cal, date_created) values('My Calendar', '$userid', 't', 'now');
+					 select currval('calendars_id_seq') as id;
+					 insert into calendar_events_labels(user_id, name, color) values('$userid', 'Birthdays', 'FF9484');
+					 insert into calendar_events_labels(user_id, name, color) values('$userid', 'Meetings', 'EEEEEE');
+					 insert into calendar_events_labels(user_id, name, color) values('$userid', 'Holidays', 'FFE773')");
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result);
+			$id = $row['id'];
+			$dbh->FreeResults($result);
+		}
+	}
+	
+	return $id;
+}
+
+function GetProjectCalendar(&$dbh, $PID, $project_name)
+{
+	$query = "select id from calendars where project_id='$PID' and def_cal='t'";
+	$result = $dbh->Query($query);
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result);
+		$id = $row['id'];
+		$dbh->FreeResults($result);
+	}
+	else
+	{
+		$dbh->Query("insert into calendars(name, project_id, def_cal, date_created) values('$project_name', '$PID', 't', 'now');
+					 select currval('calendars_id_seq') as id;
+					 insert into calendar_events_labels(project_id, name, color) values('$PID', 'Deadlines', 'FF9484');
+					 insert into calendar_events_labels(project_id, name, color) values('$PID', 'Meetings', 'EEEEEE');
+					 insert into calendar_events_labels(project_id, name, color) values('$PID', 'Holidays', 'FFE773')");
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result);
+			$id = $row['id'];
+			$dbh->FreeResults($result);
+		}
+	}
+	
+	return $id;
+}
+function CalendarGetProjectId(&$dbh, $CALID)
+{
+	$id = NULL;
+	$query = "select project_id as id from calendars where id='$CALID'";
+	$result = $dbh->Query($query);
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result);
+		$id = $row['id'];
+		$dbh->FreeResults($result);
+	}
+	
+	return $id;
+}
+
+function CalGetNumEvents(&$dbh, $calid)
+{
+	$result = $dbh->Query("select count(*) as num from calendar_events where calendar='$calid'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result);
+		$num = $row['num'];
+		$dbh->FreeResults($result);
+	}
+	
+	$num = (is_numeric($num)) ? $num : 0;
+	return $num;
+}
+
+function CalGetNumSharedUsers(&$dbh, $calid)
+{
+	$result = $dbh->Query("select count(*) as num from calendar_sharing where 
+							calendar='$calid' and accepted='t'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result);
+		$num = $row['num'];
+		$dbh->FreeResults($result);
+	}
+	
+	$num = (is_numeric($num)) ? $num : 0;
+	return $num;
+}
+
+/******************************************************************************************************************
+	Function:	CreateRecurringLink(&$dbh, $calid, $month, $day, $year)
+	
+	Purpose:	Check for and create events with link to a recurring event
+	
+	Details:	There are 4 types of recurring events
+				1:	Daily
+					Check date_start - date_end, interval, and day for match
+				2:	Weekly
+					Check date_start - date_end, interval, and week_days for match
+				3:	Monthly
+					Check date_start - date_end, (day, interval) or (relative_type, relative_section) for match
+				4:	Yearly
+					Check date_start - date_end, month, (dat) or (relative_type, relative_section) for match
+******************************************************************************************************************/
+function RecurringCreateLinks(&$dbh, $calid, $month, $day, $year)
+{
+	// Get recurring events for date range
+	$query = "select id, type, interval, day, month, relative_type, relative_section, week_days[1] as day0, 
+				week_days[2] as day1, week_days[3] as day2, week_days[4] as day3, week_days[5] as day4, 
+				week_days[6] as day5, week_days[7] as day6, date_start, date_end, calendar, start_block,
+				end_block, location, name, label, notes, sharing, all_day, contact_id
+				from calendar_events_recurring where date_start<='$month/$day/$year' and 
+				(date_end>='$month/$day/$year' or date_end is NULL) and calendar='$calid'";
+	$result = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($result);
+	for ($i=0; $i<$num;$i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$id = $row['id'];
+		$type = $row['type'];
+		$interval = ($row['interval']) ? $row['interval'] : 1;
+		
+		// Skip by today if an event already exists for this recurrance
+		if (!RecurringEventExists($dbh, $calid, $id, "$month/$day/$year", "$month/$day/$year"))
+		{
+			switch($type)
+			{
+			case 1: // Daily
+				// Check additional conditions
+				$curdate = strtotime($row['date_start']);
+				$today = strtotime("$month/$day/$year");
+				while ($curdate <= $today)
+				{
+					if ($curdate == $today)
+					{
+						// Insert new event
+						$query = "insert into calendar_events
+									(start_block, end_block, location, calendar, contact_id,
+									name, label, sharing, notes, date_start, date_end, all_day, recur_id)
+									values
+									('".$row['start_block']."', '".$row['end_block']."', 
+									'".$row['location']."', '".$row['calendar']."', ".db_CheckNumber($row['contact_id']).", 
+									'".$row['name']."', ".db_CheckNumber($row['label']).", 
+									'".$row['sharing']."', '".$row['notes']."', ".db_UploadDate(date("m/d/Y", $curdate)).", 
+									".db_UploadDate(date("m/d/Y", $curdate)).", '".$row['all_day']."', '$id');
+									select currval('calendar_events_id_seq') as id;";
+						$idres = $dbh->Query($query);
+						if ($dbh->GetNumberRows($idres))
+						{
+							$idrow = $dbh->GetNextRow($idres, 0);
+							RecurringCopyReminders($dbh, $id, $idrow['id']);
+						}
+					}
+					// Add interval days to the current looped timestamp
+					$curdate = strtotime("+ ".$interval." days", $curdate);
+				}
+				break;
+			case 2: // Weekly
+				// Check additional conditions
+				$curdate = strtotime($row['date_start']);
+				$today = strtotime("$month/$day/$year");
+				$beginday = date("w", $curdate);
+				while ($curdate <= $today)
+				{
+					for ($j=$beginday; $j<=7; $j++)
+					{
+						if ($curdate == $today && $row['day'.date("w", $today)] == 't')
+						{
+							// Insert new event
+							$query = "insert into calendar_events
+										(start_block, end_block, location, calendar, contact_id,
+										name, label, sharing, notes, date_start, date_end, all_day, recur_id)
+										values
+										('".$row['start_block']."', '".$row['end_block']."', 
+										'".$row['location']."', '".$row['calendar']."', ".db_CheckNumber($row['contact_id']).", 
+										'".$row['name']."', ".db_CheckNumber($row['label']).", 
+										'".$row['sharing']."', '".$row['notes']."', ".db_UploadDate(date("m/d/Y", $curdate)).", 
+										".db_UploadDate(date("m/d/Y", $curdate)).", '".$row['all_day']."', '$id');
+										select currval('calendar_events_id_seq') as id;";
+							$idres = $dbh->Query($query);
+							if ($dbh->GetNumberRows($idres))
+							{
+								$idrow = $dbh->GetNextRow($idres, 0);
+								RecurringCopyReminders($dbh, $id, $idrow['id']);
+							}
+						}
+						$beginday == 0;
+						$curdate = strtotime("+1 day", $curdate);
+					}
+					// Add interval weeks to the current looped timestamp
+					if ($interval > 1)
+						$curdate = strtotime("+ ".($interval-1)." weeks", $curdate);
+				}
+				break;
+			case 3: // Monthly
+				if ($row['relative_type'] && $row['relative_section'])
+				{
+					$thismonth = strtotime("$month/1/$year");
+					$curmonth = date("m", strtotime($row['date_start']));
+					$curyear = date("Y", strtotime($row['date_start']));
+					$curdate = strtotime("$curmonth/1/$curyear");
+					
+					while ($curdate <= $thismonth)
+					{
+						if ($curdate == $thismonth)
+						{
+							// get first - last weekday numerical representation
+							$target_day = RecurringGetFirstToLastDay($month, $year, $row['relative_type'], $row['relative_section']);
+							$today = date("d", strtotime("$month/$day/$year"));
+							if ($target_day == $today)
+							{
+								// Insert new event
+								$query = "insert into calendar_events
+											(start_block, end_block, location, calendar, contact_id,
+											name, label, sharing, notes, date_start, date_end, all_day, recur_id)
+											values
+											('".$row['start_block']."', '".$row['end_block']."', 
+											'".$row['location']."', '".$row['calendar']."', ".db_CheckNumber($row['contact_id']).", 
+											'".$row['name']."', ".db_CheckNumber($row['label']).", 
+											'".$row['sharing']."', '".$row['notes']."', ".db_UploadDate("$month/$day/$year").", 
+											".db_UploadDate("$month/$day/$year").", '".$row['all_day']."', '$id');
+											select currval('calendar_events_id_seq') as id;";
+								$idres = $dbh->Query($query);
+								if ($dbh->GetNumberRows($idres))
+								{
+									$idrow = $dbh->GetNextRow($idres, 0);
+									RecurringCopyReminders($dbh, $id, $idrow['id']);
+								}
+							}
+						}
+						$curdate = strtotime("+ ".$interval." months", $curdate);
+					}
+				}
+				else // Day and interval only
+				{
+					$curdate = strtotime(date("Y-m", strtotime($row['date_start']))."-".$row['day']);
+					//print(date("Y-m", strtotime($row['date_start']))."-".$row['day']."<br>");
+					$today = strtotime("$month/$day/$year");
+					while ($curdate <= $today && $curdate != -1)
+					{
+						if ($curdate == $today)
+						{
+							// Insert new event
+							$query = "insert into calendar_events
+										(start_block, end_block, location, calendar, contact_id,
+										name, label, sharing, notes, date_start, date_end, all_day, recur_id)
+										values
+										('".$row['start_block']."', '".$row['end_block']."', 
+										'".$row['location']."', '".$row['calendar']."', ".db_CheckNumber($row['contact_id']).", 
+										'".$row['name']."', ".db_CheckNumber($row['label']).", 
+										'".$row['sharing']."', '".$row['notes']."', ".db_UploadDate(date("m/d/Y", $curdate)).", 
+										".db_UploadDate(date("m/d/Y", $curdate)).", '".$row['all_day']."', '$id');
+										select currval('calendar_events_id_seq') as id;";
+							$idres = $dbh->Query($query);
+							if ($dbh->GetNumberRows($idres))
+							{
+								$idrow = $dbh->GetNextRow($idres, 0);
+								RecurringCopyReminders($dbh, $id, $idrow['id']);
+							}
+						}
+						// Add interval months to the current looped timestamp
+						$curdate = strtotime("+ ".$interval." months", $curdate);
+					}
+				}
+				break;
+			case 4: // Yearly
+				if ($row['relative_type'] && $row['relative_section'])
+				{
+					$evmonth = $row['month'];
+					
+					if ($month == $evmonth)
+					{
+						// get first - last weekday numerical representation
+						$target_day = RecurringGetFirstToLastDay($month, $year, $row['relative_type'], $row['relative_section']);
+						$today = date("d", strtotime("$month/$day/$year"));
+						if ($target_day == $today)
+						{
+							// Insert new event
+							$query = "insert into calendar_events
+										(start_block, end_block, location, calendar, contact_id,
+										name, label, sharing, notes, date_start, date_end, all_day, recur_id)
+										values
+										('".$row['start_block']."', '".$row['end_block']."', 
+										'".$row['location']."', '".$row['calendar']."', ".db_CheckNumber($row['contact_id']).", 
+										'".$row['name']."', ".db_CheckNumber($row['label']).", 
+										'".$row['sharing']."', '".$row['notes']."', ".db_UploadDate("$month/$day/$year").", 
+										".db_UploadDate("$month/$day/$year").", '".$row['all_day']."', '$id');
+										select currval('calendar_events_id_seq') as id;";
+							$idres = $dbh->Query($query);
+							if ($dbh->GetNumberRows($idres))
+							{
+								$idrow = $dbh->GetNextRow($idres, 0);
+								RecurringCopyReminders($dbh, $id, $idrow['id']);
+							}
+						}
+					}
+				}
+				else // Each year on the day of this event
+				{
+					$curdate = strtotime($row['date_start']);
+					$curdate = strtotime(date("Y", strtotime($row['date_start']))."-".$row['month']."-".$row['day']);
+					$today = strtotime("$month/$day/$year");
+					while ($curdate <= $today)
+					{
+						if ($curdate == $today)
+						{
+							// Insert new event
+							$query = "insert into calendar_events
+										(start_block, end_block, location, calendar, contact_id,
+										name, label, sharing, notes, date_start, date_end, all_day, recur_id)
+										values
+										('".$row['start_block']."', '".$row['end_block']."', 
+										'".$row['location']."', '".$row['calendar']."',  ".db_CheckNumber($row['contact_id']).", 
+										'".$row['name']."', ".db_CheckNumber($row['label']).", 
+										'".$row['sharing']."', '".$row['notes']."', ".db_UploadDate(date("m/d/Y", $curdate)).", 
+										".db_UploadDate(date("m/d/Y", $curdate)).", '".$row['all_day']."', '$id');
+										select currval('calendar_events_id_seq') as id;";
+							$idres = $dbh->Query($query);
+							if ($dbh->GetNumberRows($idres))
+							{
+								$idrow = $dbh->GetNextRow($idres, 0);
+								RecurringCopyReminders($dbh, $id, $idrow['id']);
+							}
+						}
+						// Add interval months to the current looped timestamp
+						$curdate = strtotime("+ ".$interval." years", $curdate);
+					}
+				}
+				break;
+			}
+		}
+	}
+	$dbh->FreeResults($result);
+}
+
+function RecurringEventExists(&$dbh, $calid, $recurid, $date_start, $date_end)
+{
+	$query = "select id from calendar_events_recurring where calendar='$calid'
+				and (id in (select recur_id from calendar_events where date_start='$date_start' and recur_id='$recurid')
+					or 
+					id in (select recurring_id from calendar_events_recurring_ex where recurring_id='$recurid' and exception_date='$date_start'))";
+	$result = $dbh->Query($query);
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result);
+		$exists = ($row['id']) ? true : false;
+		$dbh->FreeResults($result);
+	}
+	
+	return $exists;
+}
+
+function RecurringGetFirstToLastDay($month, $year, $type, $week_day)
+{
+	$weekday = CalGetWeekdayName($week_day);
+	// Get first, second, third, fourth, or last day of the week in the week_day variable
+	$tmpdate = strtotime("$type $weekday", strtotime("$month/1/$year"));
+	if (date("m", $tmpdate) > $month || date("m", $tmpdate) > $year) // we went one past the last day into the next month
+	{
+		$retday = RecurringGetFirstToLastDay($month, $year, $type-1, $week_day);
+	}
+	else
+	{
+		$retday = date("d", $tmpdate);
+	}
+
+	return $retday;
+}
+
+function EventGetName(&$dbh, $EID, $RID)
+{
+	if ($EID)
+		$res = $dbh->Query("select name from calendar_events where id='$EID'");
+	else if ($RID)
+		$res = $dbh->Query("select name from calendar_events_recurring where id='$RID'");
+	
+	if ($dbh->GetNumberRows($res))
+	{
+		$row = $dbh->GetNextRow($res, 0);
+		$retval = $row['name'];
+		$dbh->FreeResults($res);
+	}
+	
+	return $retval;
+}
+
+function CalGetReminderTypeName($id)
+{
+	switch ($id)
+	{
+	case 0:
+		return "None";
+	case 1:
+		return "Send Email";
+	case 2:
+		return "Send Text Message";
+	case 3:
+		return "Popup Alert";
+	}
+}
+
+function CalGetReminderIntervalName($id)
+{
+	switch ($id)
+	{
+	case 1:
+		return "Minute(s)";
+	case 2:
+		return "Hour(s)";
+	case 3:
+		return "Day(s)";
+	case 4:
+		return "Week(s)";
+	}
+}
+
+function RecurringCopyReminders(&$dbh, $recur_id, $event_id)
+{
+	$result = $dbh->Query("select * from calendar_events_reminders where recur_id='$recur_id'");
+	$num = $dbh->GetNumberRows($result);
+	for($i=0; $i<$num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$query = "insert into calendar_events_reminders(complete, event_id, count, interval, type, send_to)
+					values('".(($row['complete'] == 't') ? 't' : 'f')."', '$event_id', ".db_CheckNumber($row['count']).", 
+					".db_CheckNumber($row['interval']).", ".db_CheckNumber($row['type']).", '".$row['send_to']."');
+				  select currval('calendar_events_reminders_id_seq') as id;";
+		$idres = $dbh->Query($query);
+		if ($dbh->GetNumberRows($idres))
+		{
+			$idrow = $dbh->GetNextRow($idres, 0);
+			CalReminderSetExeTime($dbh, $event_id, $idrow['id'], $row['count'], $row['interval']);
+			$dbh->FreeResults($idres);
+		}
+	}
+	$dbh->FreeResults($result);
+}
+
+function CalReminderSetExeTime(&$dbh, $eid, $remid, $count, $interval)
+{
+	if ($eid)
+		$result = $dbh->Query("select start_block, date_start, all_day from calendar_events where id='$eid'");
+
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		
+		if ($row['all_day'] == 't')
+			$start_time = "0:00";
+		else
+			$start_time = GetBlockName24($row['start_block']);
+		
+		switch ($interval)
+		{
+		case 1:
+			$instr = "MINUTES";
+			break;
+		case 2:
+			$instr = "HOURS";
+			break;
+		case 3:
+			$instr = "DAYS";
+			break;
+		case 4:
+			$instr = "WEEKS";
+			break;
+		}
+		if ($count)
+			$cond = " - INTERVAL '$count $instr'";
+		$query = "update calendar_events_reminders set execute_time='".$row['date_start']." $start_time'::TIMESTAMP $cond
+					where id='$remid'";
+		$dbh->Query($query);
+		
+		$dbh->FreeResults($result);
+	}
+}
+
+function CalCreateHolidays(&$dbh, $calid)
+{
+	if (is_numeric($calid))
+	{
+		$result = $dbh->Query("select * from calendar_events_holidays");
+		$num = $dbh->GetNumberRows($result);
+		for($i=0; $i<$num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			$query = "insert into calendar_events_recurring(interval, day, relative_type, relative_section, date_start, date_end, sharing,
+															calendar, start_block, end_block, name, all_day, type, month, system_type)
+						values(".db_CheckNumber($row['interval']).", ".db_CheckNumber($row['day']).", 
+						".db_CheckNumber($row['relative_type']).", ".db_CheckNumber($row['relative_section']).", 
+						".db_UploadDate($row['date_start']).", ".db_UploadDate($row['date_end']).", '1',
+						'$calid', ".db_CheckNumber($row['start_block']).", ".db_CheckNumber($row['end_block']).", 
+						'".$dbh->Escape($row['name'])."', '".(($row['all_day'] == 't') ? 't' : 'f')."', 
+						".db_CheckNumber($row['type']).", ".db_CheckNumber($row['month']).", '1');";
+			$dbh->Query($query);
+		}
+		$dbh->FreeResults($result);
+	}
+}
+
+function CalGetStatusName(&$dbh, $staid)
+{
+	switch($staid)
+	{
+	case 1:
+		return 'Open';
+	case 2:
+		return 'Skipped/Missed';
+	case 3:
+		return 'Completed';
+	default:
+		return 'Open';
+	}
+}
+
+function CalGetWeekdayName($week_day)
+{
+	switch ($week_day)
+	{
+	case 1:
+		return 'Sunday';
+		break;
+	case 2:
+		return 'Monday';
+		break;
+	case 3:
+		return 'Tuesday';
+		break;
+	case 4:
+		return 'Wednesday';
+		break;
+	case 5:
+		return 'Thursday';
+		break;
+	case 6:
+		return 'Friday';
+		break;
+	case 7:
+		return 'Saturday';
+		break;
+	}
+}
+?>

@@ -1,0 +1,53 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("../calendar/calendar_functions.awp");
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+
+	header("Content-type: text/xml");			// Returns XML document
+	echo '<?xml version="1.0" encoding="UTF-8"
+	  standalone="yes"?>'; 
+	echo "<response>\n";
+	
+	/*
+	$query = "select calendar_events_reminders.type, calendar_events_reminders.send_to, 
+				calendar_events.name,  calendar_events.start_block, 
+				calendar_events.end_block, calendar_events.all_day, 
+				calendar_events.date_start, calendar_events.date_end, calendar_events.location,
+				calendar_events_reminders.event_id, calendar_events_reminders.id as remid from 
+				calendar_events_reminders, calendars, calendar_events
+				where calendar_events_reminders.event_id=calendar_events.id
+				and calendar_events.calendar=calendars.id and calendar_events_reminders.type = '3'
+				and calendars.user_id = '$USERID'
+				and calendar_events_reminders.execute_time <= now()
+				and (calendar_events_reminders.complete='f' or calendar_events_reminders.complete is NULL)";
+				
+	$result = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($result);
+	for($i=0; $i<$num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$dates = $row['date_start']." - ".(($row['date_end']) ? $row['date_end'] : "No End");
+		$times = ($row['all_day'] == 't') ? "All Day" : GetBlockName($row['start_block'])." - ".GetBlockName($row['end_block']);
+		$location = $row['location'];
+		// Set reminder complete
+		$dbh->Query("update calendar_events_reminders set complete='t' where id='".$row['remid']."'");
+		// Send reminder
+		print("<reminder>");
+		print("<event_id>".rawurlencode($row['event_id'])."</event_id>");
+		print("<event_name>".rawurlencode($row['name'])."</event_name>");
+		print("<location>".rawurlencode($location)."</location>");
+		print("<dates>".rawurlencode($dates)."</dates>");
+		print("<times>".rawurlencode($times)."</times>");
+		print("</reminder>");
+	}
+	$dbh->FreeResults($result);
+	 */
+	
+	echo "</response>";
+?>

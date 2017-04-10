@@ -1,0 +1,22 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	
+	$dbh = $ANT->dbh;
+	$CATID = $_GET['cid'];
+	header("Content-type: text/xml");			// Returns XML document
+	
+	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"
+	  standalone=\"yes\"?>"; 
+	echo '<gallery timer="5" order="sequential" fadetime="2" looping="yes" xpos="0" ypos="0">'."\n";
+	$result = $dbh->Query("select id, user_id, file_name from user_files where category_id='$CATID' and lower(file_type)='jpg' order by file_title");
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$filename = $row['id'];
+		echo "<image path=\"".$filename."\" />\n";
+	}
+	$dbh->FreeResults($result);
+	echo "</gallery>\n";
+?>

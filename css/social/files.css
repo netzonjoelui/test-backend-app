@@ -1,0 +1,17 @@
+/**************************************************************************************
+*	Pages:		For Aereus File Manager Specific Classes
+***************************************************************************************/
+.FileManagerFileSearch
+{
+	float:right;
+	height:20px;
+	line-height:20px;
+	padding-right:3px;
+	font-size:10px;
+	font-weight:bold;
+	color:#000000;
+}
+
+.FileSearchStyles {
+font-family: Arial, Verdana,  Helvetica, sans-serif; font-size: 10px; border: #B7B7B7; border-style:solid; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; height:16px; width:100%;
+}

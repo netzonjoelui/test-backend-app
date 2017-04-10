@@ -1,0 +1,281 @@
+<?php
+	function CheckCreatorMembership(&$dbh, $PID)
+	{
+		$result = $dbh->Query("select user_id from projects where id='$PID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$userid = $row['user_id'];
+			
+			$nres = $dbh->Query("select id from project_membership where project_id='$PID' and user_id='$userid'");
+			if (!$dbh->GetNumberRows($nres))
+				$dbh->Query("insert into project_membership(user_id, project_id, title, notes, accepted)
+							values('$userid', '$PID', 'Project Lead', 'Created Project', 't')");
+		}
+		
+	}
+
+	if ($_GET['setpos'] == 1 && $_GET['memid'] && $_GET['pos_id'])
+	{
+		$dbh->Query("update project_membership set position_id='".$_GET['pos_id']."' where id='".$_GET['memid']."'");
+		// Now assign any tasks assigned to position to this user
+		$result = $dbh->Query("select id from project_tasks where project='$PID' and position_id='".$_GET['pos_id']."'");
+		$numrows = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $numrows; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			$uid = ProjectGetMemberAttrib(&$dbh, $_GET['memid'], "user_id");
+			
+			$dbh->Query("update project_tasks set user_id='$uid' where id='".$row['id']."'");
+
+			// If there are position tasks, and duplicate members, ask what to do about tasks
+			$rest = $dbh->Query("select user_id from project_membership where 
+								   position_id='".$_GET['pos_id']."' and project_id='$PID' and user_id!='".$uid."'");
+			$numt = $dbh->GetNumberRows($rest);
+			for ($j = 0; $j < $numt; $j++)
+			{
+				$rowt = $dbh->GetNextRow($rest, $j);
+				
+				// Copy position tasks
+				$dbh->Query("insert into project_tasks (name, notes, user_id, date_entered, date_completed, priority, project, entered_by,
+							 deadline, cost_estimated, cost_actual, start_date, type, file_id, customer_id)
+							 select  name, notes, '".$rowt['user_id']."' as user_id, date_entered, date_completed, priority, project, entered_by,
+							 deadline, cost_estimated, cost_actual, start_date, type, file_id, customer_id
+							 from project_tasks where project='$PID' and position_id='".$_GET['pos_id']."'");
+			}
+		}
+		$dbh->FreeResults($result);
+
+	}
+
+	if ($_POST['save_position'] && $_POST['position_name'])
+	{
+		$dbh->Query("insert into project_positions(name, project_id) values('".$dbh->Escape($_POST['position_name'])."', '$PID')");
+	}
+
+	if (is_numeric($_GET['dres']))
+	{
+		$result = $dbh->Query("select user_id from project_membership where id='".$HTTP_GET_VARS['dres']."'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$duid = $row['user_id'];
+		}
+		
+		$dbh->Query("delete from project_membership where id='".$HTTP_GET_VARS['dres']."' and project_id='$PID'");
+		$dbh->Query("delete from project_tasks where user_id='$duid' and project='$PID'");
+	}
+
+	if (is_numeric($_GET['dpos']))
+	{
+		$dbh->Query("delete from project_positions where id='".$_GET['dpos']."' and project_id='$PID'");
+	}
+
+	if ($_POST['send_invitation'] && $_POST['invite_to'])
+	{
+		$delim = (strpos($_POST['invite_to'], ";") !== false) ? ';' : ',';
+		
+		$rec = explode($delim, $_POST['invite_to']);
+		
+		if (is_array($rec) && count($rec))
+		{
+			foreach($rec as $addr)
+			{
+				if ($addr && $addr != ' ')
+				{
+					// Determine if this attendee is a ant user, a personal contact, or just an email address
+					$email_address = EmailAdressGetDisplay($addr, 'address');
+					
+					// First look to see if this is an ANT user
+					$result = $dbh->Query("select user_id from email_users where lower(email_address)=lower('$email_address')");
+					if ($dbh->GetNumberRows($result))
+					{
+						$row = $dbh->GetNextRow($result, 0);
+						$add_uid = $row['user_id'];
+						$dbh->FreeResults($result);
+						
+						$result = $dbh->Query("select id from project_membership where user_id = '".$add_uid."' and project_id='$PID'");
+						if (!$dbh->GetNumberRows($result))
+						{
+							$query = "insert into project_membership(user_id, project_id, title, notes, invite_by, accepted)
+										values('".$add_uid."', '$PID', '".$_POST['title']."', 
+										'".$_POST['notes']."', '$USERNAME', 'f')";
+							$dbh->Query($query);
+							
+							// Set permissions
+							// TODO: Security
+							
+							$to = UserGetEmail(&$dbh, $add_uid);
+							$headers['From']  = UserGetEmail(&$dbh, $USERID);
+							$headers['To']  = $to;
+							$headers['Subject']  = "Project Invitation ".date('m/d/Y');
+							$headers["Date"] =  date('D, j M Y H:i:s ', mktime()) . EmailTimeZone();
+							$body = "This email has been sent to inform you that you have been ";
+							$body .= "invited to project '".GetProjectName(&$dbh, $PID)."' by ".$USERNAME." on ".date("l dS of F Y h:i:s A");
+							$body .= "\n\n Please accept or decline the invitation in the project manager!";
+							// Create new email object
+							$email = new Email();
+							$status = $email->send($to, $headers, $body);
+							unset($email);
+						}
+						else
+						{
+							$query = "update project_membership set title='".$_POST['title']."'
+										where user_id='".$add_uid."' and project_id='$PID'";
+							$dbh->Query($query);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	WindowFrameToolbarStart('100%');
+	echo ButtonCreate("Invite Member", "document.getElementById('divInvite').style.display='block'");
+	echo ButtonCreate("Add Position", "document.getElementById('divPosition').style.display='block'");
+	WindowFrameToolbarEnd();
+		
+	// Make sure user who created the project is listed as a member
+	CheckCreatorMembership(&$dbh, $PID);
+	
+	
+	
+	echo "<div id='divInvite' style='display:none;margin-top:10px;'>";
+	echo "<form name='frm_invite' action='project.awp?$FWDVARS' method='post'>";
+	WindowFrameStart("Invite New Member", "100%");
+	echo "		<table border='0'>
+				<tr style='font-weight:bold;'><td>User has access to:</td><td>Enter user email:</td></tr>
+				<tr>
+					<td>
+						<input type='checkbox' name='dacl_specifications' checked> Edit Specifications<br>
+						<input type='checkbox' name='dacl_subprojects' checked> Create Subprojects<br>
+						<input type='checkbox' name='dacl_files,' checked> Upload Files<br>
+						<input type='checkbox' name='dacl_invitations' checked> Invite Members<br>
+						<input type='checkbox' name='dacl_tasks' checked> Create Tasks for other members<br>
+					</td>
+					<td valign='top'>";
+						$acField = new CAutoComplete('/users/xml_getusers_email_ac.awp', 'invite_to', 
+														NULL, '', "style='width:250px'", ',');
+						$acField->PrintTextBox();
+	echo 				"<br />
+						<strong>Position</strong><br />
+						<input type='text' name='title' value='' style='width:250px' />
+						<br /><br />
+						".ButtonCreate("Send Invitation", "SUBMIT:frm_invite:send_invitation")."
+						".ButtonCreate("Cancel", "document.getElementById('divInvite').style.display='none'")."
+					</td> 
+				</tr>
+			</table>";
+	WindowFrameEnd();
+	echo "	</form>";
+	echo "  </div>";
+	
+	echo "<div id='divPosition' style='display:none;margin-top:10px;'>";
+	echo "<form name='frm_pos' action='project.awp?$FWDVARS' method='post'>";
+	WindowFrameStart("Create New Position", "100%");
+	echo "Position Name: <input type='text' name='position_name' value='' style='width:250px' />
+ 		  <br /><br />
+		  ".ButtonCreate("Save Position", "SUBMIT:frm_pos:save_position")
+		  .ButtonCreate("Cancel", "document.getElementById('divPosition').style.display='none'");
+	WindowFrameEnd();
+	echo "	</form>";
+	echo "  </div>";
+
+	echo "<div style='padding-top:10px;'>";
+	
+	// Get a list of positions
+	$arr_positions = array();
+	$result = $dbh->Query("select project_positions.id, project_positions.name from project_positions
+							where project_positions.project_id='$PID'");
+	$numrows = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $numrows; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$pos[0] = $row['id'];
+		$pos[1] = $row['name'];
+		$arr_positions[] = $pos;
+	}
+	$dbh->FreeResults($result);
+
+		
+	// Create new tool table
+	$tbl = new CToolTable;	
+	
+	// Create table headers
+	$tbl->StartHeaders();
+	$tbl->AddHeader("Members");
+	$tbl->AddHeader("Position");
+	$tbl->AddHeader("Add Task");
+	$tbl->AddHeader("Delete", 'center', '50px');
+	$tbl->EndHeaders();
+	
+	$result = $dbh->Query("select project_membership.id, users.id as userid, users.name, project_membership.position_id,
+							project_membership.title, project_membership.accepted from project_membership, users
+							where project_membership.project_id='$PID' and project_membership.user_id=users.id
+							order by name");
+	$numrows = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $numrows; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$inv_id = $row['id'];
+		$title = $row['title'];
+		$memberid = $row['userid'];
+		$name = $row['name'];
+		$mem_pos = $row['position_id'];
+		$accepted = $row['accepted'];
+		
+		$retpage = base64_encode("project.awp?pid=$PID&action=resources");
+		
+		$tbl->StartRow();
+		$tbl->AddCell($name);
+		// Get position
+		$pos_buf = "<select name='pos_".$inv_id."' onchange=\"projectSetMemPos('$inv_id', this.value);\">";
+		$pos_buf .= "<option value='0'>None Assigned</option>";
+		if (is_array($arr_positions))
+		{
+			foreach ($arr_positions as $pos)
+				$pos_buf .= "<option value='".$pos[0]."' ".(($pos[0] == $mem_pos) ? 'selected' : '').">".$pos[1]."</option>";
+		}
+		$pos_buf .= "</select>";
+		$tbl->AddCell($pos_buf);
+		if ($accepted == 't')
+			$tbl->AddCell("<a class='TableLinksAlert' href='task_edit.awp?pid=$PID&uid=$memberid&page=$retpage'>New Task</a>");
+		else
+			$tbl->AddCell("Not Accepted");
+			
+		$tbl->AddCell("<a class='TableLinks' href='project.awp?tabnav=resources&pid=$PID&dres=$inv_id'>
+						<img src='/images/themes/$THEMENAME/deleteTask.gif' border='0' title='Delete'></a>", false, 'center');
+		$tbl->EndRow();	
+	}
+	$dbh->FreeResults($result);
+	$tbl->PrintTable();	
+	print("</div>");
+
+	echo "<div style='padding-top:10px;'>";
+	// Create new tool table
+	$tbl = new CToolTable;	
+	
+	// Create table headers
+	$tbl->StartHeaders();
+	$tbl->AddHeader("Positions");
+	$tbl->AddHeader("Delete", 'center', '50px');
+	$tbl->EndHeaders();
+	
+	$result = $dbh->Query("select id, name from project_positions where project_id='$PID' order by name");
+	$numrows = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $numrows; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$id = $row['id'];
+		$name = $row['name'];
+		
+		$tbl->StartRow();
+		$tbl->AddCell($name);
+		$tbl->AddCell("<a class='TableLinks' href='project.awp?$FWD&dpos=$id'>
+						<img src='/images/themes/$THEMENAME/deleteTask.gif' border='0' title='Delete'></a>", false, 'center');
+		$tbl->EndRow();	
+	}
+	$dbh->FreeResults($result);
+	$tbl->PrintTable();	
+	print("</div>");
+?>

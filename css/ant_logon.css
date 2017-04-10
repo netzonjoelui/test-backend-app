@@ -1,0 +1,139 @@
+<?php header("Content-type: text/css"); ?>
+body.login 
+{
+	/*background-image : url("../images/homepage_bg.gif");*/
+	/*background-position : 0 0;*/
+	/*background-repeat : repeat-x;*/
+	/*background-color : #FFFFFF;*/
+	background-color : #323338;
+}
+
+a.loginLinks
+{
+	color: #999999; 
+	text-decoration: none; 
+	font-size: 11px; 
+	font-family: Arial, Verdana, Helvetica, sans-serif; 
+}
+
+a.loginLinks:hover
+{
+	color: #333333; 
+	text-decoration: underline; 
+	font-size: 11px; 
+	font-family: Arial, Verdana, Helvetica, sans-serif; 
+}
+a.signupLinks
+{
+	color:#990000;
+	text-decoration:underline;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:16px;
+	font-weight:bold;
+}
+a.signupLinks:hover
+{
+	text-decoration:none;
+	color:#FF0000;	
+}
+
+form 
+{ 
+	margin: 0; 
+} 
+
+table.loginTable 
+{
+	text-align:center;
+	margin-left:auto;
+	margin-right:auto;
+	margin-top:50px;
+}
+
+.block 
+{
+	background-color:#FFFFFF;
+	background-image:url("/images/login_message.png");
+	background-position:0 0;
+	background-repeat:no-repeat;
+	padding:0px;
+	width:438px;
+	height:330px;
+}
+
+.blockTxt
+{
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:12px;
+	color:#333333;
+}
+
+.blockTxtHeader
+{
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:14px;
+	font-weight:bold;
+	color:#404040;
+	padding:4px;
+}
+.formTxt
+{
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:12px;
+	font-weight:bold;
+	color:#404040;
+}
+.signIn
+{
+	font-size:11px; 
+	font-family:Arial, Helvetica, sans-serif; 
+	color: #666666;
+}
+
+
+.hand 
+{
+	cursor:pointer;
+	padding-right:30px;
+	padding-bottom:5px;
+}
+.input_box
+{
+	height:18px; 
+	width:150px; 
+	border-style:solid; 
+	border-color:#999999; 
+	border-width:1px; 
+	font-weight:100; 
+	font-size:12px; 
+	font-family:Arial, Helvetica, sans-serif; 
+	color:#666666;
+}
+
+.select_box
+{
+	height:18px; 
+	width:150px; 
+	border-style:solid; 
+	border-color:#999999; 
+	border-width:1px; 
+	font-weight:100; 
+	font-size:12px; 
+	font-family:Arial, Helvetica, sans-serif; 
+	color:#666666;
+}
+span.TableLinksAlertSpan 
+{ 
+	color: #990000; 
+	text-decoration: none; 
+	font-size: 11px; 
+	font-family: Arial, Verdana, Helvetica, sans-serif; 
+}
+
+span.TableLinksAlertSpan:hover 
+{ 
+	color: #FF0000; 
+	text-decoration: underline; 
+	font-size: 11px; 
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+}

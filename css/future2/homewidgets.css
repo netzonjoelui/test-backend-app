@@ -1,0 +1,133 @@
+
+/**************************************************************************************
+*	Pages:	CWidgetBox classes
+***************************************************************************************/
+.CWidgetBoxDrSPOff
+{
+	border-top: 5px solid transparent;
+}
+.CWidgetBoxDrSPOver
+{
+	border-top: 5px solid blue;
+}
+
+a.FavoriteLinks
+{
+	color:#666666;
+	text-decoration:none;
+	font-size:11px;
+	font-family:Arial, Verdana, Helvetica, sans-serif;
+}
+
+a.FavoriteLinks:hover
+{
+	color:#FF0000;
+	text-decoration:underline;
+	font-size:11px;
+	font-family:Arial, Verdana, Helvetica, sans-serif;
+}
+
+/**************************************************************************************
+*	Page:		/home_stocks.awp
+*	Purpose:	Stock Ticker Page
+***************************************************************************************/
+.HStocksHeader
+{
+	font-family: Arial, Helvetica, sans-serif; 
+	font-size:11px; 
+	color: #000000; 
+	font-weight:bold;
+	background-color:#C5CEE2;
+}
+
+.HStocksHeaderHr
+{
+	height:1px;
+	background-color:#FFFFFF;
+}
+
+.HStocksMarketsRow
+{
+	background-color:#FCE396;
+}
+
+.HStocksPosNum
+{
+	color:#006600;
+}
+
+.HStocksNegNum
+{
+	color:#FF0000;
+}
+
+.HStocksRow1
+{
+	background-color:#FFFFFF;
+}
+
+.HStocksRow2
+{
+	background-color:#ECECEC;
+}
+
+/**************************************************************************************
+*	Pages:		For Aereus Friends Specific Classes
+***************************************************************************************/
+.MyFriendsAddField
+{
+	float:right;
+	height:22px;
+	line-height:22px;
+	font-size:12px;
+	font-weight:bold;
+	color:#000000;
+}
+
+
+.websearchStyles {
+font-family: Arial, Verdana,  Helvetica, sans-serif; font-size: 12px; border: #758397; border-style:solid; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; width:100%;
+}
+.myasearchStyles {
+font-family: Arial, Verdana,  Helvetica, sans-serif; font-size: 12px; border: #758397; border-style:solid; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; width:100%;
+}
+.antFavoritesStyles {
+font-family: Arial, Verdana,  Helvetica, sans-serif; font-size: 12px; border: #758397; border-style:solid; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; width:100%;
+}
+
+/**************************************************************************************
+*	Page:		home_welcome.awp
+***************************************************************************************/
+.HomeWelcomeText
+{
+	color:#191970;
+}
+
+.HomeWelcomeProgressBarLeft
+{
+	float:left;
+	height:13px;
+	
+	background-color:#191970;
+	border-bottom: 1px solid #191970;
+	border-top: 1px solid #191970;
+	border-left: 1px solid #191970;
+}
+
+.HomeWelcomeProgressBarRight
+{
+	float:left;
+	height:13px;
+	border-bottom: 1px solid #191970;
+	border-top: 1px solid #191970;
+	border-right: 1px solid #191970;
+}
+
+/**************************************************************************************
+*	Page:		CContentTable with padding
+***************************************************************************************/
+
+.CWidContentTableBodyPadding
+{
+	padding:5px;
+}

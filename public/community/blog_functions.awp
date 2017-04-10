@@ -1,0 +1,179 @@
+<?php
+function BlogGetTitle(&$dbh, $BID)
+{
+	$retval = "";
+	
+	if (is_numeric($BID))
+	{
+		$result = $dbh->Query("select title from blogs where id='$BID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$retval = $row['title'];
+		}
+	}
+	
+	return $retval;
+}
+
+function BlogGetURL(&$dbh, $BID)
+{
+	$retval = "";
+	
+	if (is_numeric($BID))
+	{
+		$result = $dbh->Query("select name from blogs where id='$BID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$retval = $row['name'].".myablog.com";
+		}
+	}
+	
+	return $retval;
+}
+
+function BlogGetName(&$dbh, $BID)
+{
+	$retval = "";
+	
+	if (is_numeric($BID))
+	{
+		$result = $dbh->Query("select name from blogs where id='$BID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$retval = $row['name'];
+		}
+	}
+	
+	return $retval;
+}
+
+function BlogAddPublicInterface($name)
+{
+	global $settings_blog_gateway, $settings_localhost;
+	
+	$fhandle = fopen("http://$settings_blog_gateway/man_blg.awp?ssec=F234dG&a=$name&url=$settings_localhost/blogs", "r");
+	fclose($fhandle);
+	/*
+	global $settings_db_server, $settings_db_user, $settings_db_password, $settings_localhost;
+	
+	$dbh = new CDatabase($settings_db_server, "myablog", 
+						 $settings_db_user, $settings_db_password, "pgsql");
+	
+	$dbh->Query("insert into users(name, url) values('$name', '$settings_localhost/blogs');");
+	*/
+}
+
+function BlogDelPublicInterface($name)
+{
+	global $settings_blog_gateway, $settings_localhost;
+	
+	$fhandle = fopen("http://$settings_blog_gateway/man_blg.awp?ssec=F234dG&d=$name&url=$settings_localhost/blogs", "r");
+	fclose($fhandle);
+
+	/*
+	global $settings_db_server, $settings_db_user, $settings_db_password, $settings_localhost;
+	
+	$dbh = new CDatabase($settings_db_server, "myablog", 
+						 $settings_db_user, $settings_db_password, "pgsql");
+	
+	$dbh->Query("delete from users where name='$name';");
+	*/
+}
+
+function BlogGetNumPosts(&$dbh, $BID)
+{
+	$retval = "0";
+	if ($BID)
+	{
+		$result = $dbh->Query("select count(*) as cnt from blog_articles where blog_id='$BID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$retval = $row['cnt'];
+		}
+	}
+	
+	return $retval;
+}
+
+function BlogGetThemeName(&$dbh, $TID)
+{
+	$retval = "0";
+	if ($TID)
+	{
+		$result = $dbh->Query("select name from blog_themes where id = '$TID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$retval = $row['name'];
+		}
+	}
+	
+	return $retval;
+}
+
+function BlogGetLastPostDate(&$dbh, $BID)
+{
+	$retval = "0";
+	if ($BID)
+	{
+		$result = $dbh->Query("select to_char(time_entered, 'MONTH DD YYYY') as date
+								from blog_articles where blog_id='$BID'
+								order by time_entered DESC limit 1");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$retval = $row['date'];
+		}
+	}
+	
+	return $retval;
+}
+
+function BlogGetLastPostId(&$dbh, $BID)
+{
+	$retval = "0";
+	if ($BID)
+	{
+		$result = $dbh->Query("select id from blog_articles where blog_id='$BID'
+								order by time_entered DESC limit 1");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$retval = $row['id'];
+		}
+	}
+	
+	return $retval;
+}
+
+function BlogGetNumArticleComments(&$dbh, $AID)
+{
+	$retval = "0";
+	if ($AID)
+	{
+		$result = $dbh->Query("select count(*) as cnt
+								from blog_article_comments where article_id='$AID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$retval = $row['cnt'];
+		}
+	}
+	
+	return $retval;
+}
+
+
+?>

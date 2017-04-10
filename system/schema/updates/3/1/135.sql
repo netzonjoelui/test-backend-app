@@ -1,0 +1,26 @@
+-- Add commit_id columnt to all groupings for synchronization
+ALTER TABLE object_groupings ADD COLUMN commit_id bigint;
+ALTER TABLE project_priorities ADD COLUMN commit_id bigint;
+ALTER TABLE customer_opportunity_types ADD COLUMN commit_id bigint;
+ALTER TABLE user_notes_categories ADD COLUMN commit_id bigint;
+ALTER TABLE customer_lead_queues ADD COLUMN commit_id bigint;
+ALTER TABLE customer_opportunity_stages ADD COLUMN commit_id bigint;
+ALTER TABLE xml_feed_post_categories ADD COLUMN commit_id bigint;
+ALTER TABLE activity_types ADD COLUMN commit_id bigint;
+ALTER TABLE customer_lead_classes ADD COLUMN commit_id bigint;
+ALTER TABLE customer_labels ADD COLUMN commit_id bigint;
+ALTER TABLE user_teams ADD COLUMN commit_id bigint;
+ALTER TABLE user_groups ADD COLUMN commit_id bigint;
+ALTER TABLE project_bug_status ADD COLUMN commit_id bigint;
+ALTER TABLE customer_invoice_status ADD COLUMN commit_id bigint;
+ALTER TABLE project_groups ADD COLUMN commit_id bigint;
+ALTER TABLE project_bug_types ADD COLUMN commit_id bigint;
+ALTER TABLE customer_lead_status ADD COLUMN commit_id bigint;
+ALTER TABLE customer_stages ADD COLUMN commit_id bigint;
+ALTER TABLE customer_lead_sources ADD COLUMN commit_id bigint;
+ALTER TABLE customer_objections ADD COLUMN commit_id bigint;
+ALTER TABLE project_bug_severity ADD COLUMN commit_id bigint;
+ALTER TABLE customer_lead_rating ADD COLUMN commit_id bigint;
+ALTER TABLE customer_status ADD COLUMN commit_id bigint;
+ALTER TABLE project_positions ADD COLUMN commit_id bigint;
+ALTER TABLE email_mailboxes ADD COLUMN commit_id bigint;

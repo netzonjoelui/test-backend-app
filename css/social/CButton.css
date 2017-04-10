@@ -1,0 +1,651 @@
+/**************************************************************************************
+*	LIB:		CButton
+*	Purpose:	aereus.lib.js class creates button div
+***************************************************************************************/
+.CButton
+{
+	display:inline-block;
+	background:none;
+	margin:0px 3px 0px 0px;
+	padding:3px 0;
+	border-width:0;
+	overflow:visible;
+	/*font-family:Verdana, Arial, Helvetica, sans-serif;*/
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+	font-size:10px;
+	text-decoration:none;
+}
+* html .CButton
+{
+	padding-bottom:3px;
+	margin:0;
+}
+
+.CButton span
+{
+	margin:0;
+	padding:2px 0 1px 0;
+}
+
+.CButton span span
+{
+	white-space: nowrap;
+	position:relative;
+	padding:2px 2px 1px 2px;
+}
+
+* html .CButton span 	/* IE seems to add its own padding*/
+{
+	padding-top:0;
+}
+
+/* Gecko adds 3px margin */
+@-moz-document url-prefix() 
+{
+     button.CButton { margin:0 0 0 -3px; }
+}
+/*
+html:not([lang*=""]) button.CButton 
+{
+	margin:0px -1px -1px -3px;
+}
+*/
+
+
+/* disabled
+ * ------------------------------*/
+.CButton[disabled]
+{
+	color: #666;
+}
+
+.CButton[disabled] span 
+{
+	/* background:#ddd url(img/bg-button.gif) repeat-x 0 0; */
+	background-color: #EEE;
+	margin:0;
+	padding:3px 0 2px 0;
+	border-left:1px solid #bbb;
+	border-right:1px solid #aaa;
+}
+
+* html .CButton[disabled] span 	/* IE seems to add its own padding*/
+{
+	padding-top:0;
+}
+
+.CButton[disabled] span span 
+{
+	position:relative;
+	padding:3px 3px 2px 3px;
+	border-width:0;
+	border-top:1px solid #bbb;
+	border-bottom:1px solid #aaa;
+}
+
+/* only needed if implementing separate hover/focus/active state for buttons */
+.CButton[disabled]:hover span, .CButton[disabled]:hover span span, .CButton[disabled]:focus span, .CButton[disabled]:focus span span, .CButton[disabled]:active span, .CButton[disabled]:active span span 
+{
+	border-color:#bbb !important;
+} 
+
+.CButton[disabled]:focus, .CButton[disabled]:active 
+{
+	outline:none; /* doesn't seem to be respected for <button>, only <a> */
+}
+
+
+/* b1 scheme 
+ * ------------------------------*/
+button.b1
+{
+}
+
+button.b1 span 
+{
+	background-image:url(/images/themes/skygrey/buttons/background.gif); 
+	background-position:0px 0px; 
+	background-repeat:repeat;
+	color:#000000;
+	border-left:1px solid #7F8786;
+	border-right:1px solid #7F8786;
+}
+
+button.b1 span span 
+{
+	border-width:0;
+	border-top:1px solid #7F8786;
+	border-bottom:1px solid #7F8786;
+}
+
+/* only needed if implementing separate hover/focus/active state for buttons */
+button.b1:hover span, button.b1:hover span span, button.b1:focus span, button.b1:focus span span 
+{
+	cursor:pointer; /* important for any clickable/pressable element */
+	border-color:#7F8786 !important;
+	color:#0000FF;
+}
+button.b1:active span, button.b1:active span span 
+{
+	/*background-position:0 -400px;*/
+	outline:none;
+	color:#0000FF;
+}
+button.b1:focus, button.b1:active 
+{
+	outline:none; /* doesn't seem to be respected for <button>, only <a> */
+}
+
+/* b2 scheme 
+ * ------------------------------*/
+button.b2
+{
+}
+
+button.b2 span 
+{
+	background-image:url(/images/themes/skygrey/buttons/background2.gif); 
+	background-position:0px 0px; 
+	background-repeat:repeat;
+	color:#000000;
+	border-left:1px solid #529A52;
+	border-right:1px solid #529A52;
+}
+
+button.b2 span span 
+{
+	border-width:0;
+	border-top:1px solid #529A52;
+	border-bottom:1px solid #aaa;
+}
+
+/* only needed if implementing separate hover/focus/active state for buttons */
+button.b2:hover span, button.b2:hover span span, button.b2:focus span, button.b2:focus span span 
+{
+	cursor:pointer; /* important for any clickable/pressable element */
+	border-color:#7F8786 !important;
+	color:#0000FF;
+}
+button.b2:active span, button.b2:active span span 
+{
+	/*background-position:0 -400px;*/
+	outline:none;
+	background-color: #7F8786;
+	color:#0000FF;
+}
+button.b2:focus, button.b2:active 
+{
+	outline:none; /* doesn't seem to be respected for <button>, only <a> */
+}
+
+/* b3 scheme 
+ * ------------------------------*/
+button.b3
+{
+}
+
+button.b3 span 
+{
+	background-image:url(/images/themes/skygrey/buttons/background3.gif); 
+	background-position:0px 0px; 
+	background-repeat:repeat;
+	color:#000000;
+	border-left:1px solid #CC0000;
+	border-right:1px solid #CC0000;
+}
+
+button.b3 span span 
+{
+	border-width:0;
+	border-top:1px solid #CC0000;
+	border-bottom:1px solid #CC0000;
+}
+
+/* only needed if implementing separate hover/focus/active state for buttons */
+button.b3:hover span, button.b3:hover span span, button.b3:focus span, button.b3:focus span span 
+{
+	cursor:pointer; /* important for any clickable/pressable element */
+	border-color:#CC0000 !important;
+	color:#0000FF;
+}
+button.b3:active span, button.b3:active span span 
+{
+	/*background-position:0 -400px;*/
+	outline:none;
+	background-color: #fff;
+	color:#0000FF;
+	border-color:#ccc !important;
+}
+button.b3:focus, button.b3:active 
+{
+	outline:none; /* doesn't seem to be respected for <button>, only <a> */
+}
+
+
+/* DEPRECATED 
+ * ================================================================================================*/
+/* global settings */
+.CButton_b1, .CButton_b2, .CButton_b3
+{
+	margin: 1px;
+}
+
+/* b1 scheme */
+.CButton_b1
+{
+	cursor: pointer;
+}
+.CButtonTopLeft_b1
+{
+	background-image:url(/images/themes/skygrey/buttons/tl1_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 1px;
+	height: 1px;
+}
+.CButtonTopLeft_b1Over
+{
+	background-image:url(/images/themes/skygrey/buttons/tl1_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 1px;
+	height: 1px;
+}
+.CButtonTopCenter_b1
+{
+	background-image:url(/images/themes/skygrey/buttons/bt1_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+}
+.CButtonTopCenter_b1Over
+{
+	background-image:url(/images/themes/skygrey/buttons/bt1_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+}
+.CButtonTopRight_b1
+{
+	background-image:url(/images/themes/skygrey/buttons/tr1_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 3px;
+	height: 1px;
+}
+.CButtonTopRight_b1Over
+{
+	background-image:url(/images/themes/skygrey/buttons/tr1_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 3px;
+	height: 1px;
+}
+.CButtonBodyLeft_b1
+{
+	background-image:url(/images/themes/skygrey/buttons/ml1_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-y;
+}
+.CButtonBodyLeft_b1Over
+{
+	background-image:url(/images/themes/skygrey/buttons/ml1_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-y;
+}
+.CButtonBody_b1
+{
+	background-image:url(/images/themes/skygrey/buttons/background.gif); 
+	background-position:0px 0px; 
+	background-repeat:repeat;
+	color:#000000;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:9px;
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBody_b1Over
+{
+	background-image:url(/images/themes/skygrey/buttons/background.gif); 
+	background-position:0px 0px; 
+	background-repeat:repeat-x;
+	color:#0000FF;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBodyRight_b1
+{
+	background-image:url(/images/themes/skygrey/buttons/mr1_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-y;
+}
+.CButtonBodyRight_b1Over
+{
+	background-image:url(/images/themes/skygrey/buttons/mr1_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-y;
+}
+.CButtonBottomLeft_b1
+{
+	background-image:url(/images/themes/skygrey/buttons/bl1_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+}
+.CButtonBottomLeft_b1Over
+{
+	background-image:url(/images/themes/skygrey/buttons/bl1_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+}
+.CButtonBottomCenter_b1
+{
+	background-image:url(/images/themes/skygrey/buttons/bm1_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+}
+.CButtonBottomCenter_b1Over
+{
+	background-image:url(/images/themes/skygrey/buttons/bm1_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+}
+.CButtonBottomRight_b1
+{
+	background-image:url(/images/themes/skygrey/buttons/br1_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 3px;
+	height: 3px;
+}
+.CButtonBottomRight_b1Over
+{
+	background-image:url(/images/themes/skygrey/buttons/br1_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 3px;
+	height: 3px;
+}
+
+/* b2 scheme */
+.CButton_b2
+{
+	cursor: pointer;
+}
+.CButtonTopLeft_b2
+{
+	background-image:url(/images/themes/skygrey/buttons/tl2_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 1px;	
+	height: 1px;
+}
+.CButtonTopLeft_b2Over
+{
+	background-image:url(/images/themes/skygrey/buttons/tl2_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 1px;	
+	height: 1px;
+}
+.CButtonTopCenter_b2
+{
+	background-image:url(/images/themes/skygrey/buttons/bt2_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+}
+.CButtonTopCenter_b2Over
+{
+	background-image:url(/images/themes/skygrey/buttons/bt2_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+}
+.CButtonTopRight_b2
+{
+	background-image:url(/images/themes/skygrey/buttons/tr2_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+}
+.CButtonTopRight_b2Over
+{
+	background-image:url(/images/themes/skygrey/buttons/tr2_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+}
+.CButtonBodyLeft_b2
+{
+	background-image:url(/images/themes/skygrey/buttons/ml2_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-y;
+}
+.CButtonBodyLeft_b2Over
+{
+	background-image:url(/images/themes/skygrey/buttons/ml2_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-y;
+}
+.CButtonBody_b2
+{
+	background-image:url(/images/themes/skygrey/buttons/background2.gif); 
+	background-position:0px 0px; 
+	background-repeat:repeat;
+	color:#000000;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:9px;
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBody_b2Over
+{
+	background-image:url(/images/themes/skygrey/buttons/background2.gif); 
+	background-position:0px 0px; 
+	background-repeat:repeat-x;
+	color:#0000FF;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBodyRight_b2
+{
+	background-image:url(/images/themes/skygrey/buttons/mr2_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-y;
+}
+.CButtonBodyRight_b2Over
+{
+	background-image:url(/images/themes/skygrey/buttons/mr2_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-y;
+}
+.CButtonBottomLeft_b2
+{
+	background-image:url(/images/themes/skygrey/buttons/bl2_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+}
+.CButtonBottomLeft_b2Over
+{
+	background-image:url(/images/themes/skygrey/buttons/bl2_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+}
+.CButtonBottomCenter_b2
+{
+	background-image:url(/images/themes/skygrey/buttons/bm2_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+}
+.CButtonBottomCenter_b2Over
+{
+	background-image:url(/images/themes/skygrey/buttons/bm2_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+}
+.CButtonBottomRight_b2
+{
+	background-image:url(/images/themes/skygrey/buttons/br2_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 3px;
+	height: 3px;
+}
+.CButtonBottomRight_b2Over
+{
+	background-image:url(/images/themes/skygrey/buttons/br2_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 3px;	
+	height: 3px;
+}
+
+
+/* b3 scheme */
+.CButton_b3
+{
+	cursor: pointer;
+}
+.CButtonTopLeft_b3
+{
+	background-image:url(/images/themes/skygrey/buttons/tl3_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 1px;	
+	height: 1px;
+}
+.CButtonTopLeft_b3Over
+{
+	background-image:url(/images/themes/skygrey/buttons/tl3_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 1px;	
+	height: 1px;
+}
+.CButtonTopCenter_b3
+{
+	background-image:url(/images/themes/skygrey/buttons/bt3_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+}
+.CButtonTopCenter_b3Over
+{
+	background-image:url(/images/themes/skygrey/buttons/bt3_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+}
+.CButtonTopRight_b3
+{
+	background-image:url(/images/themes/skygrey/buttons/tr3_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+}
+.CButtonTopRight_b3Over
+{
+	background-image:url(/images/themes/skygrey/buttons/tr3_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+}
+.CButtonBodyLeft_b3
+{
+	background-image:url(/images/themes/skygrey/buttons/ml3_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-y;
+}
+.CButtonBodyLeft_b3Over
+{
+	background-image:url(/images/themes/skygrey/buttons/ml3_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-y;
+}
+.CButtonBody_b3
+{
+	background-image:url(/images/themes/skygrey/buttons/background3.gif); 
+	background-position:0px 0px; 
+	background-repeat:repeat;
+	color:#000000;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:9px;
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBody_b3Over
+{
+	background-image:url(/images/themes/skygrey/buttons/background3.gif); 
+	background-position:0px 0px; 
+	background-repeat:repeat-x;
+	color:#0000FF;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBodyRight_b3
+{
+	background-image:url(/images/themes/skygrey/buttons/mr3_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-y;
+}
+.CButtonBodyRight_b3Over
+{
+	background-image:url(/images/themes/skygrey/buttons/mr3_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-y;
+}
+.CButtonBottomLeft_b3
+{
+	background-image:url(/images/themes/skygrey/buttons/bl3_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+}
+.CButtonBottomLeft_b3Over
+{
+	background-image:url(/images/themes/skygrey/buttons/bl3_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+}
+.CButtonBottomCenter_b3
+{
+	background-image:url(/images/themes/skygrey/buttons/bm3_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+}
+.CButtonBottomCenter_b3Over
+{
+	background-image:url(/images/themes/skygrey/buttons/bm3_off.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+}
+.CButtonBottomRight_b3
+{
+	background-image:url(/images/themes/skygrey/buttons/br3_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 3px;	
+	height: 3px;
+}
+.CButtonBottomRight_b3Over
+{
+	background-image:url(/images/themes/skygrey/buttons/br3_off.gif);
+	background-position:0 0;
+	background-repeat:none;
+	width: 3px;	
+	height: 3px;
+}
+

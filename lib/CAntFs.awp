@@ -1,0 +1,425 @@
+<?php	
+/****************************************************************************************************
+
+	/ 					-	local:/
+	%userdir%			- 	local:/users/[username]/
+	%tmp%				- 	local:/users/[username]/System/Temp
+	%contactfiles%		- 	local:/users/[username]/System/Contact Files/
+	%projectfiles%		-	local:/System/Project Files/
+	%emailattachments%	-	local:/users/[username]/System/Email Attachments/
+
+	antshare://ant.aereus.com/[accountid] - XML share with another account
+
+*****************************************************************************************************/
+require_once("lib/CDatabase.awp");
+require_once("lib/WorkerMan.php");
+require_once("lib/CAntFsFile.php");
+require_once("lib/CAntFsFolder.php");
+require_once("userfiles/file_functions.awp");
+
+class CAntFs
+{
+	// Public Variables
+	// ----------------------------------------------------------------
+	var $user;				// AntUser class
+	var $dbh;				// CDatbase class with antfs tables
+	var $root_dacl;			// Dacl class for security
+	var $cur_folder;		// The current working directory
+	var $protocol;			// remote, local (defauls to local)
+	var $root_folder_id;	// The local root folder id
+	var $account_root_id;	// The root folder id for this account
+	var $filter_types;		// Only show certain types of files (array) ['doc', 'jpg']
+	var $filter_search;		// Search string for files (will be used in loadSearch function later)
+	var $conditions;		// Array used to store conditions
+	var $fShowDeleted;		// Set flag to show deleted files (off by default)
+
+	// Public Functions
+	// ----------------------------------------------------------------
+	function CAntFs(&$dbh, $user=null, $root_id=null)
+	{
+		$this->conditions = array();
+		$this->fShowDeleted = false;
+		$this->user = $user;
+		$this->dbh = $dbh;
+		$this->cur_folder = null;
+		//$this->account = ($user) ? $user->accountId : settingsGetAccountId($dbh, settingsGetAccountName());
+		$this->account_root_id  = UserFilesGetAccountRootId($this->dbh, null);
+		$this->root_folder_id = ($root_id) ? $root_id : $this->account_root_id;
+
+		// Make sure that all special folders are in place
+		if ($user->id)
+		{
+			$user_root = UserFilesGetRootId($dbh, $user->id);
+			UserFilesInitSpecialCategories($dbh, $user->id, $user_root);
+		}
+
+		// Verify that system folders exist
+		// -------------------------------------------------
+		if ($root_id == $this->account_root_id && $this->account_root_id)
+		{
+			$this->openFolder("/System", true);
+
+			if (!$this->openFolder("/System/InfoCenter"))
+			{
+				$fldr = $this->openFolder("/System/InfoCenter", true);
+				// Grant full control to everyone - parent folder will mask this sub-folder
+				// Only the document editor in InfoCenter should write directly to this folder
+				if ($fldr && $fldr->dacl)
+					$fldr->dacl->grantGroupAccess(GROUP_EVERYONE, "Full Control");
+			}
+
+			if (!$this->openFolder("/System/temp"))
+			{
+				$fldr = $this->openFolder("/System/temp", true);
+				// Grant full control to everyone - parent folder will mask this sub-folder
+				// Only the document editor in InfoCenter should write directly to this folder
+				if ($fldr && $fldr->dacl)
+					$fldr->dacl->grantGroupAccess(GROUP_EVERYONE, "Full Control");
+			}
+		}
+	}
+
+	// Return handle to CAntFsFile
+	function open($path, $mode='rw', $createifmissing=false)
+	{
+	}
+
+	// Return handle to CAntFsFolder
+	function openFolder($path, $createifmissing=false)
+	{
+		$folders = $this->splitPathToFolderArray($path, $createifmissing);
+
+		if ($folders)
+		{
+			$ret = new CAntFsFolder($this->dbh, $this->user, $folders[count($folders)-1], null, $this->protocol, null, $this->conditions);
+			// Files and folders not loaded until getnum is called so it is save to set params now
+			$ret->filter_types = $this->filter_types;
+			$ret->filter_search = $this->filter_search;
+			$ret->fShowDeleted = $this->fShowDeleted;
+			return $ret;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	// Check if a folder exists
+	function folderExists($path)
+	{
+		$folders = $this->splitPathToFolderArray($path, false);
+
+		return ($folders) ? true : false;
+	}
+
+	// Return handle to CAntFsFolder
+	function openFolderById($fid, $createifmissing=false)
+	{
+		$ret = new CAntFsFolder($this->dbh, $this->user, $fid, null, $this->protocol, null, $this->conditions);
+		// Files and folders not loaded until getnum is called so it is save to set params now
+		$ret->filter_types = $this->filter_types;
+		$ret->filter_search = $this->filter_search;
+		return $ret;
+	}
+
+	// Return handle to CAntFsFile
+	function openFileById($fid)
+	{
+		if (!$fid)
+			return false;
+
+		$file = new CAntFsFile($this->dbh, $fid);
+
+		return $file;
+	}
+
+	function changeFolder($path)
+	{
+		// Get account root
+		$this->cur_folder = $this->root_folder_id; 
+	}
+
+	// Delete a file
+	function del($path)
+	{
+	}
+	function delFileById($fid, $hard=false) // deprecated
+	{
+		return $this->removeFileById($fid, $hard);
+	}
+	function removeFileById($fid, $hard=false)
+	{
+		// TODO: security
+		UserFilesRemoveFile($this->dbh, $fid, $this->user->id, false, $hard);
+		return true;
+	}
+
+	// Move a file
+	function moveFileById($fid, $newname, $newfolderid=null)
+	{
+		$dbh = $this->dbh;
+
+		if ($newname || $newfolderid)
+		{
+			$change = "";
+			if ($newname)
+				$change .= "file_title='".$dbh->Escape($newname)."'";
+			if (is_numeric($newfolderid))
+			{
+				if ($change) $change .= ", ";
+				$change .= "category_id='$newfolderid'";
+			}
+
+			$dbh->Query("update user_files set $change  where id='".$fid."'");
+		}
+		$this->name = $newname;
+	}
+
+	// Delete a directory
+	function delFolder($path, $recursize=false)
+	{
+	}
+
+	// Delete a directory
+	function delFolderById($folder_id)
+	{
+		UserFilesDeleteCategory($this->dbh, $folder_id, $this->user->id);
+	}
+
+	// Move a folder
+	function moveFolderById($fid, $newname, $newfolderid=null)
+	{
+		$dbh = $this->dbh;
+
+		// TODO: Make sure we do not move a folder into it's own sub-folder.
+		// That would orphan the entire folder and create circular references
+
+		if ($newname || $newfolderid)
+		{
+			$change = "";
+			if ($newname)
+				$change .= "name='".$dbh->Escape($newname)."'";
+			if (is_numeric($newfolderid))
+			{
+				if ($change) $change .= ", ";
+				$change .= "parent_id='$newfolderid'";
+			}
+
+			$dbh->Query("update user_file_categories set $change  where id='".$fid."' and f_special is not true");
+		}
+		$this->name = $newname;
+	}
+
+	// Get icon for file type
+	function getFileIcon($type, $theme)
+	{
+	}
+
+	// Humanize size
+	function getHumanSize($size)
+	{
+		if ($size >= 1000000000000)
+			return round($size/1000000000000, 1) . "TB";
+		if ($size >= 1000000000)
+			return round($size/1000000000, 1) . "G";
+		if ($size >= 1000000)
+			return round($size/1000000, 1) . "M";
+		if ($size >= 1000)
+			return round($size/1000, 0) . "K";
+		if ($size < 1000)
+			return $size + "B";
+	}
+
+	// Private Functions
+	// ----------------------------------------------------------------
+	function splitPathToFolderArray($path, $createifmissing)
+	{
+		// Translate any variables in path
+		$path = $this->translateVariablePaths($path);
+
+		// Get protocol
+		if (strpos($path, "://"))
+		{
+			$parts = explode("://", $path);
+			$this->protocol = $parts[0];
+			$path = $parts[1];
+		}
+		else
+		{
+			$this->protocol = "local";
+		}
+
+		// Parse folder path
+		$folder_names = explode("/", $path);
+		$folder_ids = array();
+
+		// Check for absolute path
+		if ($folder_names[0] == "") // First char was '/'
+		{
+			// TEMP: Translate userpaths to old system
+			if ($this->user && strpos($path, "/users/".$this->user->name) !== false)
+			{
+				$folder_ids[0] = UserFilesGetRootId($this->dbh, $this->user->id);
+
+				// Delete the next two entries (users/username)
+				$tmp_arr = array();
+				for ($i = 3; $i < count($folder_names); $i++)
+					$tmp_arr[] = $folder_names[$i];
+				unset($folder_names);
+				$folder_names = $tmp_arr;
+				unset($tmp_arr);
+			}
+			else
+			{
+				$folder_ids[0] = $this->root_folder_id;
+			}
+		}
+		else // Relative path to current directory
+		{
+            $folder_ids[0] = null;
+            if(isset($this->cur_folder->id))
+			    $folder_ids[0] = $this->cur_folder->id;
+		}
+
+		$last_folder = $folder_ids[0];
+		foreach ($folder_names as $fname)
+		{
+			if ($fname)
+			{
+				$fid = $this->folderGetId($fname, $last_folder);
+
+				// If the folder was not found and creatifmissing is true, then add dir
+				if (!$fid && $createifmissing)
+					$fid = $this->m_createFolder($last_folder, $fname);
+
+				if ($fid)
+				{
+					$folder_ids[] = $fid;
+					$last_folder = $fid;
+				}
+				else // Folder not found
+				{
+					return false;
+				}
+			}
+		}
+
+		return $folder_ids;
+	}
+
+	function folderGetId($fname, $parent_id)
+	{
+		$ret = null;
+		$dbh = $this->dbh;
+
+		if ($fname && $parent_id)
+		{
+			$result = $dbh->Query("select id from user_file_categories where 
+								   parent_id='$parent_id' and f_deleted is not true and lower(name)=lower('".$dbh->Escape($fname)."')");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$ret = $row['id'];
+				$dbh->FreeResults($result);
+			}
+		}
+
+		return $ret;
+	}
+
+	function translateVariablePaths($path)
+	{
+		$retval = "";
+
+		if ($this->user)
+		{
+			$retval = str_replace("%userdir%", "/users/".$this->user->name, $path);
+			$retval = str_replace("%emailattachments%", "/users/".$this->user->name."/System/Email Attachments", $retval);
+			$retval = str_replace("%tmp%", "/users/".$this->user->name."/System/Temp", $retval);
+		}
+		else
+		{
+			$retval = str_replace("%userdir%", "/System", $path);
+			$retval = str_replace("%emailattachments%", "/System/Email Attachments", $retval);
+			$retval = str_replace("%tmp%", "/System/temp", $retval);
+			// translate 
+			$retval = $path;
+		}
+
+		return $retval;
+	}
+
+	function setFilter($filter_types=null, $filter_str=null)
+	{
+		$this->filter_search = $filter_str;
+		$this->filter_types = $filter_types;
+	}
+
+	function setFilterSpecial($name, $val)
+	{
+		switch ($name)
+		{
+		case 'updated_after':
+			$this->conditions['updated_after'] = $val;
+
+			break;
+		}
+	}	
+
+	function moveTmpFile($fid, $folder)
+	{
+		$dbh = $this->dbh;
+		$folderid = $folder->id;
+
+		if ($folderid && $fid)
+		{
+			$dbh->Query("update user_files set category_id='$folderid', f_temp='f' where id='$fid'");
+		}
+	}
+
+	function m_createFolder($parent_id, $folder_name)
+	{
+		$ret = false;
+		$dbh = $this->dbh;
+
+		if ($parent_id && $folder_name)
+		{
+			// First check to see if this folder previously existed and undelete (but not all the files)
+			$result = $dbh->Query("select id, f_deleted from user_file_categories where name='".$dbh->Escape($folder_name)."' 
+									and parent_id='$parent_id'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$ret = $dbh->GetValue($result, 0, "id");
+				if ("t" == $dbh->GetValue($result, 0, "f_deleted"))
+				{
+					$dbh->Query("update user_file_categories set f_deleted='f' where id='$ret'");
+				}
+			}
+			else
+			{
+				$uid = ($this->user->id) ? $this->user->id : null;
+				if (!$uid)
+				{
+					$result = $dbh->Query("select user_id from user_file_categories where id='$parent_id'");
+					if ($dbh->GetNumberRows($result))
+						$uid = $dbh->GetValue($result, 0, "user_id");
+				}
+
+				if ($uid)
+				{
+					$result = $dbh->Query("insert into user_file_categories(name, user_id, parent_id) 
+										   values('".$dbh->Escape($folder_name)."', ".$dbh->EscapeNumber($uid).", 
+										   '$parent_id');
+										   select currval('user_file_categories_id_seq') as id;");
+					if ($dbh->GetNumberRows($result))
+					{
+						$row = $dbh->GetNextRow($result, 0);
+						$ret = $row['id'];	
+					}
+				}
+			}
+		}
+
+		return $ret;
+	}
+}

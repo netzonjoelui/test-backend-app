@@ -1,0 +1,83 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/content_table.awp");
+	require_once("project_functions.awp");
+	require_once("../lib/CDropdownMenu.awp");
+	require_once("../users/user_functions.php");
+	require_once("../lib/Button.awp");
+	require_once("../lib/WindowFrame.awp");
+	
+	$USERNAME = $_SESSION["USER_NAME"];
+	$dbh = new CDatabase();
+									  
+	$USERID = $_SESSION["USER_ID"];
+	if (isset($_POST['save_project']))
+	{
+		if ($_POST['tname'])
+		{
+			$query = "insert into project_templates(user_id, name, notes, time_created)
+						values('$USERID', '".$_POST['tname']."', '".$_POST['notes']."', 'now');
+						select currval('project_templates_id_seq') as id;";
+			$result = $dbh->Query($query);
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$id = $row['id'];
+				$dbh->FreeResults($result);
+				header("Location: template.awp?tmpid=$id ");
+			}
+			else
+				header("Location: templates.awp");
+		}
+		else
+			$status_message = "Please enter a name!";
+	}
+?>		
+<html>
+<head>
+	<title>Add Project</title>
+	<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme(&$dbh, $USERID, 'css') ?>">
+	
+</head>
+
+<body class='appTopSpacer'>
+
+<?php
+	/********************************************************************************************
+	*	Begin Main body content table
+	*********************************************************************************************/
+	TableContentOpen("600", "Crete New Project Template", NULL, 3);
+
+	echo "<form name='new_project' action='template_add.awp' method='post'>"; 
+
+	WindowFrameToolbarStart('100%');
+	echo "<div>
+			".ButtonCreate("Save and Continue", "SUBMIT:new_project:save_project");
+	if ($page)		
+		echo ButtonCreate("Go Back", "JavaScript:document.location='$page'");
+	echo ButtonCreate("Help", "window.open('/help/helpdoc.awp?docid=22');", "b3");
+	echo "<div style='float:right;color:#990000;padding-right:3px;font-weight:bold;font-size:14px;'>$status_message</div>";		
+	echo "</div>";
+	WindowFrameToolbarEnd();
+
+		//Begin layout table
+		echo "<div style='padding-top:10px;'>
+			  <table cellspacing='0' cellpadding='0' align='center' border='0' width='98%'>
+				<tr>
+					<td valign='top'>";
+		WindowFrameStart("Details", "100%");
+		echo "<table cellpadding='0' cellspacing='5' align='left' border='0' width='100%' class='field'>
+			  <tr valign='top'><td width='80' nowrap align='right' style='font-weight:bold;'>Name:</td><td><input type='text' name='tname' style='width:100%;' value='$name'></td></tr>
+			  <tr valign='top'><td width='80' nowrap align='right' style='font-weight:bold;'>Description:</td><td><textarea name='notes' style='width:100%;' rows='6'>$notes</textarea></td></tr></table>";
+		WindowFrameEnd();
+		echo "</td></tr></table></div>";
+
+	echo "</form>";
+	// Close the content table
+	TableContentClose();
+?>
+</body>
+</html>

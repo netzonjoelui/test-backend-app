@@ -1,0 +1,132 @@
+/**************************************************************************
+ *	CAutoCompleteCal.js
+ **************************************************************************/
+.acCalContainer
+{
+	border: 1px solid #000;
+	font-family:arial; 
+	font-size:12px;
+	background-color: white;
+}
+
+.acCalContainer a
+{
+	color: black;
+	text-decoration: none;
+}
+
+.acCalYearNavigation, .acCalMonthNavigation
+{
+	background-color:#33CCFF; 
+	text-align:center; 
+	vertical-align:center; 
+	text-decoration:none; 
+	color:#000000; 
+	font-weight:bold;
+}
+
+.acCalText
+{
+	text-decoration: none;
+}
+
+td.acCalDayColumnHeader
+{
+	text-align:right; 
+	border:solid thin #C0C0C0;
+	border-width:0px 0px 1px 0px;
+}
+
+.acCalCurrentMonthDate, .acCalOtherMonthDate, .acCalCurrentDate
+{
+	text-align:right; 
+	text-decoration:none;
+}
+
+.acCalCurrentMonthDateDisabled, .acCalOtherMonthDateDisabled, .acCalCurrentDateDisabled
+{
+	color:#D0D0D0;
+	text-align:right;
+	text-decoration:line-through;
+}
+
+.acCalCurrentMonthDate, .acCalCurrentDate
+{
+	color:#000000;
+}
+
+.acCalOtherMonthDate
+{
+	color:#808080;
+}
+
+td.acCalCurrentDate
+{
+	color:white; 
+	background-color: #C0C0C0; 
+	border-width:1px; 
+	border:solid thin #800000;
+}
+
+td.acCalCurrentDateDisabled
+{
+	border-width:1px; 
+	border:solid thin #FFAAAA;
+}
+
+td.acCalTodayText, td.acCalTodayTextDisabled
+{
+	border:solid thin #C0C0C0; 
+	border-width:1px 0px 0px 0px;
+}
+
+a.acCalTodayText, span.acCalTodayTextDisabled
+{
+	height:20px;
+}
+
+a.acCalTodayText
+{
+	color: black;
+}
+
+.acCalTodayTextDisabled
+{
+	color:#D0D0D0;
+}
+
+/* Add time classes */
+div.acTimePicker 
+{
+	border: 1px solid #000;
+	font-family:arial; 
+	font-size:13px;
+	background-color: #888888;
+	color: #fff;
+	position: absolute;
+	height: 200px;
+	width:4em; /* needed for IE */
+	overflow: auto;
+	z-index: 99;
+}
+div.acTimePicker-12hours 
+{
+  width:6em; /* needed for IE */
+}
+ 
+div.acTimePicker ul 
+{
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+div.acTimePicker li 
+{
+  padding: 1px;
+  cursor: pointer;
+}
+div.acTimePicker li.selected 
+{
+  background: #000000;
+  color: #fff;
+}

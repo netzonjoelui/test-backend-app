@@ -1,0 +1,512 @@
+/**************************************************************************************
+*	LIB:		CButton
+*	Purpose:	aereus.lib.js class creates button div
+***************************************************************************************/
+.CButton
+{
+	display:inline-block;
+	margin:0 3px 0 0;
+	padding: 1px;
+	font: 11px Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	text-decoration:none;
+	height: 20px;
+	overflow:visible;
+}
+* html .CButton
+{
+	padding-bottom:3px;
+}
+
+/* Gecko adds 3px margin */
+@-moz-document url-prefix() 
+{
+     button.CButton { margin:0 -3px; }
+}
+/*
+html:not([lang*=""]) button.CButton 
+{
+	margin:0 -3px;
+}
+*/
+
+.CButton span span
+{
+	white-space: nowrap;
+}
+
+/* disabled
+ * ------------------------------*/
+.CButton[disabled]
+{
+	color: #666;
+}
+
+.CButton[disabled] span 
+{
+	/* background:#ddd url(img/bg-button.gif) repeat-x 0 0; */
+	background-color: #EEE;
+	margin:0;
+	padding:1px 0;
+	border-left:1px solid #bbb;
+	border-right:1px solid #aaa;
+}
+
+* html .CButton[disabled] span 	/* IE seems to add its own padding*/
+{
+	padding-top:0;
+}
+
+.CButton[disabled] span span 
+{
+	position:relative;
+	padding:1px 2px 1px 2px;
+	border-width:0;
+	border-top:1px solid #bbb;
+	border-bottom:1px solid #aaa;
+}
+
+/* only needed if implementing separate hover/focus/active state for buttons */
+.CButton[disabled]:hover span, .CButton[disabled]:hover span span, .CButton[disabled]:focus span, .CButton[disabled]:focus span span, .CButton[disabled]:active span, .CButton[disabled]:active span span 
+{
+	border-color:#bbb !important;
+} 
+
+.CButton[disabled]:focus, .CButton[disabled]:active 
+{
+	outline:none; /* doesn't seem to be respected for <button>, only <a> */
+}
+
+
+/* b1 scheme 
+ * ------------------------------*/
+button.b1
+{
+}
+
+button.b1 span 
+{
+}
+
+* html button.b1 span 	/* IE seems to add its own padding*/
+{
+}
+
+button.b1 span span 
+{
+}
+
+/* only needed if implementing separate hover/focus/active state for buttons */
+button.b1:hover span, button.b1:hover span span, button.b1:focus span, button.b1:focus span span 
+{
+}
+button.b1:active span, button.b1:active span span 
+{
+}
+button.b1:focus, button.b1:active 
+{
+	outline:none; /* doesn't seem to be respected for <button>, only <a> */
+}
+
+/* b2 scheme 
+ * ------------------------------*/
+button.b2
+{
+	color: green;
+}
+
+button.b2 span 
+{
+}
+
+* html button.b2 span 	/* IE seems to add its own padding*/
+{
+}
+
+button.b2 span span 
+{
+}
+
+/* only needed if implementing separate hover/focus/active state for buttons */
+button.b2:hover span, button.b2:hover span span, button.b2:focus span, button.b2:focus span span 
+{
+}
+button.b2:active span, button.b2:active span span 
+{
+}
+button.b2:focus, button.b2:active 
+{
+	outline:none; /* doesn't seem to be respected for <button>, only <a> */
+}
+
+/* b3 scheme 
+ * ------------------------------*/
+button.b3
+{
+	color: blue;
+}
+
+button.b3 span 
+{
+}
+
+* html button.b3 span 	/* IE seems to add its own padding*/
+{
+}
+
+button.b3 span span 
+{
+}
+
+/* only needed if implementing separate hover/focus/active state for buttons */
+button.b3:hover span, button.b3:hover span span, button.b3:focus span, button.b3:focus span span 
+{
+}
+button.b3:active span, button.b3:active span span 
+{
+}
+button.b3:focus, button.b3:active 
+{
+	outline:none; /* doesn't seem to be respected for <button>, only <a> */
+}
+
+/* DEPRECATED 
+ * ================================================================================================*/
+/* global settings */
+.CButton_b1, .CButton_b2, .CButton_b3
+{
+	margin: 1px;
+}
+
+/* b1 scheme */
+.CButton_b1
+{
+	cursor: pointer;
+}
+.CButtonTopLeft_b1
+{
+	background-color: #436297;
+	width: 1px;
+	height: 1px;
+}
+.CButtonTopLeft_b1Over
+{
+	background-color: #436297;
+	width: 1px;
+	height: 1px;
+}
+.CButtonTopCenter_b1
+{
+	background-color: #436297;
+}
+.CButtonTopCenter_b1Over
+{
+	background-color: #436297;
+}
+.CButtonTopRight_b1
+{
+	background-color: #506d9d;
+	width: 1px;
+	height: 1px;
+}
+.CButtonTopRight_b1Over
+{
+	background-color: #506d9d;
+	width: 1px;
+	height: 1px;
+}
+.CButtonBodyLeft_b1
+{
+	background-color: #506d9d;
+}
+.CButtonBodyLeft_b1Over
+{
+	background-color: #506d9d;
+}
+.CButtonBody_b1
+{
+	background-image:url('/images/themes/future2/buttons/bg1.gif');
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:16px;
+	color:#FFFFCC;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	font-weight:bold; 
+	padding-left:4px; 
+	padding-right:4px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBody_b1Over
+{
+	background-image:url('/images/themes/future2/buttons/bg2.gif');
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:16px;
+	color:#333366;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	font-weight:bold; 
+	padding-left:4px; 
+	padding-right:4px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBodyRight_b1
+{
+	background-color: #506d9d;
+}
+.CButtonBodyRight_b1Over
+{
+	background-color: #506d9d;
+}
+.CButtonBottomLeft_b1
+{
+	background-color: #506d9d;
+}
+.CButtonBottomLeft_b1Over
+{
+	background-color: #506d9d;
+}
+.CButtonBottomCenter_b1
+{
+	background-color: #506d9d;
+}
+.CButtonBottomCenter_b1Over
+{
+	background-color: #506d9d;
+}
+.CButtonBottomRight_b1
+{
+	background-color: #506d9d;
+	width: 1px;
+	height: 1px;
+}
+.CButtonBottomRight_b1Over
+{
+	background-color: #506d9d;
+	width: 1px;
+	height: 1px;
+}
+
+/* b2 scheme */
+.CButton_b2
+{
+	cursor: pointer;
+}
+.CButtonTopLeft_b2
+{
+	background-color: #57a150;
+	width: 1px;	
+	height: 1px;
+}
+.CButtonTopLeft_b2Over
+{
+	background-color: #57a150;
+	width: 1px;	
+	height: 1px;
+}
+.CButtonTopCenter_b2
+{
+	background-color: #57a150;
+}
+.CButtonTopCenter_b2Over
+{
+	background-color: #57a150;
+}
+.CButtonTopRight_b2
+{
+	background-color: #57a150;
+}
+.CButtonTopRight_b2Over
+{
+	background-color: #57a150;
+}
+.CButtonBodyLeft_b2
+{
+	background-color: #57a150;
+}
+.CButtonBodyLeft_b2Over
+{
+	background-color: #57a150;
+}
+.CButtonBody_b2
+{
+	background-image:url('/images/themes/future2/buttons/bg5.gif');
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:16px;
+	color:#FFFFCC;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	font-weight:bold; 
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBody_b2Over
+{
+	background-image:url('/images/themes/future2/buttons/bg6.gif');
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:16px;
+	color:#FFFF66;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	font-weight:bold; 
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBodyRight_b2
+{
+	background-color: #57a150;
+}
+.CButtonBodyRight_b2Over
+{
+	background-color: #57a150;
+}
+.CButtonBottomLeft_b2
+{
+	background-color: #57a150;
+}
+.CButtonBottomLeft_b2Over
+{
+	background-color: #57a150;
+}
+.CButtonBottomCenter_b2
+{
+	background-color: #57a150;
+}
+.CButtonBottomCenter_b2Over
+{
+	background-color: #57a150;
+}
+.CButtonBottomRight_b2
+{
+	background-color: #57a150;
+	width: 1px;
+	height: 1px;
+}
+.CButtonBottomRight_b2Over
+{
+	background-color: #57a150;
+	width: 1px;	
+	height: 1px;
+}
+
+/* b3 scheme */
+.CButton_b3
+{
+	cursor: pointer;
+}
+.CButtonTopLeft_b3
+{
+	background-color:#be1c1c;
+	width: 1px;	
+	height: 1px;
+}
+.CButtonTopLeft_b3Over
+{
+	background-color:#be1c1c;
+	width: 1px;	
+	height: 1px;
+}
+.CButtonTopCenter_b3
+{
+	background-color:#be1c1c;
+}
+.CButtonTopCenter_b3Over
+{
+	background-color:#be1c1c;
+}
+.CButtonTopRight_b3
+{
+	background-color:#be1c1c;
+}
+.CButtonTopRight_b3Over
+{
+	background-color:#be1c1c;
+}
+.CButtonBodyLeft_b3
+{
+	background-color:#be1c1c;
+}
+.CButtonBodyLeft_b3Over
+{
+	background-color:#be1c1c;
+}
+.CButtonBody_b3
+{
+	background-image:url('/images/themes/future2/buttons/bg3.gif');
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:16px;
+	color:#FFFFCC;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	font-weight:bold; 
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBody_b3Over
+{
+	background-image:url('/images/themes/future2/buttons/bg4.gif');
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:16px;
+	color:#FFFF66;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	font-weight:bold; 
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBodyRight_b3
+{
+	background-color:#be1c1c;
+}
+.CButtonBodyRight_b3Over
+{
+	background-color:#be1c1c;
+}
+.CButtonBottomLeft_b3
+{
+	background-color:#be1c1c;
+}
+.CButtonBottomLeft_b3Over
+{
+	background-color:#be1c1c;
+}
+.CButtonBottomCenter_b3
+{
+	background-color:#be1c1c;
+}
+.CButtonBottomCenter_b3Over
+{
+	background-color:#be1c1c;
+}
+.CButtonBottomRight_b3
+{
+	background-color:#be1c1c;
+	width: 1px;	
+	height: 1px;
+}
+.CButtonBottomRight_b3Over
+{
+	background-color:#be1c1c;
+	width: 1px;	
+	height: 1px;
+}

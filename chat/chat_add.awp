@@ -1,0 +1,26 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../users/user_functions.php");
+	require_once("../email/email_functions.awp");
+	require_once("../lib/Button.awp");
+
+	$dbh = new CDatabase();
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	
+	if ($USERID && $_POST['to_id'] && $_POST['message'])
+	{
+		$dbh->Query("insert into user_chat(from_id, to_id, time_sent, message, deliver_to, color) 
+					values('$USERID', '".$_POST['to_id']."', 'now', '".$dbh->Escape($_POST['message'])."', '$USERID', '".$_POST['mycolor']."')");
+		$dbh->Query("insert into user_chat(from_id, to_id, time_sent, message, deliver_to, color) 
+					values('$USERID', '".$_POST['to_id']."', 'now', '".$dbh->Escape($_POST['message'])."', '".$_POST['to_id']."', '".$_POST['mycolor']."')");
+	}
+?>
+<html>
+<head><title>Inerting Chat</title></head>
+<body <?php if ($USERID && $_POST['to_id'] && $_POST['message']) echo "onLoad=\"parent.SendProcessed();\""; ?>>
+</body>
+</html>

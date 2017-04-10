@@ -1,0 +1,100 @@
+/**************************************************************************************
+*	Page:		Calndar pages
+***************************************************************************************/
+.CalendarMonthCell
+{
+	border-top:1px solid #CCCCCC;
+	border-right:1px solid #CCCCCC;
+	font-size: 11px;
+}
+
+.CalendarMonthCellToday
+{
+	border-top:1px solid #CCCCCC;
+	border-right:1px solid #CCCCCC;
+	font-size: 11px;
+}
+
+.CalendarMonthHdr
+{
+	text-decoration:none;
+	color:#000000;
+	border-bottom:1px solid #CCCCCC;
+	padding: 3px;
+}
+
+.CalendarMonthHdrToday
+{
+	text-decoration:none;
+	font-weight:bold;
+	color:#000000;
+	background-color:#FFCC33;
+	border-bottom:1px solid #CCCCCC;
+	padding: 3px;
+}
+
+.CalendarMonthMainTable
+{
+	border-left:1px solid #CCCCCC;
+	border-bottom:1px solid #CCCCCC;
+}
+
+.CalendarMonthWeekdayHdr
+{
+	border-width: 1px 1px 0 0;
+	border-style: solid;
+	border-color: #CCCCCC;
+	height:20px;
+	font-weight:bold;
+	text-align:center;
+}
+
+.CalendarWeekColHdr
+{
+	border-left: 1px solid;
+	height:20px;
+	font-weight:bold;
+	padding:3px;
+}
+
+.CalendarWeekColHdrToday
+{
+	border-left: 1px solid;
+	height:20px;
+	font-weight:bold;
+	padding:3px;
+	background-color:#FFCC33;
+}
+
+.CalendarWeekColAllDay
+{
+	border-left: 1px solid;
+	border-top: 1px solid;
+	padding-top: 3px solid;
+}
+
+.CalendarWeekCol
+{
+	border-left: 1px solid;
+}
+
+.CalendarDayAllDay
+{
+	border: 1px solid #cccccc;
+}
+
+.CalendarUserStatus1
+{
+	background-color:#EA7E71;
+}
+
+.CalendarUserStatus2
+{
+	background-color:#FBF3AE;
+}
+
+.CalendarUserStatus3
+{
+	background-color:#9CBD64;
+}
+

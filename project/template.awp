@@ -1,0 +1,137 @@
+<?php
+	require_once("../lib/AntConfig.php");
+    require_once("ant.php");
+    require_once("ant_user.php");
+	require_once("lib/CDatabase.awp");
+	require_once("lib/content_table.awp");
+	require_once("users/user_functions.php");
+	require_once("lib/CToolTabs.awp");
+	require_once("lib/CToolTable.awp");
+	require_once("lib/date_time_functions.php");
+	require_once("lib/WindowFrame.awp");
+	require_once("lib/CDropdownWindow.awp");
+	require_once("lib/Button.awp");
+	require_once("lib/CAutoComplete.awp");
+	require_once("userfiles/file_functions.awp");
+	// ALIB
+	require_once("lib/aereus.lib.php/CCache.php");
+	//require_once("lib/aereus.lib.php/CSessions.php");
+	require_once("project_functions.awp");
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+	$THEMENAME = $USER->themeName;
+	$TMPID = $_GET['tmpid'];
+	
+	$TABNAV = ($_GET['tabnav']) ? $_GET['tabnav']: 'specifications';
+	
+	$RETPAGE = $_GET['retpage'];
+	
+	$FWDVARS = "tabnav=$TABNAV&retpage=$RETPAGE&tmpid=$TMPID";
+?>
+
+<html>
+<head>
+	<title>Template</title>
+	<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme(&$dbh, $USERID, 'css') ?>">
+<?php
+	// Aereus lib
+	include("lib/aereus.lib.js/js_lib.php");
+	// ANT lib
+	include("lib/js/includes.php");
+?>
+	<script type="text/javascript" language="javascript">
+	function DeleteTemplateTask(id)
+	{
+		if (confirm("Are you sure you want to delete this task?"))
+		{
+			document.location = "template.awp?<?php print($FWDVARS); ?>&dtid="+id;
+		}
+	}
+	function DeleteTemplateMember(id)
+	{
+		if (confirm("Are you sure you want to delete this member?"))
+		{
+			document.location = "template.awp?<?php print($FWDVARS); ?>&dmid="+id;
+		}
+	}
+	function DeleteTemplatePosition(id)
+	{
+		if (confirm("Are you sure you want to delete this position?"))
+		{
+			document.location = "template.awp?<?php print($FWDVARS); ?>&dpid="+id;
+		}
+	}
+	function openBrowser(inp)
+	{
+		var cbrowser = new CFileOpen();
+		cbrowser.inp = inp;
+		cbrowser.onSelect = function(fid, name, path) 
+		{
+			this.inp.value = fid;
+
+			var lbl = document.getElementById("file_name_lbl");
+			if (lbl)
+				lbl.innerHTML = name;
+		}
+		cbrowser.showDialog();
+	}
+	</script>
+</head>
+
+<body class='appTopSpacer'>
+
+<?php
+	if ($TMPID)
+	{
+		/********************************************************************************************
+		*	Begin Main body content table
+		*********************************************************************************************/
+		TableContentOpen('755', "Template: ".GetTemplateName(&$dbh, $TMPID), NULL, 3);
+		
+		/******************************************************************************
+		*	Create top navigatio
+		*******************************************************************************/
+		$tabNav = new CToolTabs("template.awp", "tmpid=$TMPID&retpage=$RETPAGE");
+		$tabNav->AddTab("Home", "specifications");
+		$tabNav->AddTab("Tasks", "tasks");
+		$tabNav->AddTab("Members", "members");
+		$tabNav->AddTab("Sharing", "sharing");
+		//$tabNav->AddTab("Automation", "automation");
+		//$tabNav->AddTab("Files", "files");
+		//$tabNav->AddTab("Additional Data", "additional");
+		$tabNav->PrintTabs();
+		
+		switch($TABNAV)
+		{
+		case 'specifications':
+			include("template_specifications.awp");
+			break;
+		case 'tasks':
+			include("template_tasks.awp");
+			break;
+		case 'automation':
+			include("template_tasks.awp");
+			break;
+		case 'additional':
+			include("template_additional.awp");
+			break;
+		case 'members':
+			include("template_members.awp");
+			break;
+		case 'sharing':
+			include("template_share.awp");
+			break;
+		default:
+			break;
+		}
+		
+		// Close the content table
+		TableContentClose();
+		unset($mMenu);
+	}
+?>
+</body>
+</html>

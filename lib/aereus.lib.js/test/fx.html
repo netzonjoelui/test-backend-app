@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Test FX</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<link rel="STYLESHEET" type="text/css" href="../style.css" />
+
+	<script language="javascript" type="text/javascript" src="../jquery.min.js"></script>
+	<script language="javascript" type="text/javascript" src="../jquery/jquery-ui-1.10.3.custom.min.js"></script>
+	<script language="javascript" type="text/javascript" src="../alib.js"></script>
+	<script language="javascript" type="text/javascript" src="../dom.js"></script>
+	<script language="javascript" type="text/javascript" src="../fx.js"></script>
+</head>
+<body>
+	<h1>alib.events Demo</h1>
+
+	<h2>Slide</h2>
+	<button id="slideUp">SlideUp</button>
+	<button id="slideDown">SlideDown</button>
+	<button id="hideLeft">Hide to left</button>
+	<button id="showLeft">Show from left</button>
+	<div id="slideCon" style='border:1px solid; height:150px; background-color:blue;'>Animate Me</div>
+	<script language='javascript' type='text/javascript'>
+		document.getElementById("slideUp").onclick = function()
+		{
+			alib.fx.slideUp(document.getElementById("slideCon"), function() { alert("finished"); }, 500);
+		}
+
+		document.getElementById("slideDown").onclick = function()
+		{
+			alib.fx.slideDown(document.getElementById("slideCon"));
+		}
+
+		document.getElementById("hideLeft").onclick = function()
+		{
+			alib.fx.hideLeft(document.getElementById("slideCon"));
+		}
+
+		document.getElementById("showLeft").onclick = function()
+		{
+			alib.fx.showLeft(document.getElementById("slideCon"));
+		}
+	</script>
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+<?php
+	header("Content-type: text/xml");			// Returns XML document
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("lib/CAntObject.php");
+	require_once("lib/CAntObjectList.php");
+	require_once("customer_functions.awp");
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+
+	$CID = $_GET['cid'];
+	$LABEL = $_GET['lid'];
+	$START = ($_GET['start']) ? $_GET['start'] : 0;
+	
+	if ($_GET['showper'])
+		$SHOWPER = $_GET['showper'];
+	else
+		$SHOWPER = 200;
+		
+	if ($_GET['search_value'])
+		$SEARCH_VALUE = base64_decode($_GET['search_value']);
+	else
+		$SEARCH_VALUE = rawurldecode($_GET['search']);
+	
+	echo '<?xml version="1.0" encoding="UTF-8"
+	  standalone="yes"?>'; 
+	
+	echo "<customers>\n";
+
+	$olist = new CAntObjectList($dbh, "customer", $USER);
+	$olist->addConditionText($SEARCH_VALUE);
+
+	if (is_numeric($_GET['type_id']))
+		$olist->addCondition("and", "type_id", "is_equal", $_GET['type_id']);
+
+	if ($LABEL)
+		$olist->addCondition("and", "groups", "is_equal", $LABEL);
+		
+	if (is_numeric($CID))
+		$olist->addCondition("and", "id", "is_equal", $CID);
+
+	// Add sort conditions
+	$olist->addOrderBy("first_name", "asc");
+	$olist->addOrderBy("last_name", "asc");
+
+	$olist->getObjects(0, $_GET['limit']);
+	$num = $olist->total_num;
+	
+	if ($num > $SHOWPER)
+	{
+		// Get total number of pages
+		$leftover = $num % $SHOWPER;
+		
+		if ($leftover)
+			$numpages = (($num - $leftover) / $SHOWPER) + 1; //($numpages - $leftover) + 1;
+		else
+			$numpages = $num / $SHOWPER;
+		// Get current page
+		if ($START > 0)
+		{
+			$curr = $START / $SHOWPER;
+			$leftover = $START % $SHOWPER;
+			if ($leftover)
+				$curr = ($curr - $leftover) + 1;
+			else 
+				$curr += 1;
+		}
+		else
+			$curr = 1;
+		// Get previous page
+		if ($curr > 1)
+			$prev = $START - $SHOWPER;
+		// Get next page
+		if (($START + $SHOWPER) < $num)
+			$next = $START + $SHOWPER;
+		$pag_str = "Page $curr of $numpages";
+		echo "<paginate><prev>$prev</prev><next>$next</next><pag_str>$pag_str</pag_str></paginate>";
+	}
+	
+	$num = $olist->getNumObjects();
+	for ($i = 0; $i < $num; $i++)
+	{
+		$obj = $olist->getObject($i);
+		$name = $obj->getName();
+		$labelstr = CustGetLabelsString($dbh, $obj->id);
+
+		print("<contact>\n");
+		print("<id>".$obj->id."</id>");
+		print("<uid>".rawurlencode($obj->id)."</uid>");		// DEPRECATED
+		print("<name>".rawurlencode($name)."</name>");
+		print("<labels>".rawurlencode($labelstr)."</labels>");
+		print("<number>".rawurlencode($obj->getValue('phone_work'))."</number>");
+		print("<email>".rawurlencode($obj->getValue('email_default', true)."&nbsp;")."</email>");
+		print("</contact>");
+
+	}
+	
+	echo "</customers>";
+?>

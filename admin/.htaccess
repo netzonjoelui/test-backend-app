@@ -1,0 +1,6 @@
+RewriteEngine on 
+
+RewriteRule workflow$ workflow.php
+RewriteRule workflow/([0-9a-zA-Z-_'.]+)$ workflow.php?object=$1
+RewriteRule workflow/([0-9a-zA-Z-_'.]+)/([0-9]+)$ workflow.php?object=$1&wfid=$2
+RewriteRule workflow_task$ workflow_task.php

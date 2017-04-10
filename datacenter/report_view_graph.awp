@@ -1,0 +1,42 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/aereus.lib.php/CChart.php");
+	require_once("../users/user_functions.php");
+	require_once("datacenter_functions.awp");
+
+	$dbh = new CDatabase();
+
+	$GID = $_GET['gid'];
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+	<title>View Graph</title>
+	<style type='text/css'>
+	html, body
+	{
+		height: 100%;
+	}
+	</style>
+</head>
+<body>
+<?php
+	$result = $dbh->Query("select graph_name from dc_database_report_graphs where id='$GID'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		if ($row['graph_name'])
+			$type = $row['graph_name'];
+
+		$chart = new CChart($type, "/datacenter/xml_chartdata.awp?gid=$GID");
+		echo $chart->getChart("500", "400");
+	}
+?>
+</body>
+</html>
+

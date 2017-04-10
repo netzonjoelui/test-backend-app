@@ -1,0 +1,318 @@
+/**
+ * New classes
+ */
+
+.emailThreadMessageCol
+{
+	border-top-width:1px;
+	border-top-style:solid;
+	border-top-color:#666;
+
+	cursor:pointer;
+	padding: 5px;
+	margin-left: 3px;
+	margin-right: 3px;
+}
+
+.emailThreadMessageExp
+{
+	margin-bottom: 10px;
+	border-top: 1px solid #ccc;
+}
+
+.emailMessageBody
+{
+	margin-left: 10px;
+}
+
+/**
+ * Depricated classes
+ */
+a.EmailThreadTitleBoxLinks
+{
+	text-decoration:none;
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	font-weight:bold;
+	color:#000000;
+}
+
+a.EmailThreadTitleBoxLinks:hover
+{
+	text-decoration:none;
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	font-weight:bold;
+	color:#CC0000;
+}
+
+a.EmailThreadTitleBoxLinks:visited
+{
+	text-decoration:none;
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	font-weight:bold;
+	color:#000000;
+}
+
+/**************************************************************************************
+*	Pages:		For Email Specific Classes
+***************************************************************************************/
+
+.FromToData
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	color:#000099;
+}
+
+.EmailSingleMessageBody
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	color:#000000;
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#FFFFFF;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#FFFFFF;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#FFFFFF;
+	background-color:#FFFFFF;
+	width:auto;
+	padding:3px;
+}
+
+.EmailSingleMessageBody a
+{
+	color:#000066;
+}
+
+.EmailMainBodyText
+{
+	padding:5px;
+}
+.EmailCollapsedMessage
+{
+	border-top-width:1px;
+	border-top-style:solid;
+	border-top-color:#666;
+
+	cursor:pointer;
+	padding: 5px;
+	margin-left: 3px;
+	margin-right: 3px;
+}
+
+.EmaiThreadMessageBody
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+	font-size:11px;
+	line-height:20px;
+	color:#000000;
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#666;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#666;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#666;
+	background-color:#FFFFFF;
+	width:auto;
+	margin-bottom: 5px;
+	padding: 3px 3px 0px 3px;
+
+	-moz-border-radius-bottomright: 5px;
+	-moz-border-radius-bottomleft: 5px;
+	-webkit-border-bottom-right-radius: 5px;
+	-webkit-border-bottom-left-radius: 5px;
+}
+/* form contianer between the header and the body */
+.EmaiThreadMessageForm
+{
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#666;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#666;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#666;
+
+	margin: 0;
+	padding: 3px;
+}
+.EmailThreadMessageHeader
+{
+	border-top-width:1px;
+	border-top-style:solid;
+	border-top-color:#666;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#666;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#666;
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#666;
+	width:auto;
+	padding-left:3px;
+	padding-top:3px;
+	margin-top: 10px;
+
+	-moz-border-radius-topright: 5px;
+	-moz-border-radius-topleft: 5px;
+	-webkit-border-top-right-radius: 5px;
+	-webkit-border-top-left-radius: 5px;
+}
+.EmailThreadTitleBox
+{
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size:12px;
+	font-weight:bold;
+	color:#000000;
+	padding-left:5px;
+	padding-top:5px;
+	padding-bottom:5px;
+	border:1px solid #666;
+	width:auto;
+	margin-top:3px;
+	background-color:#FFF;
+}
+.EmailThreadSenderExp /* Sender */
+{
+	color:#990000;
+	background-color:#D0E8FF;
+}
+.EmailThreadSenderCol
+{
+	color:#990000;
+}
+.EmailThreadRand1Exp /* Rand */
+{
+	color:#000000;
+	background-color:#E8FFD0;
+}
+.EmailThreadRand1Col
+{
+	color:#61C100;
+}
+.EmailThreadRand2Exp /* Rand */
+{
+	color:#C89111;
+	background-color:#FFE773;
+}
+.EmailThreadRand2Col
+{
+	color:#C89111;
+}
+.EmailThreadRand3Exp /* Rand */
+{
+	color:#437C71;
+	background-color:#A5CEC6;
+}
+.EmailThreadRand3Col
+{
+	color:#437C71;
+}
+.EmailThreadRand4Exp /* Rand */
+{
+	color:#5511BB;
+	background-color:#C6A5F7;
+}
+.EmailThreadRand4Col
+{
+	color:#5511BB;
+}
+.EmailThreadRand5Exp /* Rand */
+{
+	color:#867D2D;
+	background-color:#D6CE84;
+}
+.EmailThreadRand5Col
+{
+	color:#867D2D;
+}
+.EmailThreadRand6Exp /* Rand */
+{
+	color:#09818A;
+	background-color:#84EFF7;
+}
+.EmailThreadRand6Col
+{
+	color:#09818A;
+}
+.EmailThreadRand7Exp /* Rand */
+{
+	color:#C15B00;
+	background-color:#FFB573;
+}
+.EmailThreadRand7Col
+{
+	color:#C15B00;
+}
+.EmailThreadRand8Exp /* Rand */
+{
+	color:#7C7C49;
+	background-color:#E7E7D6;
+}
+.EmailThreadRand8Col
+{
+	color:#7C7C49;
+}
+.EmailThreadRand9Exp /* Rand */
+{
+	color:#426916;
+	background-color:#A5DE63;
+}
+.EmailThreadRand9Col
+{
+	color:#426916;
+}
+.EmailThreadRand10Exp /* Rand */
+{
+	color:#2042A6;
+	background-color:#849CE7;
+}
+.EmailThreadRand10Col
+{
+	color:#2042A6;
+}
+
+.EmailHeaderDivLinkPadding
+{
+	padding-left:1px;
+	padding-bottom:3px;
+	margin-left:54px;
+	margin-top:1px;
+}
+
+.EmailHeaderDivLink
+{
+	float:left;
+	cursor: pointer;
+	margin-right: 3px;
+	height: 18px;
+	vertical-align: middle;
+}
+
+.EmailHeaderValue
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+	color:#000000;
+	float:left;
+}
+
+.EmailHeaderMoreInfo
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif;
+	font-weight:bold;
+	color:#000000;
+}
+

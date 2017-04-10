@@ -1,0 +1,1590 @@
+<?php 
+	header("Content-type: text/css"); 
+?>
+/**
+ * Base styles for ANT, all themes will inherit from this document
+ */
+
+/**
+ * Reset global browser defaults
+ * ----------------------------------------------------------------------
+ */
+img { border: 0; }
+
+body 
+{ 
+	/*background: #f6f6f6 url(/images/backgrounds/default.png) repeat top left;*/
+	
+	/*background-color: #f3f3f3;*/
+	background-color: #f6f6f6;
+	font-family:Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	font-size: 11px;
+	color: #000000;
+	overflow: hidden;
+	margin:0;
+	padding:0;
+
+	/* scrollbar option for IE
+	scrollbar-base-color: #C0C0C0;
+	scrollbar-base-color: #C0C0C0;
+	scrollbar-3dlight-color: #C0C0C0;
+	scrollbar-highlight-color: #C0C0C0;
+	scrollbar-track-color: #EBEBEB;
+	scrollbar-arrow-color: black;
+	scrollbar-shadow-color: #C0C0C0;
+	scrollbar-dark-shadow-color: #C0C0C0;
+	*/
+}
+
+/* scrollbar option
+::-webkit-scrollbar { width: 10px; height: 10px;}
+::-webkit-scrollbar-button {  background-color: #666; }
+::-webkit-scrollbar-track {  background-color: #999;}
+::-webkit-scrollbar-track-piece { background-color: #ffffff;}
+::-webkit-scrollbar-thumb { height: 50px; background-color: #666; border-radius: 3px;}
+::-webkit-scrollbar-corner { background-color: #999;}
+::-webkit-resizer { background-color: #666;}
+*/
+
+/* used for all popups */
+body.popup {
+	background-color:#FFFFFF;
+	margin: 0px 10px 0 10px;
+	padding: 0px;
+}
+
+body.inline {
+	background-color:#FFFFFF;
+	margin: 0px;
+	padding: 0px;
+}
+
+/**
+ * Typography
+ * ----------------------------------------------------------------------
+ */
+p { font-size: 12px; }
+
+/* Global Link classes */
+a { text-decoration: underline; color: #0199bc; }
+a:active { text-decoration: underline; color: #0199bc; }
+a:visited { text-decoration: underline; color: #0199bc; }
+a:hover { text-decoration: underline; color: #e44045; }
+.link { text-decoration: underline; color: #000066; } /* Used for span and text acting like a link */
+.boldLink { text-decoration: none; font-weight: bold; } /* Used for bold header like links like the profile name */
+.boldLink:hover { text-decoration: underline; }
+.strong { font-weight: bold; }
+.italic { font-style:italic; }
+
+/* Headers */
+h1, .headerOne
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-weight:bold; 
+	padding-top:10px;
+}
+
+h2, .headerTwo
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-weight:bold; 
+}
+
+h3, .headerThree
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-weight:bold; 
+	margin-bottom: 3px;
+}
+
+/* Form or toolbar labels */
+.label
+{
+	font-family: Arial, Helvetica, sans-serif; 
+	font-weight: bold;
+	font-size: 12px;
+	color: #666;
+	vertical-align: middle;
+	min-height: 20px;
+	padding: 5px 10px 5px 3px;
+}
+
+/* Right now this is only used in the public profile customer/pub_profile.php */
+.headerBar
+{
+	border-bottom: 1px solid #CCCCCC;
+}
+
+/* Reset - remove all padding and margins */
+/*
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, code,
+del, dfn, em, img, q, dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-weight: inherit;
+  font-style: inherit;
+  font-size: 100%;
+  font-family: inherit;
+  vertical-align: baseline;
+}
+*/
+
+/* Lists */
+ul, ol, dl { line-height: 18px; position: relative; margin: 5px 0 10px 5px; }
+ul { list-style: disc outside; }
+ol { list-style: decimal outside; }
+li ul, li ol, ul ul, ol ol { top: 0; margin-top: 0; margin-bottom: 0; }
+
+
+/**
+ * Main header
+ * ----------------------------------------------------------------------
+ */
+.header
+{
+	background-color:#141414;
+	color:#e3e3e3;
+	vertical-align: middle;
+}
+
+.header a, .header a:visited
+{
+	color:#e3e3e3;
+	font-weight:bold; 
+	font-size:12px; 
+	text-decoration:none;
+}
+
+.headerLogo
+{
+	color:#fff;
+	font-size:20px; 
+	font:Verdana, Arial, Helvetica, sans-serif;
+	margin-left: 20px;
+	float:left;
+	width:200px;
+	padding-top: 7px;
+	padding-bottom: 5px;
+}
+
+#headerSearch
+{
+	margin-left: 230px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+#headerSearch input
+{
+	height: 25px;
+	width: 50%;
+	border: 0;
+	background-color: #e3e3e3;
+	padding: 1px 5px 1px 5px;
+	vertical-align: top;
+}
+
+#headerSearch button
+{
+	height: 27px;
+	padding: 3px 5px 3px 5px;
+	border: 0;
+	background-color: #00b2d9;
+	color: white;
+	vertical-align: top;
+
+	outline: none;
+	cursor: pointer;
+	text-align: center;
+	text-decoration: none;
+	border-radius: 0;
+	border-top-right-radius: 3px;
+   -webkit-border-top-right-radius:3px;
+   -moz-border-top-right-radius:3px;
+	border-bottom-right-radius: 3px;
+   -webkit-border-bottom-right-radius:3px;
+   -moz-border-bottom-right-radius:3px;
+}
+
+#headerActions
+{
+	margin-right: 20px;
+	padding-top: 11px;
+	float: right;
+}
+
+/**
+ * Search applet
+ */
+.searcherPopup
+{
+	position: absolute;
+	display: none;
+	padding: 10px;
+	background-color: #666;
+	z-index: 1000;
+	color: white;
+	max-height: 300px;
+	overflow: auto;
+	-moz-box-shadow: 0px 0px 10px #666;
+	-webkit-box-shadow: 0px 0px 10px #666;
+	box-shadow: 0px 0px 10px #666;
+}
+
+.searcherGroupHeader
+{
+	font-weight: bold;
+	border-bottom: 1px solid;
+	margin-bottom: 5px;
+}
+
+.searcherItemRow
+{
+	cursor: pointer;
+	margin-bottom: 5px;
+}
+
+.searcherItemTitle
+{
+}
+
+.searcherItemText
+{
+}
+
+/**
+ * Main navigation tabs
+ * ----------------------------------------------------------------------
+ */
+.topNavbarBG 
+{
+	background: #141414;
+	background: -moz-linear-gradient(top,#2c2c2c 0,#121212 100%);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0%,#2c2c2c),color-stop(100%,#121212));
+	background: -webkit-linear-gradient(top,#2c2c2c 0,#121212 100%);
+	background: -o-linear-gradient(top,#2c2c2c 0,#121212 100%);
+	background: -ms-linear-gradient(top,#2c2c2c 0,#121212 100%);
+	background: linear-gradient(top,#2c2c2c 0,#121212 100%);
+	border-top: 1px solid #343434;
+    /*
+	-moz-box-shadow: 0 2px 2px rgba(0,0,0,.2);
+	-webkit-box-shadow: 0 2px 2px rgba(0,0,0,.2);
+	box-shadow: 0 2px 2px rgba(0,0,0,.2);
+    */
+	
+    /*
+	height: 39px;
+	position: relative;
+	width: 100%;
+	z-index: 9005;
+	*/
+
+	padding-left: 20px;
+	
+}
+
+.topNavbarShadow 
+{
+	height:0px;
+	background-color:#1d89b7;
+}
+
+.topNavbarHr
+{
+	background-color: #5A6A7A;
+	height:0px;
+}
+
+.topNavTabOut
+{
+	cursor:pointer;
+	color: #e3e3e3;
+	border-right: 0;
+	font-size: 13px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+	border-right: 1px solid #141414;
+	border-left: 1px solid #141414;
+}
+.topNavTabOut div 
+{ 
+	padding: 5px 10px 7px 10px;
+	border-right: 1px solid #363636;
+	border-left: 1px solid #363636;
+}
+
+.topNavTabOver
+{
+	cursor:pointer;
+	color: #fff;
+	border-right: 0px;
+	font-size: 13px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+	border-right: 1px solid #141414;
+	border-left: 1px solid #141414;
+}
+.topNavTabOver div 
+{ 
+	padding: 5px 10px 7px 10px;
+	border-right: 1px solid #363636;
+	border-left: 1px solid #363636;
+}
+
+.topNavTabOn
+{
+	cursor:pointer;
+	color: #fff;
+	background-color: #00b2d9;
+	border-right: 0;
+	font-size: 13px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+	border-right: 1px solid #00b2d9;
+	border-right: 1px solid #00b2d9;
+}
+.topNavTabOn div 
+{ 
+	padding: 5px 10px 7px 10px;
+	border-right: 1px solid #00b2d9;
+	border-left: 1px solid #00b2d9;
+}
+
+/**
+ * Application Layout
+ * ----------------------------------------------------------------------
+ */
+
+#appnav
+{
+	margin-bottom: 13px;
+}
+
+/* Add appropriate margin to applications. Sometimes 0px is used for dashboards */
+.appTopSpacer
+{
+	margin-top: 5px;
+}
+
+/* Navigation container floated left */
+.appInstNav
+{
+	float:left;
+	width:200px;
+	margin-left: 20px;
+}
+
+/* Application body - where the browsers, loaders, and plugins load */
+.appInstBody
+{
+}
+
+/* If in desktop mode the body will float to the right of the navigation */
+.appInstBodyFloat
+{
+	margin-left: 230px;
+}
+
+/* application name/title container */
+#appname, .appname
+{
+	background-color: white; 
+	border-bottom: 1px solid #e3e3e3;
+	color:#5a6a7a;
+
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 2px;
+	font-size:18px; 
+	font:Verdana, Arial, Helvetica, sans-serif;
+	font-weight:bold; 
+}
+
+/* application title container */
+.apptitle
+{
+	height: 0px;
+	display: none;
+	/*color:#5a6a7a;*/
+	color: #666;
+	padding: 10px 10px 15px 20px;
+	margin-bottom: 13px;
+	border-bottom: 1px solid #ccc;
+}
+
+/* breadcrumbs */
+.apptitle > div
+{
+	margin-left: 2px;
+}
+
+/* Application name text */
+.apptitle h1
+{
+	font-size: 20px; 
+	margin: 3px 0 0 0;
+	padding: 0;
+	font-weight:bold; 
+	/*color: #007ba9;*/
+	color: #666;
+	font:Verdana, Arial, Helvetica, sans-serif;
+}
+
+/* application body frame/container */
+#appbody
+{
+	/*
+	margin-left: 20px;
+	margin-right: 10px;
+	*/
+}
+
+/**
+ * Elastic grid split into 12 parts
+ */
+.row
+{
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.row:before, .row:after {
+	display: table;
+	content: " ";
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+.col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12
+{
+	float: left;
+}
+
+.col-1 { width: 8.333333333333332%; }
+.col-2 { width: 16.66666666666667%; }
+.col-3 { width: 25%; }
+.col-4 { width: 33.33333333333333%; }
+.col-6 { width: 50%; }
+.col-8 { width: 66.66666666666667%%; }
+.col-9 { width: 75%; }
+.col-10 { width: 83.33333333333333%; }
+.col-11 { width: 91.66666666666667%; }
+.col-12 { width: 100%; }
+
+/**
+ * Common margin classes
+ */
+.mgb1 { margin-bottom: 10px; }
+.mgb2 { margin-bottom: 20px; }
+.mgb3 { margin-bottom: 30px; }
+
+/**
+ * Float classes
+ */
+.left { float: left; }
+.right { float: right; }
+.clear { clear: both; }
+
+/**
+ * Tables
+ * ----------------------------------------------------------------------
+ */
+table 
+{ 
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	font-size: 11px; 
+}
+.headerTable, th
+{
+	font-weight: bold;
+}
+/* used for creating think hr lines in tables */
+.horizontalline, hr
+{
+	height:1px;
+	background-color:#0066FF;
+}
+
+/**
+ * Containers
+ * ----------------------------------------------------------------------
+ */
+
+/* loading div or span */
+.loading
+{
+	background-image: url(/images/loading.gif);	
+	background-repeat: no-repeat;
+	width: 16px;
+	height: 16px;
+	margin: 10px;
+}
+/* used in conjunction with another class to add warning - class='headerOne alert' */
+.alert { color: red; }
+/* notice & notification containers */
+.error, .notice, .success, .info {padding:.8em;margin:10px 0 10px 0;border:2px solid #ddd;}
+.error {background:#FBE3E4;color:#8a1f11;border-color:#FBC2C4;}
+.notice {background:#FFF6BF;color:#514721;border-color:#FFD324;}
+.success {background:#E6EFC2;color:#264409;border-color:#C6D880;}
+.info {color:#514721; border-color:#7eabcd;}
+.error a {color:#8a1f11; background:none; padding:0; margin:0; text-decoration: underline; }
+.notice a {color:#514721; background:none; padding:0; margin:0; text-decoration: underline; }
+.success a {color:#264409; background:none; padding:0; margin:0; text-decoration: underline; }
+.info a {color:#264409; background:none; padding:0; margin:0; text-decoration: underline; }
+
+/**
+ * Object loader form classes
+ * ----------------------------------------------------------------------
+ */
+
+/**
+ * A header label
+ */
+.headerLabel
+{
+	font-family: Arial, Helvetica, sans-serif; 
+	font-weight: bold;
+	font-size: 13px;
+	color: #000;
+	vertical-align: middle;
+	padding: 5px 0px 0px 0px;
+}
+
+/* The name of the field/property */
+.formLabel
+{
+	white-space: nowrap;
+	font-family: Arial, Helvetica, sans-serif; 
+	font-weight: bold;
+	font-size: 12px;
+	color: #666;
+	vertical-align: middle;
+	text-align: right;
+	min-height: 20px;
+	padding: 5px 10px 5px 3px;
+	width: 100px;
+}
+.formLabel.compact { font-size: 12px; padding: 3px; width:auto; text-align: left; min-height: auto; font-weight: normal; }
+
+/* The value and the input */
+.formValue
+{
+	padding: 5px 5px 5px 0;
+	font-size: 13px;
+	vertical-align: middle;
+	color: #000;
+	min-height: 20px;
+}
+
+.formValue.compact { font-size: 12px; padding: 3px; text-align: left; min-height: auto; }
+
+/* label with no width - often used between inputs */
+.formValueLabel {
+	display: inline-block;
+	white-space: nowrap;
+	font-weight: bold;
+	font-size: 12px;
+	color: #666;
+	vertical-align: middle;
+	min-height: 20px;
+	padding: 7px 5px 0 5px;
+}
+
+/* used for html documents */
+.formHtmlBody
+{
+	font-weight: normal;
+}
+
+/* The row for UIML forms */
+.formRow
+{
+}
+
+.formRow > td
+{
+	/*border-bottom: 1px solid #ccc;*/
+}
+
+/* The title of the object, browser, or plugin */
+.formTitle
+{
+	font-size: 20px;
+	font-weight: bold;
+	text-align:left;
+	padding:5px 5px 0px 0px;
+	margin:0px;
+	color: #666;
+}
+
+
+/**
+ * Object Loader Classes 
+ */
+.objectLoader
+{
+}
+
+/* Header with title */
+.objectLoaderHeader
+{
+	font-size: 20px;
+	font-weight: bold;
+	text-align:left;
+	padding:5px 5px 0px 5px;
+	margin:0px;
+	color: #666;
+	/*text-transform:uppercase;*/
+}
+
+/* Header Breadcrumbs Container */
+.objectLoaderHeader .breadCrumbs
+{
+	margin-left: 1px;
+	margin-bottom: 3px;
+}
+.objectLoaderHeader .breadCrumbs, .objectLoaderHeader .breadCrumbs a
+{
+	font-size: 11px;
+	font-weight: bold;
+	color: #00b2d9;
+	text-decoration: none;
+}
+
+.objectLoaderBody
+{
+	margin: 0 5px 0 5px;
+}
+
+.objectInfobox
+{
+	background-color: white;
+	border: 1px solid #7eabcd;
+	padding: 0px 3px 10px 0px;
+
+	-moz-box-shadow: 5px 5px 5px #ccc;
+	-webkit-box-shadow: 5px 5px 5px #ccc;
+	box-shadow: 5px 5px 5px #ccc;
+}
+
+/**
+ * AntObjectList classes
+ * ----------------------------------------------------------------------
+ */
+
+/* Header with title */
+.aobListHeader
+{
+	font-size: 20px;
+	font-weight: bold;
+	text-align:left;
+	padding:5px 5px 0px 5px;
+	margin:0px;
+	color: #666;
+	/*text-transform:uppercase;*/
+}
+
+.aobListRow, .aobListRowAct, .aobListRowAlert
+{
+	cursor:pointer;
+	color:#000000;
+	background-color:#FFFFFF;
+	font-size: 13px;
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+
+.aobListRow > td, .aobListRowAct > td, .aobListRowAlert > td
+{
+	border-bottom-color:#cccccc; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+/* Inactive / Normal state */
+.aobListRow
+{
+}
+
+/* Over - on mouse over */
+.aobListRow:hover
+{
+	background-color: #e3e3e3;
+}
+
+/* Active - selected */
+.aobListRowAct
+{
+	background-color:#00b2d9;
+	color:#fff;
+}
+
+.aobListRowAct td, .aobListRowAct .aobjListBold
+{
+	color:#fff;
+	/*color:#000000;*/
+}
+
+
+/* Alert - usually means unread */
+.aobListRowAlert
+{
+	background-color:#e1e3e8;
+}
+
+.aobListRowAlert td
+{
+	/*color:#fff;*/
+	color: #333;
+}
+
+/* No select option - no hover */
+.aobListRowNoSelect
+{
+	background-color: none;
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: auto;
+	-khtml-user-select: auto;
+	-moz-user-select: auto;
+	-o-user-select: auto;
+	user-select: auto;
+}
+
+/* The container where the title of the list view goes */
+.aobListTitle
+{
+	padding: 3px 0 3px 5px;
+	font-weight: bold;
+}
+
+/* The container where the page number and pagination goes */
+.aobListRight
+{
+	padding-right: 5px;
+	padding-top: 3px;
+}
+
+/* Breadcrumbs - used for file browsing */
+.aobListBreadCrumbs
+{
+	padding: 3px 0 3px 5px;
+	font-weight: bold;
+}
+
+/* General table styles */
+
+.aobListTable
+{
+	width: 100%;
+}
+
+.aobListTable th
+{
+	text-align: left;
+	background-color:#979797; 
+	color:#FFFFFF;
+	border-right:1px solid #FFFFFF;
+	padding: 2px 0px 2px 5px;
+}
+
+.aobjListBold
+{
+	font-weight:bold;
+	color: #666;
+}
+
+.aobListItal
+{
+	color:#336699;
+}
+
+
+/* Comment row */
+.aobListRowComment
+{
+	cursor:default;
+	margin: 5px 5px 0px 0px;
+	padding: 5px 0 5px 0;
+	background-color: #ECEFF5;
+	color: black;
+
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: auto;
+	-khtml-user-select: auto;
+	-moz-user-select: auto;
+	-o-user-select: auto;
+	user-select: auto;
+}
+
+/* Comment row */
+.aobListRowActivity
+{
+	cursor:default;
+	margin: 0;
+	padding: 10px;
+	background-color: none;
+	color: black;
+	border-bottom: 1px solid #ccc;
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: auto;
+	-khtml-user-select: auto;
+	-moz-user-select: auto;
+	-o-user-select: auto;
+	user-select: auto;
+}
+
+.aobListRowActivity a, .aobListRowActivity span, .aobListRowActivity img
+{
+	vertical-align: middle;
+}
+
+/* No select option - no hover */
+.aobListRowNoSelect, .aobListRowNoSelect:hover
+{
+	background-color: none;
+	cursor:auto;
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: auto;
+	-khtml-user-select: auto;
+	-moz-user-select: auto;
+	-o-user-select: auto;
+	user-select: auto;
+}
+
+.aobListBlankState
+{
+	padding: 10px;
+	font-size: 13px;
+}
+
+/* Browser toolbar container */
+.aobToolbar { }
+
+/* Search container */
+.aobSearch
+{
+	margin-top: 5px;
+	margin-left: 4px;
+}
+
+/* The body of the object browser */
+.aobBody
+{
+}
+
+/**
+ * Generic clickable list classes
+ * ----------------------------------------------------------------------
+ */
+.actListRow
+{
+	border-bottom-color:#cccccc; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	padding: 5px;
+	cursor: pointer;
+}
+.actListRow:hover
+{
+	background-color: #e3e3e3;
+}
+
+/* Unread */
+.actListRow .selected
+{
+	background-color:#CCCCCC;
+	color:#000000;
+}
+.actListRow .selected:hover
+{
+	background-color:#CCCCCC;
+}
+
+/* Alert - usually means unread */
+.actListRow.unread
+{
+	background-color:#e1e3e8;
+	color: #333;
+}
+
+/* Main image on the left - usually used for icon or user image */
+.actListRow .mainImage
+{
+	float: left;
+	width: 50px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+}
+
+/**************************************************************************************
+*	Input:		For Input Box and Form Specific Classes
+***************************************************************************************/
+form
+{
+	margin: 0px;
+}
+
+/* Fix box sizing to include border and padding set defaults */
+textarea, select, input[type=text], input[type=password] {
+	-webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	font-size: 13px;
+}
+
+textarea
+{
+   -webkit-border-radius:3px;
+   -moz-border-radius:3px;
+   border-radius:3px;
+   border: 1px solid #b7b7b7; 
+   padding: 5px;
+}
+
+textarea:hover
+{
+	border: 1px solid #b7b7b7; 
+}
+
+textarea:focus
+{
+	border: 1px solid #3E7AA2; 
+	color: #333333;
+}
+
+textarea:focus:hover
+{
+	border: 1px solid #3E7AA2; 
+	color: #333333;
+}
+
+div.clearIcon
+{
+    position: relative;
+}
+div.clearIcon span 
+{
+    position: absolute;
+    display: block;
+    right: 5px;
+    margin-right: 1px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    background: url(/images/icons/close_16.png);
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+/* Input used for posting comments */
+input.comment
+{
+   border: 1px solid;
+   text-indent:5px;
+   margin: 0;
+   height:14px;
+}
+
+input[type=text], input[type=password]
+{
+   -webkit-border-radius:3px;
+   -moz-border-radius:3px;
+   border-radius:3px;
+   text-indent:5px;
+   margin: 0;
+   height:30px;
+   background: #fff;
+   border: 1px solid #b7b7b7;
+}
+
+input[type=button]
+{
+    cursor: pointer;
+}
+
+input[type=checkbox], input[type=radio]
+{
+    height: 14px;
+    margin-right: 3px;
+}
+
+input:focus { border: 1px solid #3E7AA2; }
+
+input[disabled]
+{
+	border: 1px solid #999;
+	background-color: #ddd;
+}
+
+textarea[disabled]
+{
+	border: 1px solid #999;
+	background-color: #ddd;
+}
+
+
+/*
+ * Fancy input styles
+ */
+input.fancy 
+{
+	/* inherited from global input[type=text] now */
+}
+
+input.medium
+{
+   height:26px;
+   line-height:15px;
+   text-indent:3px;
+   margin: 0;
+}
+
+input.small
+{
+   height:18px;
+   line-height:15px;
+   text-indent:3px;
+   margin: 0;
+}
+
+input.grLeft
+{
+	-webkit-border-top-right-radius: 0px; 
+	-moz-border-top-right-radius: 0px;
+	border-top-right-radius: 0px;
+
+	-webkit-border-bottom-right-radius: 0px; 
+	-moz-border-bottom-right-radius: 0px;
+	border-bottom-right-radius: 0px;
+	margin-right: 0px;
+	border-right: 0;
+}
+
+input.grRight
+{
+	-webkit-border-top-left-radius: 0px; 
+	-moz-border-top-left-radius: 0px;
+	border-top-left-radius: 0px;
+
+	-webkit-border-bottom-left-radius: 0px; 
+	-moz-border-bottom-left-radius: 0px;
+	border-bottom-left-radius: 0px;
+	margin-left: 0px;
+}
+
+
+/* used for onblur text in text input */
+.inputBlurText
+{
+	color: #B8B8B8;
+}
+
+
+
+
+/**************************************************************************************
+*	Reader:		For Reader Classes
+***************************************************************************************/
+.readerTitle
+{
+	font-size: 14px;
+	font-weight: bold;
+	line-height: 18px;
+	text-align:left;
+	color: #000000;	
+	padding:5px;
+	margin:0px;
+	height: 22px;
+	background-color:#F6F5F4;
+	border-bottom:1px solid #808080;
+}
+
+.readerBody
+{
+	font-size: 12px;
+	font-weight: normal;
+	line-height: 18px;
+	text-align:left;
+	color: #000000;	
+	padding:5px;
+	margin:10px 0 0 0;
+}
+
+.readerBody h1
+{
+	font-size: 18px;
+}
+.readerBody h2
+{
+	font-size: 16px;
+}
+.readerBody h3
+{
+	font-size: 14px;
+}
+.readerBody h4
+{
+	font-size: 12px;
+	font-weight: bold;
+}
+.readerBody h5
+{
+	font-size: 10px;
+	font-weight: bold;
+}
+
+.readerRibbon
+{
+
+}
+
+
+
+/**************************************************************************************
+*	alib.js:		global styles
+***************************************************************************************/
+
+/* Popup alerts used through page for status updates. This si the container */
+.statusAlert
+{
+	border: 1px solid #130B40;
+	padding: 8px;
+	background-color: #93B4C7;
+	color: white;
+	font-weight: bold;
+}
+
+/**************************************************************************************
+*	Global includes
+***************************************************************************************/
+<?php
+	include("progressbar.css");
+	include("wizard.css");
+	include("CTextBoxList.css");
+?>
+
+/**
+ * alib.ui.Menu
+ * ==================================================================
+ */
+
+.alibMenu
+{
+	padding-top: 5px;
+	cursor: default;
+	font: normal 13px Arial, sans-serif;
+	margin: 0;
+	outline: none;
+	z-index: 20000;
+	max-height: 300px;
+	overflow: auto;
+	background-color: #ffffff;
+	color: black;
+	-moz-box-shadow: 0px 0px 10px #666;
+	-webkit-box-shadow: 0px 0px 10px #666;
+	box-shadow: 0px 0px 10px #666;
+}
+
+.alibMenuItem
+{
+	color: black;
+	font: normal 13px Arial, sans-serif;
+	margin: 0;
+	padding: 4px 28px 4px 28px;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.alibMenuItemLabel
+{
+}
+
+.alibMenuItemIcon
+{
+	text-align: left;
+}
+
+
+/* State: disabled. */
+.alibMenuItemDisabled .alibMenuItemLabel 
+{
+  color: #ccc !important;
+}
+
+.alibMenuItemDisabled .alibMenuItemIcon 
+{
+  opacity: 0.3;
+  -moz-opacity: 0.3;
+  filter: alpha(opacity=30);
+}
+
+/* State: hover. */
+.alibMenuItemHover  
+{
+  background-color: #ccc;
+  color: black;
+  /* Use an explicit top and bottom border so that the selection is visible
+   * in high contrast mode. */
+  border-color: #000;
+  border-style: dotted;
+  border-width: 1px 0;
+  padding-bottom: 3px;
+  padding-top: 3px;
+}
+
+/* State: selected/checked. */
+.alibMenuItemCheckbox,
+.alibMenuItemIcon 
+{
+	display: block;
+	height: 16px;
+	width: 16px;
+	float: left;
+	margin-left: -20px;
+	vertical-align: middle;
+	background-repeat: no-repeat;
+}
+
+/**
+ * Right arrow for submenu
+ */
+.alibSubMenuArrow 
+{
+  color: #000;
+  left: auto;
+  padding-right: 6px;
+  position: absolute;
+  right: 0;
+  text-align: right;
+}
+
+/* State: disabled. */
+.alibMenuItemDisabled .alibSubMenuArrow 
+{
+  color: #ccc;
+}
+
+/* Menu button dropdown icon */
+.alibMenuButtonIcon
+{
+}
+
+
+/**
+ * alib.ui.Toolbar - is replacing CTOolBart
+ * ==================================================================
+ */
+
+/* toolbar container */
+.alibToolbar
+{
+	background-color: #fff;
+	padding: 0px 0px 3px 0px;
+}
+
+/* toolbar button class */
+.alibToolbarButton
+{
+	border: 1px solid transparent;
+	cursor: default;
+	position: relative;
+	display: -moz-inline-box;
+	display: inline-block;
+	height: 20px;
+	vertical-align: middle;
+	margin-right: 3px;
+	-webkit-border-radius: 2px; 
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+}
+
+.alibToolbarButton button
+{
+	background-color: white;
+	border: none;
+}
+
+.alibToolbarButton:hover
+{
+	border: 1px solid black;
+}
+
+.alibToolbarButton.on
+{
+	border-color: #729BD1;
+	background-color: #dde1eb;
+}
+
+/* toolbar button class */
+.alibToolbarSeparator
+{
+	border-right: 1px solid #ccc;
+	cursor: default;
+	position: relative;
+	display: -moz-inline-box;
+	display: inline-block;
+	height: 20px;
+	vertical-align: middle;
+	margin-right: 3px;
+}
+
+/**************************************************************************
+*	CToolbar - old has been replaced with the above
+**************************************************************************/
+.CToolbar
+{ 
+	/*background-color : white;*/
+	/* border:1px solid #481800;*/
+	border: 0;
+	border-bottom: 1px solid #ccc;
+	padding:5px 0px 5px 5px;
+	margin-bottom: 5px;
+	display:table;
+}
+
+/* Gecko adds 3px margin */
+@-moz-document url-prefix() 
+{
+     .CToolbar button.CButton { margin:0 -3px; }
+}
+
+.CToolbarInputBlur
+{
+	color: #666;
+}
+
+/* Used for standard text labels in toolbars */
+
+.CToolbarLabel
+{
+	padding-right:6px;
+	padding-top: 3px;
+	font-family:Arial, Verdana,  Helvetica, sans-serif; 
+	font-size:12px;
+	font-weight:bold;
+	color:#000;	
+}
+
+.CToolbarSpacer
+{
+	width: 1px;
+	background-color: gray;
+	height: 15px;
+	margin-top: 2px;
+	margin-left: 4px;
+	margin-right: 2px;
+}
+
+.CToolbarIcon
+{
+	width: 22px;
+	height: 22px;
+}
+
+/**
+ * alib.ui.Tooltip
+ * ==================================================================
+ */
+.alib-tooltip { font-size: 12px; position: absolute; padding: 5px; z-index: 100000; }
+.alib-tooltip-inner { background-color: #000; color: #FFF; max-width: 200px; padding: 5px 8px 4px 8px; text-align: center; }
+
+/* Rounded corners */
+.alib-tooltip-inner { border-radius: 3px; -moz-border-radius: 3px; -webkit-border-radius: 3px; }
+
+/* Uncomment for shadow */
+/*.alib-tooltip-inner { box-shadow: 0 0 5px #000000; -webkit-box-shadow: 0 0 5px #000000; -moz-box-shadow: 0 0 5px #000000; }*/
+
+.alib-tooltip-arrow { position: absolute; width: 0; height: 0; line-height: 0; border: 5px dashed #000; }
+
+/* Rules to colour arrows */
+.alib-tooltip-arrow-n { border-bottom-color: #000; }
+.alib-tooltip-arrow-s { border-top-color: #000; }
+.alib-tooltip-arrow-e { border-left-color: #000; }
+.alib-tooltip-arrow-w { border-right-color: #000; }
+
+.alib-tooltip-n .alib-tooltip-arrow { top: 0px; left: 50%; margin-left: -5px; border-bottom-style: solid; border-top: none; border-left-color: transparent; border-right-color: transparent; }
+.alib-tooltip-nw .alib-tooltip-arrow { top: 0; left: 10px; border-bottom-style: solid; border-top: none; border-left-color: transparent; border-right-color: transparent;}
+.alib-tooltip-ne .alib-tooltip-arrow { top: 0; right: 10px; border-bottom-style: solid; border-top: none;  border-left-color: transparent; border-right-color: transparent;}
+.alib-tooltip-s .alib-tooltip-arrow { bottom: 0; left: 50%; margin-left: -5px; border-top-style: solid; border-bottom: none;  border-left-color: transparent; border-right-color: transparent; }
+.alib-tooltip-sw .alib-tooltip-arrow { bottom: 0; left: 10px; border-top-style: solid; border-bottom: none;  border-left-color: transparent; border-right-color: transparent; }
+.alib-tooltip-se .alib-tooltip-arrow { bottom: 0; right: 10px; border-top-style: solid; border-bottom: none; border-left-color: transparent; border-right-color: transparent; }
+.alib-tooltip-e .alib-tooltip-arrow { right: 0; top: 50%; margin-top: -5px; border-left-style: solid; border-right: none; border-top-color: transparent; border-bottom-color: transparent; }
+.alib-tooltip-w .alib-tooltip-arrow { left: 0; top: 50%; margin-top: -5px; border-right-style: solid; border-left: none; border-top-color: transparent; border-bottom-color: transparent; }
+
+
+/**
+ * CTabs = this will be replaced with alib.ui.tabs soon
+ * ==================================================================
+ */
+.CTTabLeftOn
+{
+	width: 5px;
+}
+.CTTabLeftOff
+{
+	width: 5px;
+}
+.CTTabCenterOn
+{
+	font-weight: bold;
+	font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
+	background-color: #ccc;
+	font-size:11px;
+	color:#333;
+	padding:5px;
+	cursor: pointer;
+}
+
+.CTTabCenterOff
+{
+	font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
+	background-color: non;
+	font-size:11px;
+	font-weight: bold;
+	color:#666;
+	padding:5px;
+	text-decoration: underline;
+	cursor: pointer;
+	border-top: 1px solid transparent;
+	border-left: 1px solid transparent;
+	border-right: 1px solid transparent;
+}
+
+.CTTabCenterOff:hover
+{
+}
+
+.CTTabRightOn
+{
+	width: 0px;
+}
+
+.CTTabRightOff
+{
+	width: 0px;
+}
+
+.CTTabHr
+{
+	border-top: 1px solid #ccc;
+	padding-bottom: 10px;
+	background-color: none;
+}
+/* Where the content is placed */
+.CTTabBody
+{
+	padding: 5px;
+}
+
+/**
+ * Help classes
+ * ----------------------------------------------------------------------
+ */
+.helpTourCon
+{
+}
+
+.helpTourCon.dialog
+{
+	padding: 10px;
+}
+
+.helpTourCon.popup
+{
+	max-height: 300px;
+	max-width: 300px;
+	padding: 10px;
+	background-color: white;
+
+	overflow: auto;
+	-moz-box-shadow: 0px 0px 10px #666;
+	-webkit-box-shadow: 0px 0px 10px #666;
+	box-shadow: 0px 0px 10px #666;
+}
+
+/* help title bar */
+.helpTourCon h1
+{
+	padding: 0;
+	margin: 0;
+}
+
+.helpTourConButtons
+{
+	margin-top: 10px;
+	vertical-align: middle;
+}
+
+.helpTourConButtons button, .helpTourConButtons span,  .helpTourConButtons input, 
+.helpTourConButtons input[type=checkbox]
+{
+	vertical-align: middle;
+}
+
+.helpTourTitle
+{
+	margin: 0 0 10px 0;
+	font-size: 16px;
+}
+
+/* Body header */
+.helpTourCon p
+{
+	font-size: 13px;
+	line-height: 16px;
+}
+
+/**************************************************************************************
+*	Theme Includes
+***************************************************************************************/
+<?php
+	$folder = "base";
+	include("$folder/calendar.css");
+	//include("$folder/topnav.css");
+	include("$folder/files.css");
+	include("$folder/homewidgets.css");
+	include("$folder/dashboard.css");
+	//include("$folder/AntObjectBrowser.css");
+	include("$folder/email.css");
+	include("$folder/chat.css");
+	
+	/*
+	*	List of styles that control the look of aereuslib classes
+	*/
+	//include("$folder/CToolbar.css");
+	include("$folder/CWindowFrame.css");
+	include("$folder/CSplitContainer.css");
+	//include("$folder/CTabs.css");
+	include("$folder/CContentTable.css");
+	include("$folder/CMenuBar.css");
+	include("$folder/CDropdownMenu.css");
+	include("$folder/CToolTable.css");
+	//include("$folder/CButton.css");
+	include("$folder/ui_button.css");
+	include("$folder/ui_slimscroll.css");
+	include("$folder/CNavBar.css");
+	include("$folder/CDatasheet.css");
+	include("$folder/CTreeView.css");
+	include("$folder/CDialog.css");
+	include("$folder/CRte.css");
+	include("$folder/CAutoComplete.css");
+?>

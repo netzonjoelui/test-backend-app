@@ -1,0 +1,1 @@
+ALTER TABLE workflows ADD COLUMN f_condition_unmet boolean;

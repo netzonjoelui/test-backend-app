@@ -1,0 +1,370 @@
+<?php
+	$dc_coltypes = array(
+		array("1", "text", "text"), 
+		array("2", "number", "float"), 
+		array("3", "date", "date"), 
+		array("4", "date & time", "timestamp"), 
+		array("5", "auto number", "serial"), 
+		array("6", "yes/no", "bool"),
+		array("7", "Integer", "integer"),
+		array("8", "Big Integer", "int8"),
+	);
+
+	$dc_graphcolors = array("Orange"=>"F6BD0F", "Red"=>"FF0000", "Aqua"=>"0099FF", "Green"=>"006F00", "Purple"=>"A66EDD",
+							"Blue"=>"0000FF", "Fuchia"=>"FF00FF","Gray"=>"808080", "Teal"=>"008080", "Yellow"=>"FFFF00");
+
+
+	function dc_getColTypeName($id)
+	{
+		global $dc_coltypes;
+
+		for ($i = 0; $i < count($dc_coltypes); $i++)
+		{
+			if ($dc_coltypes[$i][2] == $id)
+				return $dc_coltypes[$i][1];
+		}
+
+		return "";
+	}
+
+	function dc_getColTypeReal($id)
+	{
+		global $dc_coltypes;
+
+		for ($i = 0; $i < count($dc_coltypes); $i++)
+		{
+			if ($dc_coltypes[$i][0] == $id)
+				return $dc_coltypes[$i][2];
+		}
+
+		return "";
+	}
+
+	function dc_getColIdName($dbh, $id)
+	{
+		$ret = $id;
+		
+		if (is_numeric($id))
+		{
+			$result = $dbh->Query("select name from dc_database_table_cols where id='$id'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$ret = $row['name'];
+			}
+			$dbh->FreeResults($result);
+		}
+
+		return $ret;
+	}
+
+	function dc_getColId($dbh, $tid, $colname)
+	{
+		$ret = $id;
+		
+		if (is_numeric($tid) && $colname)
+		{
+			$result = $dbh->Query("select id from dc_database_table_cols where name='".$dbh->Escape($colname)."' and table_id='$tid'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$ret = $row['id'];
+			}
+			$dbh->FreeResults($result);
+		}
+
+		return $ret;
+	}
+
+	function dc_getColType($dbh, $id)
+	{
+		$ret = NULL;
+		
+		if (is_numeric($id))
+		{
+			$result = $dbh->Query("select type_id from dc_database_table_cols where id='$id'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$ret = $row['type_id'];
+			}
+			$dbh->FreeResults($result);
+		}
+
+		return $ret;
+	}
+
+	function dc_getTblId($dbh, $dbid, $tblname)
+	{
+		$ret = null;
+		
+		if (is_numeric($dbid) && $tblname)
+		{
+			$result = $dbh->Query("select id from dc_database_tables where 
+								   name='".$dbh->Escape($tblname)."' and database_id='$dbid'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$ret = $row['id'];
+			}
+			$dbh->FreeResults($result);
+		}
+
+		return $ret;
+	}
+
+	function dc_getTblName($dbh, $tblid)
+	{
+		$ret = null;
+		
+		if (is_numeric($tblid))
+		{
+			$result = $dbh->Query("select name from dc_database_tables where id='$tblid'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$ret = $row['name'];
+			}
+			$dbh->FreeResults($result);
+		}
+
+		return $ret;
+	}
+
+	function dc_graphCheckColType($dbh, $gid, $colname, $type)
+	{
+		global $dcGCCTypeCache;
+		$ret = false;
+		
+		if (is_numeric($type) && $gid && $colname)
+		{
+			if (!$dcGCCTypeCache[$gid][$colname][$type]['cached'])
+			{
+				$result = $dbh->Query("select id from dc_database_report_graph_cols where 
+										graph_id='$gid' AND name='".$dbh->Escape($colname)."' AND type='$type'");
+				if ($dbh->GetNumberRows($result))
+				{
+					$row = $dbh->GetNextRow($result, 0);
+					$ret = true;
+				}
+				$dbh->FreeResults($result);
+				
+				$dcGCCTypeCache[$gid][$colname][$type]['ret'] = $ret;
+				$dcGCCTypeCache[$gid][$colname][$type]['cached'] = true;
+			}
+			else
+				$ret = $dcGCCTypeCache[$gid][$colname][$type]['ret'];
+		}
+
+		return $ret;
+	}
+	
+	function dc_graphIsMultiSeries($dbh, $gid)
+	{
+		$ret = false;
+
+		if ($gid)
+		{
+			$result = $dbh->Query("select count(*) as cnt from dc_database_report_graph_cols where
+									type='2' and graph_id='$gid'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				if ($row['cnt'] > 1)
+					$ret = true;
+			}
+			$dbh->FreeResults($result);
+		}
+
+		return $ret;
+	}
+
+	function dc_graphGetColColor($dbh, $gid, $colname)
+	{
+		$ret = null;
+
+		if ($gid && $colname)
+		{
+			$result = $dbh->Query("select color from dc_database_report_graph_cols where
+									name='".$dbh->Escape($colname)."' and graph_id='$gid'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$ret = $row['color'];
+			}
+			$dbh->FreeResults($result);
+		}
+
+		return $ret;
+	}
+	
+	function dc_graphGetAttribute($dbh, $gid, $attribute)
+	{
+		$ret = null;
+		
+		if ($gid && $attribute)
+		{
+			$result = $dbh->Query("select $attribute from dc_database_report_graphs where id='$gid'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$ret = $row[$attribute];
+			}
+			$dbh->FreeResults($result);
+		}
+		
+		return $ret;
+	}
+
+	function dc_graphGetNextColor()
+	{
+		global $dc_graphcolors, $dc_ggnc_index;
+		$ret = null;
+
+		// Handle first - last/reset
+		if (count($dc_graphcolors) < $dc_ggnc_index || !$dc_ggnc_index)
+			$dc_ggnc_index = 0;
+
+
+		$i = 0;
+		foreach ($dc_graphcolors as $cname=>$cval)
+		{
+			if ($i == $dc_ggnc_index)
+			{
+				$dc_ggnc_index++;
+				$ret = $cval;
+				break;
+			}
+			$i++;
+		}
+
+		if (!$ret)
+		{
+			$ret = $dc_graphcolors['red'];
+			
+		}
+
+		return $ret;
+	}
+
+	function dc_graphGetSeriesIndexColor($dbh, $gid, $index)
+	{
+		$ret = null;
+		
+		if ($gid)
+		{
+			$result = $dbh->Query("select series_colors[$index] as color 
+									from dc_database_report_graphs where
+									id='$gid'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$ret = $row['color'];
+			}
+			$dbh->FreeResults($result);
+		}
+		
+		return $ret;
+	}	
+
+	function dc_graphGetOption($dbh, $gid, $name)
+	{
+		$ret = null;
+		
+		if ($gid)
+		{
+			$result = $dbh->Query("select value from dc_database_report_graph_options 
+									where graph_id='$gid' and name='".$dbh->Escape($name)."'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$ret = $row['value'];
+			}
+			$dbh->FreeResults($result);
+		}
+		
+		return $ret;
+	}
+
+	function dc_graphSetOption($dbh, $gid, $name, $value)
+	{
+		$ret = null;
+		
+		if ($gid && $name)
+		{
+			$dbh->Query("delete from dc_database_report_graph_options where 
+						 graph_id='$gid' and name='".$dbh->Escape($name)."'");
+			$dbh->Query("insert into dc_database_report_graph_options(graph_id, name, value)
+						 values('$gid', '".$dbh->Escape($name)."', '".$dbh->Escape($value)."')");
+		}
+		
+		return $ret;
+	}
+
+	function dc_graphGetName($dbh, $gid)
+	{
+		$ret = null;
+		
+		if ($gid)
+		{
+			$result = $dbh->Query("select name from dc_database_report_graphs
+									where id='$gid'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$ret = $row['name'];
+			}
+			$dbh->FreeResults($result);
+		}
+		
+		return $ret;
+	}
+
+	function dc_getGetObj($dbh, $gid, $width=null, $height=null)
+	{
+		$retval = "";
+		if ($gid)
+		{
+			$result = $dbh->Query("select graph_name from dc_database_report_graphs where id='$gid'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				if ($row['graph_name'])
+					$type = $row['graph_name'];
+				else
+				{
+					$type = (dc_graphIsMultiSeries($dbh, $gid)) ? "MSColumn3D" : "Column3D";
+					$dbh->Query("update dc_database_report_graphs set graph_name where id='$gid'");
+				}
+				$chart = new CChart($type, "/datacenter/xml_chartdata.awp?gid=$gid");
+				$retval = "<div align='center'>".$chart->getChart($width, $height)."</div>";
+			}
+		}
+		return $retval;
+	}
+
+	function dc_getGroups($dbh, $table, $key, $title, $parent_field, $parent)
+	{
+		$buf = "";
+
+		$query = "select * from $table where ";
+		if ($parent)
+			$query .= " $parent_field='$parent'";
+		else if ($parent_field)
+			$query .= " $parent_field is null";
+		$query .= " order by $title";
+
+		$result = $dbh->Query($query);
+		$num = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetRow($result, $i);
+			$buf .= "<group key='".$row[$key]."' title='".rawurlencode($row[$title])."' parent_id='$parent' color='".$row['color']."'>";
+			if ($parent_field)
+				$buf .= dc_getGroups($dbh, $table, $key, $title, $parent_field, $row[$key]);
+			$buf .= "</group>";
+		}
+
+		return $buf;
+	}
+?>

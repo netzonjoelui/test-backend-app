@@ -1,0 +1,61 @@
+<?php
+	// ANT
+	require_once("../lib/AntConfig.php");
+	require_once("lib/CDatabase.awp");
+	require_once("users/user_functions.php");
+	require_once("email/email_functions.awp");
+	// ALIB
+	require_once("lib/aereus.lib.php/CCache.php");
+	//require_once("lib/aereus.lib.php/CSessions.php");
+	
+	header("Content-type: text/xml");			// Returns XML document
+
+	$dbh = new CDatabase();
+									  
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$ACCOUNT = $_SESSION["ACCOUNT"];
+	$PID = $_GET['pid'];
+	
+	echo '<?xml version="1.0" encoding="iso-8859-1"?>';
+	echo "\n<tnode>\n";
+	$name = base64_decode($_GET['data']);
+
+	// Look for delimiter
+	$testpos = strrpos($name, ',');
+	if ($testpos)
+		$name = str_replace(' ', '', substr($name, $testpos + 1));
+	if ($name != "")
+	{
+		if (!$settings_mya)
+		{
+			$query = "select email_users.id, email_users.user_id, email_users.email_address 
+						from email_users, users
+						where email_users.email_address like lower('$name%') 
+						and email_users.user_id = users.id
+						and users.account_id='$ACCOUNT' limit 10";
+		}
+		else
+		{
+			$query = "select email_users.id, email_users.user_id, email_address
+						from email_users, user_friends where user_friends.user_id='$USERID'
+						and user_friends.friend_id = email_users.user_id
+						and (lower(email_address) like lower('".$name."%')) limit 10";
+		}
+		
+		$result = $dbh->Query($query);
+		$num = $dbh->GetNumberRows($result);
+		//echo "<item>$query: $num</item>\n";
+		for ($i=0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+
+			if ($row['email_address'])
+			{
+				echo "<item>".base64_encode($row['email_address'])."</item>\n";
+			}
+		}
+		$dbh->FreeResults($result);
+	}
+	echo "\n</tnode>";
+?>

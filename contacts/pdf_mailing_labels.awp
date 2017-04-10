@@ -1,0 +1,92 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once('lib/pdf/class.ezpdf.php'); 
+	require_once("lib/CDatabase.awp");
+	require_once("lib/CAntObject.php");
+	require_once("lib/CAntObjectList.php");
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+					  
+	$pdf =& new Cezpdf();
+	$pdf->selectFont('../lib/pdf/fonts/Helvetica.afm');
+	$pdf->ezSetMargins(0,0,0,0);
+	
+	// Get paper coordinates
+	$result = $dbh->Query("select name, cols, y_start_pos, y_interval, x_pos from printing_papers_labels where id='".$_POST['paper']."'");
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$curY = $row['y_start_pos'];
+		$num_cols = $row['cols'] - 1;
+		$y_interval = $row['y_interval'];
+		$x_pos = explode(",", $row['x_pos']);
+	}
+	$dbh->FreeResults($result);
+	
+	$original_y = $curY;
+	$curCol = 0;
+
+	$olist = new CAntObjectList($dbh, "contact_personal", $USER);
+	$olist->processFormConditions($_POST);
+	$olist->getObjects();
+	$num = $olist->getNumObjects();
+	for ($i = 0; $i < $num; $i++)
+	{
+		$line_buf = "";
+		$obj = $olist->getObject($i);
+		$name = $obj->getValue("salutation");
+		if (!$name)
+			$name = CustGetName($dbh, $obj->id);
+
+		
+		$street = $obj->getValue('street');
+		$street2 = $obj->getValue('street2');
+		$city = $obj->getValue('city');
+		$state = $obj->getValue('state');
+		$zip = $obj->getValue('zip');
+		
+		if (!$street || !$zip)
+		{
+			$street = $obj->getValue('business_street');
+			$street2 = $obj->getValue('business_street2');
+			$city = $obj->getValue('business_city');
+			$state = $obj->getValue('business_state');
+			$zip = $obj->getValue('business_zip');
+		}
+		
+		if ($curY < 36)
+		{
+			$pdf->ezNewPage();
+			$curY = $original_y;
+			$curCol = 0;
+		}
+		
+		$pdf->addText($x_pos[$curCol], $curY, 10, $name);
+		$pdf->addText($x_pos[$curCol], $curY - 12, 10, $street);
+		if ($street2)
+		{
+			$pdf->addText($x_pos[$curCol], $curY - 24, 10, $street2);
+			$pdf->addText($x_pos[$curCol], $curY - 36, 10, "$city, $state $zip");
+		}
+		else
+			$pdf->addText($x_pos[$curCol], $curY - 24, 10, "$city, $state $zip");
+			
+		if ($curCol >= $num_cols)
+		{
+			$curY -= $y_interval;
+			$curCol = 0;
+		}
+		else
+			$curCol++;
+
+		$olist->unsetObject($i);
+	}
+
+	$pdf->ezStream();
+?>

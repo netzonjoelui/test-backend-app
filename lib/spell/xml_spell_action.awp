@@ -1,0 +1,33 @@
+<?php
+	require_once("../../lib/AntConfig.php");	
+	require_once("../../ant.php");
+	require_once("../../ant_user.php");
+	require_once("../../users/user_functions.php");
+	require_once("../../lib/CDatabase.awp");
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+	
+	$ACTION = $_GET['act'];
+	$VAL = rawurldecode($_GET['val']);
+	
+	switch ($ACTION)
+	{
+	// Home page column widths
+	//-----------------------------------------------------
+	case "addword":
+		if (!$dbh->GetNumberRows($dbh->Query("select word from user_dictionary where user_id='$USERID' and word='".$dbh->Escape($VAL)."'")))
+		{
+			$dbh->Query("insert into user_dictionary(user_id, word) values('$USERID', '".$dbh->Escape($VAL)."');");
+		}
+		break;
+	}
+	
+	header("Content-type: text/xml"); // Returns XML document
+	echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+
+	echo "<response>OK</response>";
+?>
+

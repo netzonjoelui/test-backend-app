@@ -1,0 +1,159 @@
+<?php
+$CONTACT_GROUP_ACLS = array("View Contacts", "Delete Contacts", "Edit Contacts");
+
+require_once("lib/CAntObject.php");
+require_once("lib/CAntObjectList.php");
+require_once("userfiles/file_functions.awp");
+require_once("calendar/calendar_functions.awp");
+require_once("customer/customer_functions.awp");
+
+function ContactGetLabelName(&$dbh, $LID)
+{
+	if (is_numeric($LID))
+	{
+		$query = "select contacts_personal_labels.id, contacts_personal_labels.name from
+					contacts_personal_labels where id='$LID'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$res = $row['name'];
+		}
+		$dbh->FreeResults($result);
+	}
+	
+	return $res;
+}
+
+function GetDefaultEmail(&$dbh, $cid)
+{
+	$obj = new CAntObject($dbh, "contact_personal", $cid);
+	return $obj->getValue("email_default", true);
+}
+
+function ContactGetEmail(&$dbh, $cid, $toget='default')
+{
+	if (is_numeric($cid))
+	{
+		if ($toget == "default")
+		{
+			$emladdr = GetDefaultEmail($dbh, $cid);
+		}
+		else
+		{
+			$obj = new CAntObject($dbh, "contact_personal", $cid);
+			$emladdr = $obj->getValue($toget, true);
+		}
+	}
+	return $emladdr;
+}
+
+function ContactGetName(&$dbh, $CID)
+{
+	if (!is_numeric($CID))
+		return;
+
+	$obj = new CAntObject($dbh, "contact_personal", $CID);
+	$varval = $obj->getName();
+
+	return $varval;
+}
+
+function ContactAddCalDate(&$dbh, $USERID, $name, $toadd, $CID, $CALID)
+{
+	$obj = new CAntObject($dbh, "contact_personal", $CID);
+	$date = $obj->getValue($toadd);
+	if (is_numeric($obj->getValue($toadd."_evnt")))
+		ContactDelCalDate($dbh, $obj->getValue($toadd."_evnt"));
+
+	$time = strtotime($date);
+	if($time)
+	{
+		$time_start = "12:00 AM";
+		$time_end = "11:59 PM";
+
+		$query = "insert into calendar_events_recurring
+				  (start_block, end_block, name, sharing, calendar, date_start,
+					ts_start, ts_end, all_day, day, month, type)
+				  values
+				  ('1', '1440', '$name', '1', '$CALID', '$date', 
+					'$date $time_start', '$date $time_end', 't', '".date('d', $time)."', '".date('m', $time)."', '4');
+				  select currval('calendar_events_recurring_id_seq') as curid;";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$curid = $row['curid'];
+			$dbh->FreeResults($result);
+			$obj->setValue($toadd."_evnt", $curid);
+			$obj->save(false);
+			$dbh->Query("insert into calendar_event_associations(event_recur_id, contact_id) values('$curid', '$CID');");
+
+			// Insert initial event
+			$query = "insert into calendar_events
+					  (start_block, end_block, name, sharing, calendar, date_start, date_end,
+						ts_start, ts_end, all_day, recur_id)
+					  values
+					  ('1', '1440', '$name', '1', '$CALID', '$date', '$date', 
+						'$date $time_start', '$date $time_end', 't', '$curid');
+					  select currval('calendar_events_id_seq') as curid;";
+			$eresult = $dbh->Query($query);
+			if ($dbh->GetNumberRows($eresult))
+			{
+				$erow = $dbh->GetNextRow($eresult, 0);
+				$evnt = $erow['curid'];
+
+				$dbh->Query("insert into calendar_event_associations(event_id, contact_id) values('".$erow['curid']."', '$CID');");
+			}
+		}
+	}
+
+	return $curid;
+}
+
+function ContactDelCalDate(&$dbh, $rid, $toget = NULL, $CID = NULL)
+{
+	if ($rid)
+	{
+		$dbh->Query("delete from calendar_events_recurring where id='$rid'");
+		$dbh->Query("delete from calendar_events where recur_id='$rid'");
+	}
+	else if ($toget && $CID)
+	{
+		$obj = new CAntObject($dbh, "contact_personal", $CID);
+		if ($obj->getValue($toget."_evnt"))
+			ContactDelCalDate($dbh, $obj->getValue($toget."_evnt"));
+	}
+}
+
+function ContactGetIdFromAddress(&$dbh, $USERID, $address)
+{
+	$ret = null;
+
+	$olist = new CAntObjectList($dbh, "contact_personal");
+	$olist->addCondition("and", "user_id", "is_equal", $USERID);
+	$olist->addCondition("and", "email", "is_equal", $address);
+	$olist->addCondition("or", "email2", "is_equal", $address);
+	$olist->getObjects();
+	if ($num = $olist->getNumObjects())
+	{
+		$omin = $olist->getObjectMin(0);
+		$ret = $omin['id'];
+	}
+	
+	return $ret;
+}
+
+function ContactGetImage(&$dbh, $cid)
+{
+	$retval = "";
+	
+	if (is_numeric($cid))
+	{
+		$obj = new CAntObject($dbh, "contact_personal", $CID);
+		$retval = $obj->getValue("image_id");
+	}
+	
+	return $retval;
+}
+?>

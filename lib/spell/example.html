@@ -1,0 +1,42 @@
+<html>
+<!--
+Pungo Spell Copyright (c) 2003 Billy Cook, Barry Johnson
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<head>
+<script src="spellcheck.js"></script>
+</head>
+<body>
+<h2>Pungo Spell - examples</h2>
+<form name="form_one" method="POST" action="foo.php">
+Form: "form_one" Text box: "text_one"<br>
+<textarea name="text_one" rows="3" cols="70">This is tesst number 1 to showw some misspelled wurds.</textarea>
+<br>
+<input type="button" value="Spell Check" onClick="spellCheck( 'form_one', 'text_one');">
+
+<p>
+Form: "form_one" Text box: "text_two"<br>
+<textarea name="text_two" rows="3" cols="70">This is tesst number 2 to showw some misspelled wurds.</textarea>
+<br>
+<input type="button" value="Spell Check" onClick="spellCheck( 'form_one', 'text_two' );">
+</form>
+
+<p>
+<form name="form_two" method="POST" action="foo.php">
+Form: "form_two" Text box: "text_one"<br>
+<textarea name="text_one" rows="3" cols="70">This is tesst number 3 to showw some misspelled wurds.</textarea>
+<br>
+<input type="button" value="Spell Check" onClick="spellCheck( 'form_two', 'text_one' );">
+</form>
+
+<!--  Add this form to your document for spell checking -->
+<form name="spell_form" id="spell_form" method="POST" target="spellWindow" action="checkspelling.php"><input type="hidden" name="spell_formname" value=""><input type="hidden" name="spell_fieldname" value=""><input type="hidden" name="spellstring" value=""></form>
+</body>
+</html>
+

@@ -1,0 +1,77 @@
+/**************************************************************************************
+*	Page:		topNav.awp
+*	Purpose:	Navigation filler for button line
+***************************************************************************************/
+.topNavbarBG 
+{
+	background-color:#5A6A7A;
+	padding-left: 5px;
+	/*
+	background-image:url(/images/themes/skygrey/topnavspan.png);
+	background-position:0 0;
+	background-repeat:repeat-x;
+	*/
+}
+
+.topNavbarShadow 
+{
+	height:0px;
+	background-color:#7f95ac;
+}
+
+.topNavbarHr
+{
+	/*
+	background-image:url(/images/themes/skygrey/topnavspan.png);
+	background-position:0 0;
+	background-repeat:repeat-x;
+	*/
+	background-color: #5A6A7A;
+	height:0px;
+}
+
+.topNavTabOut
+{
+	cursor:pointer;
+	color:#666;
+	background-color: #c6d4e1;
+	border-right: 1px solid #5A6A7A;
+	height:25px;
+	font-size: 12px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+}
+.topNavTabOut div 
+{ 
+	padding-left:10px; padding-right:10px; padding-top:5px;
+}
+
+.topNavTabOver
+{
+	cursor:pointer;
+	color:#666;
+	background-color: #0FC3E8;
+	border-right: 1px solid #5A6A7A;
+	height:25px;
+	font-size: 12px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+}
+.topNavTabOver div 
+{ 
+	padding-left:10px; padding-right:10px; padding-top:5px;
+}
+
+.topNavTabOn
+{
+	cursor:pointer;
+	color:#00b2d9;
+	background-color: white;
+	border-right: 1px solid #5A6A7A;
+	height:25px;
+	font-size: 12px;
+	font-weight: bold;
+	font-family: 'Lucida Grande', Tahoma, Verdana, Arial, sans-serif;
+}
+.topNavTabOn div { padding-left:10px; padding-right:10px; padding-top:5px;}
+

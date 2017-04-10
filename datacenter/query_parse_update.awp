@@ -1,0 +1,81 @@
+<?php
+	$quotes = array();
+	$ind = 0;
+
+	// Convert escaped quotes
+	$query = str_replace("\\'", "%ANTQUOTEINS%", $query);
+
+	// remove all quoted sections and replace with %qtid% var for replacement later
+	$start = strpos($query, '"');
+	while ($start !== false)
+	{
+		$end = strpos($query, '"', $start+1);
+
+		if ($end !== false)
+		{
+			$part = substr($query, $start+1, ($end-$start)-1); 
+			$quotes["%quote$ind%"] = "'".$dbh->Escape(str_replace("%ANTQUOTEINS%", "'", $part))."'";
+			$query = substr($query, 0, $start)."%quote$ind%".substr($query, $end+1);
+			$ind++;
+			$start = strpos($query, '"');
+		}
+		else
+		{
+			$start = false;
+		}
+
+	}
+
+	$start = strpos($query, "'");
+	while ($start !== false)
+	{
+		$end = strpos($query, "'", $start+1);
+
+		if ($end !== false)
+		{
+			$part = substr($query, $start+1, ($end-$start)-1); 
+			$quotes["%quote$ind%"] = "'".$dbh->Escape(str_replace("%ANTQUOTEINS%", "'", $part))."'";
+			$query = substr($query, 0, $start)."%quote$ind%".substr($query, $end+1);
+			$ind++;
+			$start = strpos($query, "'");
+		}
+		else
+		{
+			$start = false;
+		}
+
+	}
+
+	// Replace table names	
+	$result = $dbh->Query("select id, name from dc_database_tables where database_id='$DBID'");
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+		$tid = $row['id'];
+
+		$result2 = $dbh->Query("select id, name from dc_database_table_cols where table_id='$tid'");
+		$num2 = $dbh->GetNumberRows($result2);
+		for ($j = 0; $j < $num2; $j++)
+		{
+			$row2 = $dbh->GetNextRow($result2, $j);
+
+			$query = str_replace($row['name'].".[".$row2['name']."]", "utbl_".$row['id'].".col_".$row2['id'], $query);
+			$query = str_replace($row['name'].".".$row2['name'], "utbl_".$row['id'].".col_".$row2['id'], $query);
+			// Replace col names (no table def)
+			$query = str_replace("[".$row2['name']."]", "col_".$row2['id'], $query);
+			$query = str_replace($row2['name'], "col_".$row2['id'], $query);
+		}
+		$dbh->FreeResults($result2);
+
+		// Now replace table names
+		$query = str_replace($row['name'], "datacenter.utbl_".$row['id'], $query);
+	}
+	$dbh->FreeResults($result);
+
+	// Repopulate quotes
+	foreach ($quotes as $ind=>$val)
+	{
+		$query = str_replace($ind, $val, $query);
+	}
+?>

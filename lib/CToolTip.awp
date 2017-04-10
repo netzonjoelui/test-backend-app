@@ -1,0 +1,175 @@
+<?php
+class CToolTip
+{
+	var $menuName;
+	var $mBuf;
+	var $mWidth;
+	var $mAlign;
+	var $mStyle;
+	
+	function CToolTip($name, $width=NULL, $align='center', $style="background-color:999999;")
+	{
+		global $CTOOLTIP_JS;
+		
+		if ($CTOOLTIP_JS == false)
+		{
+			print($this->PrintJSFunction());
+			$CTOOLTIP_JS = true;
+		}
+		if ($width)
+			$this->mWidth = $width;
+		
+		$this->menuName = "TT".$name;
+		$this->mAlign = $align;
+		$this->mStyle = $style;
+	}
+	
+	function PrintJSFunction()
+	{
+		return "<script language=\"javascript\" type=\"text/javascript\">
+				var TTOver = true;
+				
+				function TTCreateMenu(btnh, mname, imgsrc, imgover, display)
+				{
+					if (!btnh)
+						btnh = document.getElementById('lnk' + mname);
+						
+					fm = document.getElementById(mname);
+					
+					tmpx=btnh.offsetLeft;
+					tmpy=btnh.offsetTop;
+					tmpheight=btnh.offsetHeight;
+					
+					// Get window height
+					var fullWidth = 0, fullHeight = 0;
+					if(typeof( window.innerWidth ) == 'number' ) 
+					{
+						//Non-IE
+						fullWidth = window.innerWidth;
+						fullHeight = window.innerHeight;
+					} 
+					else if( document.documentElement &&
+					  	   (document.documentElement.clientWidth || document.documentElement.clientHeight)) 
+					{
+						//IE 6+ in 'standards compliant mode'
+						fullWidth = document.documentElement.clientWidth;
+						fullHeight = document.documentElement.clientHeight;
+					} 
+					else if(document.body && (document.body.clientWidth || document.body.clientHeight)) 
+					{
+						//IE 4 compatible
+						fullWidth = document.body.clientWidth;
+						fullHeight = document.body.clientHeight;
+					}
+  
+					tmpParent=btnh.offsetParent;
+					while(tmpParent !=null)
+					{
+						tmpy+=tmpParent.offsetTop;
+						tmpx+=tmpParent.offsetLeft;
+						tmpParent=tmpParent.offsetParent;
+					}
+					
+					if (display == \"hidden\")
+					{
+						fm.style.visibility = \"hidden\";
+						if (imgsrc)
+						{
+							btnh.src = imgsrc;
+						}
+					}
+					else
+					{
+						if (imgsrc)
+						{
+							btnh.src = imgover;
+						}
+
+						fm.style.top = tmpy + tmpheight;
+						if ((tmpy + fm.offsetHeight) > fullHeight)
+						{
+							fm.style.top = tmpy - fm.offsetHeight;
+						}
+						fm.style.left = tmpx + 'px';
+
+						fm.style.visibility = \"visible\";
+					}
+					
+				}
+				</script>";
+	}
+	
+	/***********************************************************************************
+	*	Function:	CreateLinkMenu
+	*	Purpose:	Create full menu by combining div tags, name, and menu table
+	*	Parameters:
+	*				1. img_std - The main image to use for menu button
+	*				2. img_over (optional) - On mouse over image
+	*				3. img_click (optional) - On click image
+	*				4. cache (optional) - set to true if you wish to print div tags later
+	*				   If you set this to true, result of ReturnDiv() must be stored and 
+	*				   printed in the calling script
+	************************************************************************************/
+	function CreateImageMenu($img_std = NULL, $img_over = NULL, $link = NULL)
+	{
+		$name = $this->menuName ;
+
+		if ($link)
+			$buf .= "<a href='$link' border='0'>";
+		$buf .= "<img src='$img_std' 
+				  onMouseOver=\"TTCreateMenu(this, '$name', '$img_std', '$img_over', 'visible')\" 
+				  onMouseOut=\"TTCreateMenu(this, '$name', '$img_std', '$img_over', 'hidden')\" border='0'>";
+		if ($link)
+			$buf .= "</a>";
+
+		if ($cache == false)
+			$buf .= $this->ReturnDiv($name);
+			
+		return $buf;
+	}
+	
+	/***********************************************************************************
+	*	Function:	PrintImageMenu
+	*	Purpose:	Prints image and menu for image type drop up/down
+	*	Parameters:
+	*				1. img_std - The main image to use for menu button
+	*				2. img_over (optional) - On mouse over image
+	*				3. img_click (optional) - On click image
+	*				4. cache (optional) - set to true if you wish to print div tags later
+	*				   If you set this to true, result of ReturnDiv() must be stored and 
+	*				   printed in the calling script
+	************************************************************************************/
+	function PrintImageMenu($img_std, $img_over = NULL, $cache = false)
+	{
+		echo $this->CreateImageMenu($img_std, $img_over, $cache);
+	}
+	
+	/***********************************************************************************
+	*	Div tags mignt need to be printed outside of any table elements
+	************************************************************************************/
+	function ReturnDiv()
+	{
+		$name = $this->menuName ;
+		$width = $this->mWidth;
+		$style = $this->mStyle;
+		
+		$buf = "<DIV STYLE=\"position: absolute; visibility:hidden; z-index:2;\" id=\"$name\">";
+		$buf .= "<table border='0' cellspacing='1' style='$style";
+		if ($width) $buf .= "width:$width;";
+		$buf .= "'><tr>
+					<td style='color:blue;' align='".$this->mAlign."'>";
+		$buf .= $this->mBuf;
+		$buf .= "</td></tr></table>";
+		$buf .=	"</DIV>";
+		return $buf;
+	}
+	
+	/***********************************************************************************
+	*	Add to buffer
+	************************************************************************************/
+	function AddToBuf($buf)
+	{
+		$this->mBuf = $buf;
+	}
+}
+?>

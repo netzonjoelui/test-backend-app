@@ -1,0 +1,191 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("../lib/CDatabase.awp");
+	require_once("../users/user_functions.php");
+	require_once("../community/blog_functions.awp");
+	require_once("../lib/Email.php");
+	require_once("../email/email_functions.awp");
+	
+	$dbh = new CDatabase();
+	
+	$MONTH = ($_GET['month']) ? $_GET['month'] : date("m");
+	$YEAR = ($_GET['year']) ? $_GET['year'] : date("Y");
+	$ART = $_GET['art'];
+	$FWD = "month=$MONTH&year=$YEAR&blg=".$_GET['blg'];
+	 
+    if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') === false || strpos($_SERVER['HTTP_USER_AGENT'], 'Opera'))
+		$pnghack = 'f';
+    else
+		$pnghack = 't';
+		
+	if ($_GET['blg'])
+	{
+		$result = $dbh->Query("select id, user_id, name, title, show_author, show_time,
+								show_comments, show_profile, theme_id, show_one_article
+								from blogs where lower(name)=lower('".$_GET['blg']."')");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$BLGID = $row['id'];
+			$theme = ($row['theme_id']) ? BlogGetThemeName(&$dbh, $row['theme_id']) : BlogGetThemeName(&$dbh, 1);
+			$title = $row['title'];
+			$name = $row['name'];
+			$user_id = $row['user_id'];
+			$bShowAuthor = ($row['show_author'] == 'f') ? false : true;
+			$bShowTime = ($row['show_time'] == 'f') ? false : true;
+			$bShowComments = ($row['show_comments'] == 'f') ? false : true;
+			$bShowProfile = ($row['show_profile'] == 'f') ? false : true;
+			$bShowOneArticle = ($row['show_one_article'] == 't') ? true : false;
+		}
+	}
+	
+	// Check if there are any articles (go back a month of none)
+	$result = $dbh->Query("select id from blog_articles
+							where blog_id='$BLGID'
+							and extract('month' from time_entered) = '$MONTH'
+							and extract('year' from time_entered) = '$YEAR'
+							and publish = 't'");
+	if (!$dbh->GetNumberRows($result) && !$ART)
+	{
+		// Check to be sure there are previous articles
+		$result = $dbh->Query("select id from blog_articles
+								where blog_id='$BLGID'
+								and 
+								(
+									(
+										extract('month' from time_entered) < '$MONTH'
+										and extract('year' from time_entered) <= '$YEAR'
+									)
+									or
+									(
+										extract('year' from time_entered) < '$YEAR'
+									)
+								)
+								and publish = 't'");
+		if ($dbh->GetNumberRows($result))
+		{
+			if ($MONTH == 1)
+			{
+				$YEAR--;
+				$MONTH = 12;
+			}
+			else
+				$MONTH--;
+			
+			header("Location: read.awp?year=$YEAR&month=$MONTH&blg=".$_GET['blg']);
+		}
+	}
+	
+	if ($BLGID)
+	{	
+		$dates = array();
+		
+		if ($bShowOneArticle)
+		{
+			if ($ART) 
+			{
+				$cond = "and id='".$ART."'";
+				$end = "";
+			}
+			else
+			{
+				$cond = "";
+				$end = "LIMIT 1";
+			}
+		}
+		
+		// get list of dates
+		$result = $dbh->Query("select distinct to_char(time_entered, 'Month DD YYYY') as date from blog_articles
+								where blog_id='$BLGID'
+								and extract('month' from time_entered) = '$MONTH'
+								and extract('year' from time_entered) = '$YEAR'
+								and publish = 't' $cond
+								order by date DESC $end;");
+		$num = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			$dates[$i] = $row['date'];
+		}
+		$dbh->FreeResults($result);
+			
+		// Get Blogs
+		$BLOG_TXT = "";
+		$last_date = "";
+		
+		if (is_array($dates))
+		{
+			foreach ($dates as $date)
+			{
+				$BLOG_TXT .= "<div class='post_day_container'>
+								<div class='post_date_header'>".$date."</div>";
+				
+				$result = $dbh->Query("select id, title, 
+										to_char(time_entered, 'Month DD YYYY') as date,
+										to_char(time_entered, 'HH12:MI:SS am') as time, 
+										data from blog_articles where blog_id='$BLGID'
+										and extract('month' from time_entered) = '$MONTH'
+										and extract('year' from time_entered) = '$YEAR'
+										and to_char(time_entered, 'Month DD YYYY') = '$date'
+										and publish = 't'  $cond
+										order by time_entered DESC $end");
+				$num = $dbh->GetNumberRows($result);
+				for ($i = 0; $i < $num; $i++)
+				{
+					$row = $dbh->GetNextRow($result, $i);
+					$BLOG_TXT .= "<div class='post_container'>
+								  <div class='post_header'>".$row['title']."</div>
+								  <div class='post_body'>".str_replace("<br>", "&nbsp;<br />", $row['data'])."</div>
+								  <div class='post_footer'>";
+					if ($bShowTime)
+						$BLOG_TXT .= $row['time'];
+					if ($bShowAuthor)
+						$BLOG_TXT .= " :: ".UserGetFullName(&$dbh, $user_id);
+					if ($bShowComments)
+						$BLOG_TXT .= " :: <a href=\"javascript:ToggleComments('".$row['id']."');\">".
+											BlogGetNumArticleComments(&$dbh, $row['id'])." Comments</a>";
+					$BLOG_TXT .= "	  </div>";
+					
+					// Now print comments
+					// -------------------------------------------------------
+					$disp = ($_GET['showcomments'] == $row['id']) ? 'block' : 'none';
+					$BLOG_TXT .= "	  <div class='post_comment_container' id='cmts_".$row['id']."' style='display:$disp;'>";
+					$cmt_res = $dbh->Query("select user_name, body from blog_article_comments where article_id='".$row['id']."'");
+					$cmt_num = $dbh->GetNumberRows($cmt_res);
+					for ($j = 0; $j < $cmt_num; $j++)
+					{
+						$cmt_row = $dbh->GetNextRow($cmt_res, $j);
+						$BLOG_TXT .= "<div class='post_comment'><strong>".$cmt_row['user_name'].
+										"</strong><br />".str_replace("<br>", "<br />", $cmt_row['body'])."</div>";
+					}
+					$dbh->FreeResults($cmt_res);
+					// Print add comment form
+					$BLOG_TXT .= "<div class='post_comment_add'>
+									<strong>Add Comment</strong><br /><br />
+									<form name='form_cmt".$row['id']."' method='post' action='read.awp?$FWD&art=$ART'>
+									<input type='hidden' name='aid' value='".$row['id']."' />
+									Your Name:<br />
+									<input type='text' name='username' value=''><br />
+									Comments:<br />
+									<textarea rows='5' style='width:70%' name='body'></textarea><br /><br /><br />
+									<input type='submit' name='add_comment' value='Post Comment'> 
+									<input type='button' onclick=\"ToggleComments('".$row['id']."');\" value='Cancel'>
+									</form>
+								  </div>";
+						  
+					$BLOG_TXT .= "	  </div>";
+					
+					$BLOG_TXT .= "</div>";
+				}
+				$dbh->FreeResults($result);
+				
+				$BLOG_TXT .= "</div>";
+			}
+		}
+		
+		
+		print("<div></div>");		
+		print("<div></div>");		
+	}
+?>

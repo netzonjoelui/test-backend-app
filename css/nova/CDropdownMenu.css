@@ -1,0 +1,97 @@
+/**************************************************************************************
+*	Page:		CDropdownMenu.awp
+*	Purpose:	Styles for dropdown menu
+***************************************************************************************/
+
+.CDropdownMenuIcon
+{
+	background-color: #717171;
+	text-align:center;
+}
+
+.CDropdownMenuIconOver
+{
+	background-color: #333333;
+	text-align:center;
+}
+
+.CDropdownMenuLink
+{
+	background-repeat:repeat;
+	color:#666;
+	padding-left: 4px;
+	text-align: left;
+	font-weight:bold;
+}
+
+.CDropdownMenuLinkOver
+{
+	background-image: none;
+	filter: none;
+	background-color: #333333;
+	color:#FFFF00;
+	font-weight:bold;
+	padding-left: 4px;
+	text-align: left;
+}
+
+.CDropdownMenuRight
+{
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/menuBG.png);
+				background-position:0px 0px;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/menuBG.png, sizingMethod='scale');";
+	}
+	?>
+	background-repeat:repeat;
+	text-align: left;	
+}
+
+.CDropdownMenuRightOver
+{
+	background-image: none;
+	background-color: #333333;
+}
+/* Use to defile icon that suggests a sub-menu */
+.CDropdownMenuRightIcon
+{
+	width: 12px;
+	text-align:center;
+}
+
+.CDropdownMenuContainer
+{
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/menuBG.png);
+				background-position:0px 0px;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/menuBG.png, sizingMethod='scale');";
+	}
+	?>
+	background-repeat:repeat;
+	border:1px solid #444444; 
+	padding:1px;
+}
+
+.CDropdownMenuButtonPrefix
+{
+	background-image: url(/images/themes/nova/buttons/options_aarow.png);
+	background-position:50% 50%;
+	background-repeat:no-repeat;
+	width: 10px;
+	height: 5px;
+	vertical-align: middle;
+}

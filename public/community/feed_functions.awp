@@ -1,0 +1,217 @@
+<?php
+$g_feedFeildTypes = array
+(
+	array("text", "text"),
+	array("date", "date"),
+	array("float", "number"),
+	array("file", "file")
+);
+
+function FeedGetTitle(&$dbh, $FID)
+{
+	$retval = "";
+	
+	if (is_numeric($FID))
+	{
+		$result = $dbh->Query("select title from xml_feeds where id='$FID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$retval = $row['title'];
+		}
+	}
+	
+	return $retval;
+}
+
+function FeedGetOwner(&$dbh, $FID)
+{
+	$retval = "";
+	
+	if (is_numeric($FID))
+	{
+		$result = $dbh->Query("select user_id from xml_feeds where id='$FID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$retval = $row['user_id'];
+		}
+	}
+	
+	return $retval;
+}
+
+function FeedGetURL($dbh, $FID)
+{
+	$retval = "";
+	
+	if (is_numeric($FID))
+	{
+		$retval = AntConfig::getInstance()->localhost."/feeds/?fid=$FID";
+	}
+	
+	return $retval;
+}
+
+function FeedGetNumPosts(&$dbh, $FID)
+{
+	$retval = "0";
+	if ($FID)
+	{
+		$result = $dbh->Query("select count(*) as cnt from xml_feed_posts where feed_id='$FID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$retval = $row['cnt'];
+		}
+	}
+	
+	return $retval;
+}
+
+function FeedGetLastPostDate(&$dbh, $FID)
+{
+	$retval = "0";
+	if ($FID)
+	{
+		$result = $dbh->Query("select to_char(time_entered, 'MONTH DD YYYY') as date
+								from xml_feed_posts where feed_id='$FID'
+								order by time_entered DESC limit 1");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$retval = $row['date'];
+		}
+	}
+	
+	return $retval;
+}
+
+function FeedGetLastPostId(&$dbh, $FID)
+{
+	$retval = "0";
+	if ($FID)
+	{
+		$result = $dbh->Query("select id from xml_feed_posts where feed_id='$FID'
+								order by time_entered DESC limit 1");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$retval = $row['id'];
+		}
+	}
+	
+	return $retval;
+}
+
+function FeedGetFieldTypeName($type)
+{
+	global $g_feedFeildTypes;
+	$ret = $type;
+	
+	foreach ($g_feedFeildTypes as $fld)
+	{
+		if ($fld[0] == $type)
+			$ret = $fld[1];
+	}
+
+	return $ret;
+}
+
+function FeedFieldGetType($dbh, $field_id)
+{
+	$ret = "";
+
+	if ($field_id)
+	{
+		$result = $dbh->Query("select col_type from xml_feed_fields where id='$field_id'");
+		$num = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+
+			$ret = $row['col_type'];
+
+			if ($ret == "file")
+				$ret = "text";
+		}
+		$dbh->FreeResults($result);
+	}
+
+	return $ret;
+}
+
+function FeedFieldGetVal($dbh, $field_id, $post_id)
+{
+	$ret = "";
+
+	if ($field_id && $post_id)
+	{
+		$type = FeedFieldGetType($dbh, $field_id);
+
+		$result = $dbh->Query("select val_$type from xml_feed_post_values where field_id='$field_id' and post_id='$post_id'");
+		$num = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+
+			$ret = $row["val_$type"];
+		}
+		$dbh->FreeResults($result);
+	}
+
+	return $ret;
+}
+
+function FeedFieldSetVal($dbh, $field_id, $post_id, $value)
+{
+	$ret = "";
+
+	if ($field_id && $post_id)
+	{
+		$type = FeedFieldGetType($dbh, $field_id);
+
+		if ($dbh->GetNumberRows($dbh->Query("select id from xml_feed_post_values where post_id='$post_id' and field_id='$field_id'")))
+		{
+			$dbh->Query("update xml_feed_post_values set val_$type=".$dbh->EscapeNull($value)." 
+							where post_id='$post_id' and field_id='$field_id'");
+		}
+		else
+		{
+			$dbh->Query("insert into xml_feed_post_values(post_id, field_id, val_$type) 
+							values('$post_id', '$field_id', ".$dbh->EscapeNull($value).")");
+		}
+	}
+
+	return $ret;
+}
+
+function FeedUpdateExpired($dbh)
+{
+	$dbh->Query("update xml_feed_posts set f_publish='f' where time_expires<'now'");
+}
+
+function FeedPushUpdates($dbh, $FID)
+{
+	$result = $dbh->Query("select id, publish_to, furl from xml_feed_publish where feed_id='$FID'");
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+
+		//$row['publish_to'] = str_replace("//", "/", $row['publish_to']); // sometimes a url is give //lib which causes page to not load
+		//$url = "http://".$row['publish_to']."?function=update&furl=".base64_encode($row['furl']);
+		//$fp = @fopen($url, "r");
+
+		// New cache update
+		$url = "http://".$row['publish_to']."/antapi/refresh/fid/$FID";
+		$fp = @fopen($url, "r");
+	}
+	$dbh->FreeResults($result);
+}
+?>

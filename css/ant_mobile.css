@@ -1,0 +1,591 @@
+<?php 
+	/**************************************************************************************
+	* Theme:	cheery
+	*
+	* Notes:	Global definitions go in this file, specific classes
+	* 			should all be included via php includes
+	*			http://www.colourlovers.com/palette/119408/halcyon
+	***************************************************************************************/
+	header("Content-type: text/css"); 
+?>
+
+body 
+{ 
+	overflow: auto;
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	word-wrap: break-word;
+	-webkit-text-size-adjust: none;
+	        text-size-adjust: none;
+	height: 100%;
+	font-weight: 300;
+	line-height: 1;
+	color: rgb(0, 0, 0);
+	background-color: rgb(255, 255, 255);
+}
+
+/* application header */
+.header
+{
+	margin: 0;
+	padding: 3px 0 5px 0;
+	height: 36px;
+	line-height: 41px;
+	background-color: #2e2e2e;
+	/*
+	background-color: rgba(248, 248, 248, 0.9);
+	background-image: linear-gradient(0deg, rgb(200, 199, 204), rgb(200, 199, 204) 50%, transparent 50%);
+	background-size: 100% 1px;
+	background-repeat: no-repeat;
+	background-position: bottom;
+	*/
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	-webkit-touch-callout: none;
+}
+
+.header button {
+	position: absolute;
+	top: 3px;
+	display: inline-block;
+	-webkit-tap-highlight-color: rgba(0,0,0,0);
+	font-size: 17px;
+	/*color:rgb(21, 125, 251);*/
+	color: white;
+	padding: 0;
+	font-weight: 300;
+	height: 40px;
+	line-height: 40px;
+	text-overflow: ellipsis !important; /* why so !important ? */
+	max-width: 140px;
+	margin: 0;
+    border: 0;
+    outline: 0;
+    font-style: inherit;
+    font-family: inherit;
+    vertical-align: middle;
+	background: transparent; /* Fix for Chrome and Firefox OS */
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	
+}
+.header button:active {
+	opacity: 0.4;
+}
+.header button.bold {
+	font-weight: 500;
+}
+.header button.green {
+	color:rgb(41, 197, 25);
+}
+.header button.disabled {
+	color:rgb(200, 199, 204);
+}
+.header button.arrow {
+	background-size: 24px 40px;
+	background-repeat: no-repeat;
+}
+
+.header button.left {
+	left:0;
+	padding-left: 9px;
+}
+.header button.left.arrow {
+	padding-left: 23px;
+	background-image: url(/images/mobile/backBtn.svg);
+	background-position: left bottom;
+}
+.header button.right {
+	right:0;
+	text-align: right;
+	padding-right: 9px;
+}
+.header button.right.arrow {
+	padding-right: 23px;
+	background-image: url(/images/mobile/nextBtn.svg);
+	background-position: right bottom;
+}
+
+.header h1 {
+	padding: 0;
+	margin: 0 65px;
+	font-size: 17px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	text-align: center;
+	overflow: hidden;
+	-webkit-box-flex: 1;
+	   -moz-box-flex: 1;
+	        box-flex: 1;
+	font-weight: 500;
+    -webkit-tap-highlight-color: transparent;	
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Each view prints the content into this container. Replaces #appbody in desktop. */
+.viewBody
+{
+	/*padding-top: 56px;*/
+	padding-bottom: 38px;
+}
+
+.objectLoader
+{
+	background-color: white;
+	margin: 0 0 10px 0;
+	-webkit-box-shadow: #bbb 0 3px 4px;
+	-moz-box-shadow: #bbb 0 3px 4px;
+	box-shadow: #bbb 0 3px 4px;	
+}
+
+/**
+ * Main tabs
+ * ----------------------------------------------------------------------
+ */
+#footerTabs {
+	position:fixed;
+	left:0px;
+	bottom:0px;
+	width:100%;
+	padding: 5px 0 3px 0;
+	z-index: 10;
+
+	background: #141414;
+	background: -moz-linear-gradient(top,#2c2c2c 0,#121212 100%);
+	background: -webkit-gradient(linear,left top,left bottom,color-stop(0%,#2c2c2c),color-stop(100%,#121212));
+	background: -webkit-linear-gradient(top,#2c2c2c 0,#121212 100%);
+	background: -o-linear-gradient(top,#2c2c2c 0,#121212 100%);
+	background: -ms-linear-gradient(top,#2c2c2c 0,#121212 100%);
+	background: linear-gradient(top,#2c2c2c 0,#121212 100%);
+	border-top: 1px solid #343434;
+
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+#footerTabs .tab {
+	display: inline-block;
+	width: 20%;
+	color: #ccc;
+	cursor: pointer;
+	text-align: center;
+	background-repeat:no-repeat;
+	background-position:center top; 
+	font-family: Sans-serif, "Times New Roman", Times;
+	font-size: 9px;
+}
+
+#footerTabs .tab .icon {
+	width: 24px;
+	height: 24px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 3px;
+}
+
+#footerTabs .tab.on {
+	color: #fff;
+}
+
+#footerTabs .tab.home .icon {
+	background-image:url('/images/mobile/tabs-main.png');
+	background-position:0px 0px;
+}
+
+#footerTabs .tab.home.on .icon {
+	background-image:url('/images/mobile/tabs-main.png');
+	background-position:0px 24px;
+}
+
+#footerTabs .tab.apps .icon {
+	background-image:url('/images/mobile/tabs-main.png');
+	background-position:-24px 0px;
+}
+
+#footerTabs .tab.apps.on .icon {
+	background-image:url('/images/mobile/tabs-main.png');
+	background-position:-24px 24px;
+}
+
+#footerTabs .tab.chat .icon {
+	background-image:url('/images/mobile/tabs-main.png');
+	background-position:-48px 0px;
+}
+
+#footerTabs .tab.chat.on .icon {
+	background-image:url('/images/mobile/tabs-main.png');
+	background-position:-48px 24px;
+}
+
+#footerTabs .tab.notifications .icon {
+	background-image:url('/images/mobile/tabs-main.png');
+	background-position:-72px 0px;
+}
+
+#footerTabs .tab.notifications.on .icon {
+	background-image:url('/images/mobile/tabs-main.png');
+	background-position:-72px 24px;
+}
+
+#footerTabs .tab.new .icon {
+	background-image:url('/images/mobile/tabs-main.png');
+	background-position:-96px 0px;
+}
+
+#footerTabs .tab.new.on .icon {
+	background-image:url('/images/mobile/tabs-main.png');
+	background-position:-96px 24px;
+}
+
+/**
+ * Loaders and browser containers
+ * ----------------------------------------------------------------------
+ */
+.objectLoaderHeader
+{
+	background-color: white;
+}
+
+.objectLoaderBody
+{
+}
+
+/* toolbar */
+.CToolbar
+{
+}
+
+.aobBody 
+{
+	background-color: white;
+	-webkit-box-shadow: #bbb 0 3px 4px;
+	-moz-box-shadow: #bbb 0 3px 4px;
+	box-shadow: #bbb 0 3px 4px;	
+}
+
+.aobListRow
+{
+}
+
+.aobjListBold
+{
+	font-size: 16px;
+	font-weight: bold;
+	line-height: 1.2em;
+	margin: 0;
+	word-wrap: break-word;
+	font-family: sans-serif;
+	color: #000;
+	padding-top: 7px;
+}
+
+/**************************************************************************************
+*	 Forms:	Global form classes
+***************************************************************************************/
+.formTitle
+{
+	font-size: 16px;
+	font-weight: bold;
+	text-align:left;
+	padding:5px 5px 5px 0px;
+	margin:0px;
+	color: #F07E13;
+}
+/* The name of the field/property */
+.formLabel
+{
+	font-weight: bold;
+}
+/* The value and the input */
+.formValue, .formValue.td
+{
+	padding-bottom: 3px;
+	font-size: 13px;
+}
+
+input.fancy 
+{
+	/** inherit from base */
+}
+
+/**************************************************************************************
+*	 Touch
+***************************************************************************************/
+html:not(.webos) [behavior~=selectable] 
+{
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+html:not(.webos) [behavior~=selectable].selected 
+{
+  background: -webkit-gradient(linear, left top, left bottom, from(#058cf5), to(#015de6)) !important;
+  border-color: #058cf5 !important;
+  color: #fff;
+}
+html:not(.webos) [behavior~=selectable].selected span.for_me 
+{
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: #058cf5 !important;
+}
+html:not(.webos) [behavior~=selectable].selected span.more 
+{
+  background-position: -11px top;
+}
+html:not(.webos) [behavior~=selectable].selected h2 
+{
+  color: #fff;
+}
+html:not(.webos) [behavior~=selectable].selected .comments, html:not(.webos) [behavior~=selectable].selected .attachments 
+{
+  color: #fff;
+}
+html:not(.webos) [behavior~=selectable].selected .comments span.icon, html:not(.webos) [behavior~=selectable].selected .attachments span.icon 
+{
+  background-position: -14px top;
+}
+html:not(.webos) [behavior~=selectable].selected section.attachments, html:not(.webos) [behavior~=selectable].selected section.attachments article img 
+{
+  border-top-color: rgba(255, 255, 255, 0.3);
+}
+html:not(.webos) [behavior~=selectable].selected section.attachments article a,
+html:not(.webos) [behavior~=selectable].selected section.attachments article img article a,
+html:not(.webos) [behavior~=selectable].selected section.attachments article div,
+html:not(.webos) [behavior~=selectable].selected section.attachments article img article div 
+{
+  color: rgba(255, 255, 255, 0.6);
+}
+html:not(.webos) [behavior~=selectable].selected p,
+html:not(.webos) [behavior~=selectable].selected label,
+html:not(.webos) [behavior~=selectable].selected footer,
+html:not(.webos) [behavior~=selectable].selected header h1,
+html:not(.webos) [behavior~=selectable].selected .private_bug,
+html:not(.webos) [behavior~=selectable].selected span:not(.comments) 
+{
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+input[type=submit][behavior~=selectable].selected 
+{
+  background: #e5e5e5;
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #aaaaaa), color-stop(0.4, #cccccc)) !important;
+  border-color: #999 !important;
+  color: #000;
+  text-shadow: 1px 1px 1px #eee;
+}
+
+article.nav
+{
+  margin: 0;
+  border-top: 1px solid #e5e5e5;
+  background: #fff;
+  position: relative;
+  z-index: 1;
+  -webkit-transform: none;
+}
+article.nav:first-child
+{
+  border-top: none;
+}
+article.nav:last-child
+{
+  background: #fff;
+  border-bottom: 1px solid #aaa;
+  -webkit-box-shadow: #bbb 0 3px 4px;
+}
+article.nav:last-child > a
+{
+  padding-bottom: 16px !important;
+}
+article.nav*
+{
+  -webkit-transform: none;
+}
+article.nav:nth-child(1)
+{
+  -webkit-transform: translate3d(0, 0, 0);
+}
+article.tab.nav
+{
+  background: #fff2f4;
+}
+article.nav.private a
+{
+  padding-top: 6px !important;
+}
+article.nav header h1
+{
+  font-size: 13px;
+  color: #444;
+  margin: 0 0 2px;
+  font-weight: normal;
+}
+article.nav h2
+{
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.2em;
+  margin: 0;
+  word-wrap: break-word;
+}
+article.nav a:first-child
+{
+  color: #000;
+  text-decoration: none;
+  display: block;
+}
+article.nav p,
+{
+  font-weight: normal;
+  color: #777;
+  margin-top: 0.5em;
+  font-size: 13px;
+  line-height: 1.3em;
+}
+article.nav > a,
+article.nav > div:first-child 
+{
+  padding: 12px;
+  display: block;
+}
+article.nav span.more 
+{
+  height: 0;
+  width: 11px;
+  overflow: hidden;
+  padding: 11px 0 0;
+  margin: 0.25em 0 0 6px;
+  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAWCAYAAAC7ZX7KAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAehJREFUeNrM1jtIw0AYB%2FC7JNS%2BoqhTEdykBXGQOjhUKrgX8UEHQdDBQZAqdhecU3EoiIu0UMGO4qA4VNHFpVjERwcnnRSpr9pSjY1XSUspuSSXXKEf%2FCHHl4QfubskUJIkUF%2FhcLh%2BaEMJoCSBjhIEAduzRAq146CH5a0sXIjfiBE99%2F1etdeOGZXznCjHKHsoIUCpELbL5YTp3g4ozA9wG6TXMyrYQxSfPN6kgZaxF7wF9lXGPTxcIUUzOrCABroRWy1StBI4j3KPOd8wOpn9zZVE8KjUI0HjlsQcSow2eisjjr0UpJQZtNqma0k0o3F%2FLXSiGejFQe7MKFgLPYNyQhvdbYMjIS93ZxSshR5FOaWNbm%2BDnmUvlzUKrqLjmJ7fJFpxlvg26G5Ek4BZFIdK%2F80IeLaf41gG2nB9sQzzRsCs%2FImewvT3UcaNYNHUn3dawbBS%2F7UI0tHLnyFScMtg9YC1sNFmYJ8L0oESVgusha1swiXa2IcPaW07IwZI38MWHdgYKXbSzdq0sPFrcZ30S1fB7jYD63IwKTNYHJiVfzGpYSvFQcAxENjNYHHgIsoEyhEtrPx7%2Bfn0Vfa9l8CVUazaGm5Em8Li0KTY%2F5lS6VXRfoWnbQod9ABfrginE7fiDun1fwIMANUW2%2BPZzn83AAAAAElFTkSuQmCC") no-repeat left top;
+  background-size: 22px 11px;
+  -moz-background-size: 22px 11px;
+  -webkit-background-size: 22px 11px;
+  display: block;
+  float: right;
+}
+article.nav span.icon
+{
+  width: 16px;
+  height: 16px;
+  float: left;
+  margin-right: 8px;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+article.nav h2.navSecTitle
+{
+	color: #F07E13;
+}
+
+
+/**************************************************************************************
+*	List Item
+***************************************************************************************/
+article.listItem
+{
+  margin: 0;
+  border-top: 1px solid #e5e5e5;
+  background: #fff;
+  position: relative;
+  z-index: 1;
+  -webkit-transform: none;
+}
+article.listItem:first-child
+{
+  border-top: none;
+}
+article.listItem:last-child
+{
+  background: #fff;
+  border-bottom: 1px solid #aaa;
+  -webkit-box-shadow: #bbb 0 3px 4px;
+}
+article.listItem:last-child > a
+{
+  padding-bottom: 8px !important;
+}
+article.listItem*
+{
+  -webkit-transform: none;
+}
+article.listItem:nth-child(1)
+{
+  -webkit-transform: translate3d(0, 0, 0);
+}
+article.tab.listItem
+{
+  background: #fff2f4;
+}
+article.listItem.private a
+{
+  padding-top: 6px !important;
+}
+
+article.listItem h3
+{
+  font-size:12px;
+  font-weight: bold;
+  line-height: 1.2em;
+  margin: 0;
+  word-wrap: break-word;
+}
+article.listItem a:first-child
+{
+  color: #000;
+  text-decoration: none;
+  display: block;
+}
+article.listItem p,
+{
+  font-weight: normal;
+  color: #777;
+  margin-top: 0.5em;
+  font-size: 13px;
+  line-height: 1.3em;
+}
+article.listItem > a,
+article.listItem > div:first-child 
+{
+  padding: 12px;
+  display: block;
+}
+article.listItem span.icon
+{
+  width: 16px;
+  height: 16px;
+  float: left;
+  margin-right: 8px;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+/**
+ * Hidden desktop devices
+ */
+.device-desktop
+{
+	display: none;
+}
+
+/**************************************************************************************
+*	Theme Includes
+***************************************************************************************/
+<?php
+	$folder = "cheery";
+	/*
+	*	List of styles that control the look of aereuslib classes
+	*/
+	include("$folder/CContentTable.css");
+	include("$folder/CToolbar.css");
+	include("$folder/CTabs.css");
+	include("$folder/CToolTable.css");
+	include("$folder/CWindowFrame.css");
+	include("$folder/DynDiv.css");
+	include("$folder/CNavBar.css");
+?>

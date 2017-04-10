@@ -1,0 +1,1275 @@
+<?php
+	// ANT
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("lib/content_table.awp");
+	require_once("lib/CAntObject.php");
+	require_once("lib/WindowFrame.awp");
+	require_once("lib/Button.awp");
+	require_once("lib/CDropdownMenu.awp");
+	require_once("email/email_functions.awp");
+	require_once("contacts/contact_functions.awp");
+	
+	ini_set("asp_tags", "Off");
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+	$ACCOUNT_NAME = $ANT->accountName;
+	
+	$FID = $_GET['fid'];
+	$AUTOMATE = $_GET['automate'];
+	$CID = $_GET['cid'];
+	$CUSTID = $_GET['custid'];
+	$PID = $_GET['pid'];
+	
+	// Handle document save
+	if ($_POST['save'])
+	{
+		$result = $dbh->Query("select id from user_files_documents where file_id='$FID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$docid = $row['id'];
+		}
+		$dbh->FreeResults($result);
+		
+		if ($docid)
+		{
+			$query = "update user_files_documents set data='".$dbh->Escape($_POST['editorbody'])."' 
+						 where id='$docid'";
+			$dbh->Query($query);
+		}
+		else
+		{
+			$query = "insert into user_files_documents (data, file_id)
+						 values('".$dbh->Escape($_POST['editorbody'])."', '$FID')";
+			$dbh->Query($query);
+		}
+		
+		// Update file link size
+		$dbh->Query("update user_files set file_size='".strlen($_POST['editorbody'])."',
+						 time_updated='now' where id='$FID'");
+	}
+	
+	if (is_numeric($FID))
+	{
+		$result = $dbh->Query("select data, margins[1] as leftmargin, margins[2] as rightmargin,
+								margins[3] as topmargin, margins[4] as bottommargin 
+								from user_files_documents where file_id='$FID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$body = $row['data'];
+			$leftmargin = $row['leftmargin'];
+			$rightmargin = $row['rightmargin'];
+			$topmargin = $row['topmargin'];
+			$bottommargin = $row['bottommargin'];
+		}
+		$dbh->FreeResults($result);
+		
+		if ($AUTOMATE)
+		{
+			$body = str_replace("&lt;%USERFULLNAME%&gt;", UserGetFullName($dbh, $USERID), $body);
+			$body = str_replace("&lt;%TODAYSDATE%&gt;", date("m/d/Y"), $body);
+			
+			if ($CID)
+				$object = new CAntObject($dbh, "contact_personal", $CUSTID, $CID);
+			else if ($CUSTID)
+				$object = new CAntObject($dbh, "customer", $CUSTID, $USER);
+			
+			if ($object)
+			{
+				$matches = array();
+				$iterations = 0; // for safety
+				while (preg_match("/&lt;%(.*?)%&gt;/", $body, $matches))
+				{
+					$pull_var = $matches[1];
+
+					// Check if this is an associated variable
+					if (strpos($pull_var, '.') === false)
+					{
+						$type = $object->getFieldType($pull_var);
+
+						if ($type['type'] == 'fkey' && $type['subtype'] == "users" && ($varname=='to' || $varname=='cc' || $varname=='bcc'))
+						{
+							$body = str_replace("<%$pull_var%>", UserGetEmail($this->dbh, $object->getValue($pull_var)), $body);
+							$body = str_replace("&lt;%$pull_var%&gt;", UserGetEmail($this->dbh, $object->getValue($pull_var)), $body);
+						}
+						else
+						{
+							$body = str_replace("<%$pull_var%>", $object->getValue($pull_var, ($type['type'] == 'alias')?true:false), $body);
+							$body = str_replace("&lt;%$pull_var%&gt;", $object->getValue($pull_var, ($type['type'] == 'alias')?true:false), $body);
+						}
+					}
+					else
+					{
+						$parts = explode(".", $pull_var);
+						$fieldName = $parts[0];
+						$ref_field = $parts[1];
+
+						$type = $object->getFieldType($fieldName);
+						$tmpobj = new CAntObject($dbh, $type['subtype']);
+
+						// Check for user_id to email conversion
+						$type = $tmpobj->getFieldType($ref_field);
+						if ($type['type'] == 'fkey' && $type['subtype'] == "users" && ($varname=='to' || $varname=='cc' || $varname=='bcc'))
+						{
+							$body = str_replace("<%$pull_var%>", UserGetEmail($this->dbh, $tmpobj->getValue($ref_field)), $body);
+							$body = str_replace("&lt;%$pull_var%&gt;", UserGetEmail($this->dbh, $tmpobj->getValue($ref_field)), $body);
+						}
+						else
+						{
+							$body = str_replace("<%$pull_var%>", $tmpobj->getValue($ref_field, ($type['type'] == 'alias')?true:false), $body);
+							$body = str_replace("&lt;%$pull_var%&gt;", $tmpobj->getValue($ref_field, ($type['type'] == 'alias')?true:false), $body);
+						}
+					}
+
+					// Prevent infinite loop
+					$iterations++;
+					if ($iterations > 5000)
+						break;
+				}
+			}
+
+			if ($PID)
+			{
+				// Get additional fields
+				$query = "select id, name, field_type, project_id from project_fields where 
+						  project_id='$PID' or (user_id='$USERID' and project_id is null and template_id is null)";
+				$result = $dbh->Query($query);
+				$num = $dbh->GetNumberRows($result);
+				for ($i = 0; $i < $num; $i++)
+				{
+					$row = $dbh->GetNextRow($result, $i);
+					$fieldid = $row['id'];
+					$name = $row['name'];
+					$file_type = $row['field_type'];
+					
+					$valquery = "select val_$file_type from project_fields_values where field_id='$fieldid' and project_id='$PID'";
+					$valres = $dbh->Query($valquery);
+					if ($dbh->GetNumberRows($valres))
+					{
+						$valrow = $dbh->GetNextRow($valres, 0);
+						$varval = $valrow["val_$file_type"];
+						$dbh->FreeResults($valres);
+					}
+					else
+						$varval = "";
+
+					$body = str_replace("<%project.".$name."%>", $varval, $body);
+					$body = str_replace("&lt;%project.".$name."%&gt;", $varval, $body);
+				}
+				$dbh->FreeResults($result);
+
+				// Get membership
+				$result = $dbh->Query("select users.full_name, project_positions.name, users.id
+									   from project_membership, users, project_positions
+									   where project_membership.project_id='$PID' and project_membership.user_id=users.id
+									   and project_membership.position_id=project_positions.id");
+				$numrows = $dbh->GetNumberRows($result);
+				for ($i = 0; $i < $numrows; $i++)
+				{
+					$row = $dbh->GetNextRow($result, $i);
+					
+					$body = str_replace("<%project.position.".$row['name']."%>", $row['full_name'], $body);
+					$body = str_replace("&lt;%project.position.".$row['name']."%&gt;", $row['full_name'], $body);
+
+					$body = str_replace("<%project.position.".$row['name'].".email%>", UserGetEmail($dbh, $row['id']), $body);
+					$body = str_replace("&lt;%project.position.".$row['name'].".email%&gt;", UserGetEmail($dbh, $row['id']), $body);
+				}
+			}
+		}
+	}
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	<title>Aereus Credo</title>
+	<meta HTTP-EQUIV="content-type" CONTENT="text/html; charset=UTF-8">
+	<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme($dbh, $USERID, 'css'); ?>">
+	<script type="text/javascript" src="/email/email_functions.js"></script>
+	<script type="text/javascript" src="/calendar/calendar_functions.js"></script>
+	<script type="text/javascript" src="/project/project_functions.js"></script>
+	<script type="text/javascript" src="/customer/customer_functions.js"></script>
+	<script type="text/javascript" src="/contacts/contact_functions.js"></script>
+<?php
+	include("../lib/aereus.lib.js/js_lib.php");
+?>
+	<script type="text/javascript">	
+<?php
+	include("../customer/CCustomerBrowser.js");
+	include("../customer/CCustActivity.js");
+?>
+
+	// Cross-Browser Rich Text Editor
+
+	//init variables
+	var isRichText = false;
+	var rng;
+	var currentRTE;
+	var allRTEs = "";
+	var activeRTE;
+	
+	var isIE;
+	var isGecko;
+	var isSafari;
+	var isKonqueror;
+	
+	var imagesPath;
+	var includesPath;
+	var cssFile;
+	
+	
+	function initRTE(imgPath, incPath, css) 
+	{
+		//set browser vars
+		var ua = navigator.userAgent.toLowerCase();
+		isIE = ((ua.indexOf("msie") != -1) && (ua.indexOf("opera") == -1) && (ua.indexOf("webtv") == -1)); 
+		isGecko = (ua.indexOf("gecko") != -1);
+		isSafari = (ua.indexOf("safari") != -1);
+		isKonqueror = (ua.indexOf("konqueror") != -1);
+		
+		//check to see if designMode mode is available
+		if (document.getElementById && document.designMode && !isSafari && !isKonqueror)
+			isRichText = true;
+		
+		if (isIE)
+		{
+			document.onmouseover = raiseButton;
+			document.onmouseout  = normalButton;
+			document.onmousedown = lowerButton;
+			document.onmouseup   = raiseButton;
+		}
+		
+		//set paths vars
+		imagesPath = imgPath;
+		//includesPath = incPath;
+		includesPath = "/lib/rte/";
+		cssFile = css;
+		
+		//if (isRichText) document.writeln('<style type="text/css">@import "' + includesPath + 'rte.css";</style>');
+		
+		//for testing standard textarea, uncomment the following line
+		//isRichText = false;
+	}
+	
+	function writeRichText(rte, rtename, html, width, height, buttons, readOnly) 
+	{
+		if (isRichText) 
+		{
+			if (allRTEs.length > 0) allRTEs += ";";
+			allRTEs += rte;
+			
+			if (readOnly) buttons = false;
+	
+			document.writeln('<div class="rteDiv">');
+			document.writeln('<iframe id="' + rte + '" name="' + rte + '" width="' + width + '" height="' + height + '" src="' + includesPath + 'blank.htm" frameborder="0" style="border:1px solid #000000;"></iframe>');
+			//if (!readOnly) document.writeln('<br /><input type="checkbox" id="chkSrc' + rte + '" onclick="toggleHTMLSrc(\'' + rte + '\');" />&nbsp;View Source');
+			document.writeln('<iframe width="154" height="104" id="cp' + rte + '" src="' + includesPath + 'palette.htm" marginwidth="0" marginheight="0" scrolling="no" style="display:none; position: absolute; top:0px; left:0px;"></iframe>');
+			document.writeln('<input type="hidden" id="hdn' + rte + '" name="' + rtename + '" value="">');
+			document.writeln('</div>');
+			
+			document.getElementById('hdn' + rte).value = html;
+			enableDesignMode(rte, html, readOnly);
+		} 
+		else 
+		{
+			if (!readOnly) 
+			{
+				document.writeln('<textarea name="' + rte + '" id="' + rte + '" style="width: ' + width + '; height: ' + height + 'px;">' + html + '</textarea>');
+			}
+			else 
+			{
+				document.writeln('<textarea name="' + rte + '" id="' + rte + '" style="width: ' + width + 'px; height: ' + height + 'px;" readonly>' + html + '</textarea>');
+			}
+		}
+	}
+	
+	function RteSetFontSize(rte, size)
+	{
+		if (document.all) 
+		{
+			//retrieve selected range
+			var sel = frames[rte].document.selection; 
+			if (sel != null) 
+			{
+				var newRng = sel.createRange();
+				var html = newRng.text;
+				var re = new RegExp ('<'+'%', 'gi');
+				var html = html.replace(re, '&lt;%');
+				
+				var re = new RegExp ('%>', 'gi');
+				var html = html.replace(re, '%&gt;');
+				
+				html = "<span style='font-size:"+size+"'>" + html + "</span>";
+				//alert(html);
+				//newRng = rng;
+				//newRng.select();
+				
+				var re = new RegExp ('\n', 'gi') ;
+				var html = html.replace(re, '<br>') ;
+				
+				newRng.pasteHTML(html);
+				newRng.collapse(false);
+				newRng.select();
+			}
+			
+			//rteCommand(rte, 'paste', html);
+		}
+		else
+		{
+			var oRTE = document.getElementById(rte).contentWindow;
+			var sel = oRTE.getSelection();
+			
+			if (sel != null) 
+			{
+				//var newRng = sel.getRangeAt(sel.rangeCount - 1);
+				//var html = newRng.text;
+				var html = sel;
+				html = "<span style='font-size:"+size+"'>" + html + "</span>";
+				//newRng = rng;
+				//newRng.select();
+				var re = new RegExp ('\n', 'gi') ;
+				var html = html.replace(re, '<br>') ;
+			}
+			rteCommand(rte, 'insertHTML', html);
+		}
+	}
+	
+	function RteUpdateMargins(rte, left, right, top, bottom)
+	{
+	
+		var oRTE;
+		if (document.all) 
+		{
+			oRTE = frames[rte];
+		} 
+		else 
+		{
+			oRTE = document.getElementById(rte).contentWindow;
+		}
+
+		oRTE.document.body.style.marginLeft = left + "mm";
+		oRTE.document.body.style.marginRight = right + "mm";
+		oRTE.document.body.style.marginTop = top + "mm";
+		oRTE.document.body.style.marginBotton = bottom + "mm";
+	}
+	
+	function RteCorrectFontSize(rte)
+	{
+		var oRTE;
+		if (document.all) 
+		{
+			oRTE = frames[rte];
+		} 
+		else 
+		{
+			oRTE = document.getElementById(rte).contentWindow;
+		}
+		
+		var bdy = oRTE.document.body.innerHTML;
+		var re = new RegExp ('<font size="4">', 'gi') ;
+		var bdy = bdy.replace(re, '<span style="font-size:12pt;">') ;
+		
+		var re = new RegExp ('<font size="5">', 'gi') ;
+		var bdy = bdy.replace(re, '<span style="font-size:14pt;">') ;
+		
+		var re = new RegExp ('<font size="6">', 'gi') ;
+		var bdy = bdy.replace(re, '<span style="font-size:18pt;">') ;
+		
+		var re = new RegExp ('<font size="7">', 'gi') ;
+		var bdy = bdy.replace(re, '<span style="font-size:22pt;">') ;
+		
+		var re = new RegExp ('</font>', 'gi') ;
+		var bdy = bdy.replace(re, '</span>') ;
+		oHdnMessage.value = bdy;
+				
+		oRTE.document.body.innerHTML = bdy;
+	}
+	
+	function enableDesignMode(rte, html, readOnly) 
+	{
+		//var frameHtml = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"";
+		//frameHtml += "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
+		//frameHtml += "<html id=\"" + rte + "\"  xmlns=\"http://www.w3.org/1999/xhtml\">\n";
+		var frameHtml = "<html id=\"" + rte + "\">";
+		frameHtml += "<head>\n";
+
+		frameHtml += "<style>\n";
+		frameHtml += "body {\n";
+		frameHtml += " background: #FFFFFF;\n";
+		frameHtml += " margin-left: <?php print($leftmargin); ?>mm;\n";
+		frameHtml += " margin-right: <?php print($rightmargin); ?>mm;\n";
+		frameHtml += " margin-bottom: <?php print($bottommargin); ?>mm;\n";
+		frameHtml += " margin-top: <?php print($topmargin); ?>mm;\n";
+		frameHtml += " padding: 0px;\n";
+		frameHtml += "}\n";
+		frameHtml += " P {margin-top:0;margin-bottom:0}\n";
+		frameHtml += "}\n";
+		frameHtml += "</style>\n"; 
+		frameHtml += "</head>\n";
+		frameHtml += "<body>\n";
+		frameHtml += unescape(html) + "\n";
+		frameHtml += "</body>\n";
+		frameHtml += "</html>";
+		
+		if (document.all) 
+		{
+			var oRTE = frames[rte].document;
+			oRTE.open();
+			oRTE.write(frameHtml);
+			oRTE.close();
+			if (!readOnly) oRTE.designMode = "On";
+		} 
+		else 
+		{
+			try 
+			{
+				if (!readOnly) document.getElementById(rte).contentDocument.designMode = "on";
+				try 
+				{
+					var oRTE = document.getElementById(rte).contentWindow.document;
+					oRTE.open();
+					oRTE.write(frameHtml);
+					oRTE.close();
+					if (isGecko && !readOnly) 
+					{
+						//attach a keyboard handler for gecko browsers to make keyboard shortcuts work
+						oRTE.addEventListener("keypress", kb_handler, true);
+					}
+				} 
+				catch (e) 
+				{
+					alert("Error preloading content.");
+				}
+			} 
+			catch (e) 
+			{
+				//gecko may take some time to enable design mode.
+				//Keep looping until able to set.
+				if (isGecko) 
+					setTimeout("enableDesignMode('" + rte + "', \"" + html + "\", " + readOnly + ");", 10);
+				else 
+					return false;
+			}
+		}
+	}
+	
+	function updateRTEs() 
+	{
+		var vRTEs = allRTEs.split(";");
+		for (var i = 0; i < vRTEs.length; i++) 
+		{
+			updateRTE(vRTEs[i]);
+		}
+	}
+	
+	function updateRTE(rte) 
+	{
+		if (!isRichText) return;
+		
+		//set message value
+		var oHdnMessage = document.getElementById('hdn' + rte);
+		var oRTE = document.getElementById(rte);
+		var readOnly = false;
+		
+		//check for readOnly mode
+		if (document.all) 
+		{
+			if (frames[rte].document.designMode != "On" &&
+			frames[rte].document.designMode != "on") 
+			{
+				readOnly = true;
+			}
+		} 
+		else 
+		{
+			if (document.getElementById(rte).contentDocument.designMode != "on") readOnly = true;
+		}
+		
+		if (isRichText && !readOnly) 
+		{
+			//if viewing source, switch back to design view
+			/*
+			if (document.getElementById("chkSrc" + rte).checked) 
+			{
+				document.getElementById("chkSrc" + rte).checked = false;
+				toggleHTMLSrc(rte);
+			}
+			*/
+			if (oHdnMessage.value == null) oHdnMessage.value = "";
+			if (document.all) 
+			{
+				var bdy = frames[rte].document.body.innerHTML;
+				var re = new RegExp ('<p>', 'gi') ;
+				var bdy = bdy.replace(re, '<br>') ;
+				var re = new RegExp ('</p>', 'gi') ;
+				var bdy = bdy.replace(re, '') ;
+				oHdnMessage.value = bdy;
+			} 
+			else 
+			{
+				oHdnMessage.value = oRTE.contentWindow.document.body.innerHTML;
+			}
+			
+			//if there is no content (other than formatting) set value to nothing
+			if (stripHTML(oHdnMessage.value.replace("&nbsp;", " ")) == "" 
+				&& oHdnMessage.value.toLowerCase().search("<hr") == -1
+				&& oHdnMessage.value.toLowerCase().search("<img") == -1) oHdnMessage.value = "";
+			//fix for gecko
+			if (escape(oHdnMessage.value) == "%3Cbr%3E%0D%0A%0D%0A%0D%0A") oHdnMessage.value = "";
+		}
+	}
+	
+	function rteCommand(rte, command, option) 
+	{
+		//function to perform command
+		var oRTE;
+		if (document.all) 
+		{
+			oRTE = frames[rte];
+		} 
+		else 
+		{
+			oRTE = document.getElementById(rte).contentWindow;
+		}
+		
+		try 
+		{
+			oRTE.focus();
+			oRTE.document.execCommand(command, false, option);
+			oRTE.focus();
+		} 
+		catch (e) 
+		{
+	//		alert(e);
+	//		setTimeout("rteCommand('" + rte + "', '" + command + "', '" + option + "');", 10);
+		}
+	}
+	
+	function toggleHTMLSrc(rte) 
+	{
+		//contributed by Bob Hutzel (thanks Bob!)
+		var oRTE;
+		if (document.all) 
+		{
+			oRTE = frames[rte].document;
+		} 
+		else 
+		{
+			oRTE = document.getElementById(rte).contentWindow.document;
+		}
+		
+		if (document.getElementById("chkSrc" + rte).checked) 
+		{
+			//showHideElement("Buttons2_" + rte, "hide");
+			if (document.all) 
+			{
+				oRTE.body.innerText = oRTE.body.innerHTML;
+			} 
+			else 
+			{
+				var htmlSrc = oRTE.createTextNode(oRTE.body.innerHTML);
+				oRTE.body.innerHTML = "";
+				oRTE.body.appendChild(htmlSrc);
+			}
+		} 
+		else 
+		{
+			//showHideElement("Buttons1_" + rte, "show");
+			showHideElement("Buttons2_" + rte, "show");
+			if (document.all) 
+			{
+				//fix for IE
+				var output = escape(oRTE.body.innerText);
+				output = output.replace("%3CP%3E%0D%0A%3CHR%3E", "%3CHR%3E");
+				output = output.replace("%3CHR%3E%0D%0A%3C/P%3E", "%3CHR%3E");
+				
+				oRTE.body.innerHTML = unescape(output);
+			} 
+			else 
+			{
+				var htmlSrc = oRTE.body.ownerDocument.createRange();
+				htmlSrc.selectNodeContents(oRTE.body);
+				oRTE.body.innerHTML = htmlSrc.toString();
+			}
+		}
+	}
+	
+	function dlgColorPalette(rte, command) 
+	{
+		//function to display or hide color palettes
+		setRange(rte);
+		
+		//get dialog position
+		var oDialog = document.getElementById('cp' + rte);
+		var buttonElement = document.getElementById(command + '_' + rte);
+		var iLeftPos = getOffsetLeft(buttonElement);
+		var iTopPos = getOffsetTop(buttonElement) + (buttonElement.offsetHeight + 4);
+		oDialog.style.left = (iLeftPos) + "px";
+		oDialog.style.top = (iTopPos) + "px";
+		
+		if ((command == parent.command) && (rte == currentRTE)) 
+		{
+			//if current command dialog is currently open, close it
+			if (oDialog.style.display == "none") 
+			{
+				showHideElement(oDialog, 'show');
+			} 
+			else 
+			{
+				showHideElement(oDialog, 'hide');
+			}
+		} 
+		else 
+		{
+			//if opening a new dialog, close all others
+			var vRTEs = allRTEs.split(";");
+			for (var i = 0; i < vRTEs.length; i++) 
+			{
+				showHideElement('cp' + vRTEs[i], 'hide');
+			}
+			showHideElement(oDialog, 'show');
+		}
+		
+		//save current values
+		parent.command = command;
+		currentRTE = rte;
+	}
+	
+	function setColor(color) 
+	{
+		//function to set color
+		var rte = currentRTE;
+		var parentCommand = parent.command;
+		
+		if (document.all) 
+		{
+			//retrieve selected range
+			var sel = frames[rte].document.selection; 
+			if (parentCommand == "hilitecolor") parentCommand = "backcolor";
+			if (sel != null) 
+			{
+				var newRng = sel.createRange();
+				newRng = rng;
+				newRng.select();
+			}
+		}
+		
+		rteCommand(rte, parentCommand, color);
+		showHideElement('cp' + rte, "hide");
+	}
+	
+	
+	function RteInsertHtml(html, rte) 
+	{
+		if (document.all) 
+		{
+			//retrieve selected range
+			var sel = frames[rte].document.selection; 
+			if (sel != null) 
+			{
+				var newRng = sel.createRange();
+				newRng = rng;
+				newRng.select();
+			}
+			
+			rteCommand(rte, 'paste', html);
+		}
+		else
+		{
+			rteCommand(rte, 'insertHTML', html);
+		}
+	}
+	
+	
+	
+	function dlgInsertTable(rte, command) 
+	{
+		//function to open/close insert table dialog
+		//save current values
+		setRange(rte);
+		parent.command = command;
+		currentRTE = rte;
+		var windowOptions = 'history=no,toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=no,resizable=no,width=360,height=200';
+		window.open(includesPath + 'insert_table.htm', 'InsertTable', windowOptions);
+	}
+	
+	function insertLink(rte) 
+	{
+		//function to insert link
+		var szURL = prompt("Enter a URL:", "");
+		try 
+		{
+			//ignore error for blank urls
+			rteCommand(rte, "Unlink", null);
+			rteCommand(rte, "CreateLink", szURL);
+		} 
+		catch (e) 
+		{
+			//do nothing
+		}
+	}
+	
+	function addImage(rte) 
+	{
+		activeRTE = rte;
+		window.open("/userfiles/popup_browse_files.awp?browse=1&filter=jpg:jpeg:png:gif&callback=RteInsertImage");
+	}
+	
+	function RteInsertImage(fid, fname)
+	{
+		if (fid) 
+		{
+			var imagePath = "/userfiles/file_download.awp?view=1&fid=" + fid;
+			rteCommand(activeRTE, 'InsertImage', imagePath);
+		}
+	}
+	
+	// Ernst de Moor: Fix the amount of digging parents up, in case the RTE editor itself is displayed in a div.
+	// KJR 11/12/2004 Changed to position palette based on parent div, so palette will always appear in proper location regardless of nested divs
+	function getOffsetTop(elm) 
+	{
+		var mOffsetTop = elm.offsetTop;
+		var mOffsetParent = elm.offsetParent;
+		var parents_up = 2; //the positioning div is 2 elements up the tree
+		
+		while(parents_up > 0) {
+			mOffsetTop += mOffsetParent.offsetTop;
+			mOffsetParent = mOffsetParent.offsetParent;
+			parents_up--;
+		}
+		
+		return mOffsetTop;
+	}
+	
+	// Ernst de Moor: Fix the amount of digging parents up, in case the RTE editor itself is displayed in a div.
+	// KJR 11/12/2004 Changed to position palette based on parent div, so palette will always appear in proper location regardless of nested divs
+	function getOffsetLeft(elm) 
+	{
+		var mOffsetLeft = elm.offsetLeft;
+		var mOffsetParent = elm.offsetParent;
+		var parents_up = 2;
+		
+		while(parents_up > 0) 
+		{
+			mOffsetLeft += mOffsetParent.offsetLeft;
+			mOffsetParent = mOffsetParent.offsetParent;
+			parents_up--;
+		}
+		
+		return mOffsetLeft;
+	}
+	
+	function selectFont(rte, selectname) 
+	{
+		//function to handle font changes
+		var idx = document.getElementById(selectname).selectedIndex;
+		// First one is always a label
+		if (idx != 0) 
+		{
+			var selected = document.getElementById(selectname).options[idx].value;
+			var cmd = selectname.replace('_' + rte, '');
+			rteCommand(rte, cmd, selected);
+			document.getElementById(selectname).selectedIndex = 0;
+		}
+	}
+	
+	function kb_handler(evt) 
+	{
+		var rte = evt.target.id;
+		
+		//contributed by Anti Veeranna (thanks Anti!)
+		if (evt.ctrlKey) 
+		{
+			var key = String.fromCharCode(evt.charCode).toLowerCase();
+			var cmd = '';
+			switch (key) 
+			{
+				case 'b': cmd = "bold"; break;
+				case 'i': cmd = "italic"; break;
+				case 'u': cmd = "underline"; break;
+			};
+	
+			if (cmd) 
+			{
+				rteCommand(rte, cmd, null);
+				
+				// stop the event bubble
+				evt.preventDefault();
+				evt.stopPropagation();
+			}
+		}
+	}
+	
+	function insertHTML(html, pass_rte) 
+	{
+		//function to add HTML -- thanks dannyuk1982
+		if (pass_rte)
+			var rte = pass_rte;
+		else
+			var rte = currentRTE;
+	
+		var oRTE;
+		if (document.all) {
+			oRTE = frames[rte];
+		} else {
+			oRTE = document.getElementById(rte).contentWindow;
+		}
+		
+		oRTE.focus();
+		if (document.all) {
+			var oRng = oRTE.document.selection.createRange();
+			oRng.pasteHTML(html);
+			oRng.collapse(false);
+			oRng.select();
+		} else {
+	//		oRTE.document.execCommand('insertHTML', false, html);
+			oRTE.document.execCommand('insertHTML', false, html);
+		}
+	}
+	
+	function showHideElement(element, showHide) 
+	{
+		//function to show or hide elements
+		//element variable can be string or object
+		if (document.getElementById(element)) 
+		{
+			element = document.getElementById(element);
+		}
+		
+		if (showHide == "show") 
+		{
+			element.style.display = "block";
+		} 
+		else if (showHide == "hide") 
+		{
+			element.style.display = "none";
+		}
+	}
+	
+	function setRange(rte) 
+	{
+		//function to store range of current selection
+		var oRTE;
+		if (document.all) 
+		{
+			oRTE = frames[rte];
+			var selection = oRTE.document.selection; 
+			if (selection != null) rng = selection.createRange();
+		} 
+		else 
+		{
+			oRTE = document.getElementById(rte).contentWindow;
+			var selection = oRTE.getSelection();
+			rng = selection.getRangeAt(selection.rangeCount - 1).cloneRange();
+		}
+	}
+	
+	function stripHTML(oldString) 
+	{
+		//function to strip all html
+		var newString = oldString.replace(/(<([^>]+)>)/ig,"");
+		
+		//replace carriage returns and line feeds
+	   newString = newString.replace(/\r\n/g," ");
+	   newString = newString.replace(/\n/g," ");
+	   newString = newString.replace(/\r/g," ");
+		
+		//trim string
+		newString = trim(newString);
+		
+		return newString;
+	}
+	
+	function trim(inputString) 
+	{
+	   // Removes leading and trailing spaces from the passed string. Also removes
+	   // consecutive spaces and replaces it with one space. If something besides
+	   // a string is passed in (null, custom object, etc.) then return the input.
+	   if (typeof inputString != "string") return inputString;
+	   var retValue = inputString;
+	   var ch = retValue.substring(0, 1);
+		
+	   while (ch == " ") 
+	   { // Check for spaces at the beginning of the string
+		  retValue = retValue.substring(1, retValue.length);
+		  ch = retValue.substring(0, 1);
+	   }
+	   ch = retValue.substring(retValue.length - 1, retValue.length);
+		
+	   while (ch == " ") 
+	   { // Check for spaces at the end of the string
+		  retValue = retValue.substring(0, retValue.length - 1);
+		  ch = retValue.substring(retValue.length - 1, retValue.length);
+	   }
+		
+		// Note that there are two spaces in the string - look for multiple spaces within the string
+	   while (retValue.indexOf("  ") != -1) 
+	   {
+			// Again, there are two spaces in each of the strings
+		  retValue = retValue.substring(0, retValue.indexOf("  ")) + retValue.substring(retValue.indexOf("  ") + 1, retValue.length);
+	   }
+	   return retValue; // Return the trimmed string back to the user
+	}
+	
+	//*****************
+	//IE-Only Functions
+	//*****************
+	function checkspell() 
+	{
+		//function to perform spell check
+		try 
+		{
+			var tmpis = new ActiveXObject("ieSpell.ieSpellExtension");
+			tmpis.CheckAllLinkedDocuments(document);
+		}
+		catch(exception) 
+		{
+			if(exception.number==-2146827859) 
+			{
+				if (confirm("ieSpell not detected.  Click Ok to go to download page."))
+					window.open("http://www.iespell.com/download.php","DownLoad");
+			} 
+			else 
+			{
+				alert("Error Loading ieSpell: Exception " + exception.number);
+			}
+		}
+	}
+	
+	function raiseButton(e) 
+	{
+		//IE-Only Function
+		var el = window.event.srcElement;
+		
+		className = el.className;
+		if (className == 'rteImage' || className == 'rteImageLowered') 
+		{
+			el.className = 'rteImageRaised';
+		}
+	}
+	
+	function normalButton(e) 
+	{
+		//IE-Only Function
+		var el = window.event.srcElement;
+		
+		className = el.className;
+		if (className == 'rteImageRaised' || className == 'rteImageLowered') 
+		{
+			el.className = 'rteImage';
+		}
+	}
+	
+	function lowerButton(e) 
+	{
+		//IE-Only Function
+		var el = window.event.srcElement;
+		
+		className = el.className;
+		if (className == 'rteImage' || className == 'rteImageRaised') 
+		{
+			el.className = 'rteImageLowered';
+		}
+	}
+
+	initRTE("/lib/rte/images/", "", "");
+	
+	function ResizeBoxes()
+	{
+		var cont = document.getElementById('bodycontainer');
+		var bdy_ifrm = document.getElementById('editorbody');
+		
+		//alert(cont.offsetHeight);
+		bdy_ifrm.style.height = (cont.offsetHeight - 8) + 'px';
+	}
+	function PrintDocument()
+	{
+		//var bdy_ifrm = document.getElementById('editorbody');
+		//document.getElementById('editorbody').print();
+		//editorbody.print();
+		//bdy_ifrm.print();
+		//window.frames['editorbody'].focus();
+		//window.frames['editorbody'].print();
+		var oRTE = document.getElementById("editorbody");
+		var html = oRTE.contentWindow.document.body.innerHTML;
+		var re = new RegExp ('src="/userfiles', 'gi') ;
+		html = html.replace(re, 'src="http://<?php print(AntConfig::getInstance()->localhost); ?>/userfiles');
+		//alert(html);
+		document.printform.printbody.value = html;
+		document.printform.submit();
+	}
+	function submitForm() 
+	{
+		//make sure hidden and iframe values are in sync before submitting form
+		//to sync only 1 rte, use updateRTE(rte)
+		//to sync all rtes, use updateRTEs
+		updateRTE('editorbody');
+		document.edit_form.submit();
+	}
+	// Automate a template
+	function SetContact(cid)
+	{
+		document.location="<?php print("/document/editor.awp?automate=1&pid=$PID&fid=$FID&cid="); ?>"+cid;
+	}
+	function SetCustomer()
+	{
+		var cbrowser = new CCustomerBrowser();
+		cbrowser.onSelect = function(cid, name) 
+		{ 
+			document.location="<?php print("/document/editor.awp?automate=1&pid=$PID&fid=$FID&custid="); ?>"+cid;
+		}
+		cbrowser.showDialog();
+	}
+	</script>
+	<style type='text/css'>
+	body
+	{
+		height: 100%;
+		margin:0px;
+	}
+	</style>
+</head>
+<body onResize="ResizeBoxes();" onLoad="ResizeBoxes();">
+<?php
+	echo "<form onSubmit=\"return submitForm();\" name='edit_form' method='post' action='editor.awp?fid=$FID&pid=$PID&cid=$CID'>";
+	echo "<input type='hidden' name='save' value='1'>";
+	echo "<table border='0' width='100%' height='100%' cellpadding='0' cellspacing='0'>
+			<tr>
+				<td height='16'><div style='background-color:#D4D0C8;width:100%;display:table;'>";
+	echo "<div style='float:left;'>";
+	
+	$page_setup = "window.open('setup_page.awp?fid=$FID', 'page_setup', ";
+	$page_setup .= " 'top=200,left=100,width=600,height=300,";
+	$page_setup .= "toolbar=no,menubar=no,scrollbars=yes,location=no,directories=no,status=no,resizable=no');";
+	$mMenu = new CDropMenu("md_file", 'down');
+	//$mMenu->AddMenuItem("New", "javascript:RteInsertHtml('&lt;%contacts_personal.first_name%&gt;', 'editorbody');");
+	$mMenu->AddMenuItem("Close", "javascript:window.close();");
+	if (!$AUTOMATE)
+		$mMenu->AddMenuItem("Save", "javascript:submitForm();");
+	//$mMenu->AddMenuItem("Save As", "javascript:submitForm();");
+	$mMenu->AddMenuItem("Print", "javascript:PrintDocument();");
+	$mMenu->AddMenuItem("Page Setup", "javascript:$page_setup");
+	$mMenu->PrintButtonMenu("File");
+	/*
+	$mMenu->PrintImageMenu("/images/credo/m_file.gif", "/images/credo/m_file.gif", 
+						   "/images/credo/m_file.gif", false, "setRange('editorbody');");					
+	 */
+	echo "</div>";
+	echo "<div style='float:left;'>";
+	
+	$select_contact = "window.open('/contacts/popup_select_contact.awp?retfunction=SetContact', 'viewer', ";
+	$select_contact .= " 'top=200,left=100,width=600,height=300,";
+	$select_contact .= "toolbar=no,menubar=no,scrollbars=yes,location=no,directories=no,status=no,resizable=no');";
+	$mMenu = new CDropMenu("md_automate", 'down');
+	$mMenu->AddMenuItem("Apply Personal Contact", "javascript:$select_contact");
+	$mMenu->AddMenuItem("Apply Customer", "javascript:SetCustomer();");
+	$mMenu->AddMenuItem("First Name", "javascript:RteInsertHtml('&lt;%first_name%&gt;', 'editorbody');");
+	$mMenu->AddMenuItem("Spouse Name", "javascript:RteInsertHtml('&lt;%spouse_name%&gt;', 'editorbody');");
+	$mMenu->AddMenuItem("Last Name", "javascript:RteInsertHtml('&lt;%last_name%&gt;', 'editorbody');");
+	$mMenu->AddMenuItem("Company", "javascript:RteInsertHtml('&lt;%company%&gt;', 'editorbody');");
+	$mMenu->AddMenuItem("Nick Name", "javascript:RteInsertHtml('&lt;%nick_name%&gt;', 'editorbody');");
+	$mMenu->AddMenuItem("Home Email", "javascript:RteInsertHtml('&lt;%email%&gt;', 'editorbody');");
+	$mMenu->AddMenuItem("Work Email", "javascript:RteInsertHtml('&lt;%email2%&gt;', 'editorbody');");
+	$mMenu->AddMenuItem("Home Street", "javascript:RteInsertHtml('&lt;%street%&gt;', 'editorbody');");
+	$mMenu->AddMenuItem("Home City", "javascript:RteInsertHtml('&lt;%city%&gt;', 'editorbody');");
+	$mMenu->AddMenuItem("Home State", "javascript:RteInsertHtml('&lt;%state%&gt;', 'editorbody');");
+	$mMenu->AddMenuItem("Home Zip", "javascript:RteInsertHtml('&lt;%zip%&gt;', 'editorbody');");
+	$mMenu->AddMenuItem("Business Street", "javascript:RteInsertHtml('&lt;%business_street%&gt;',
+						'editorbody');");
+	$mMenu->AddMenuItem("Business City", "javascript:RteInsertHtml('&lt;%business_city%&gt;', 
+						'editorbody');");
+	$mMenu->AddMenuItem("Business State", "javascript:RteInsertHtml('&lt;%business_state%&gt;',
+						'editorbody');");
+	$mMenu->AddMenuItem("Business Zip", "javascript:RteInsertHtml('&lt;%business_zip%&gt;', 
+						'editorbody');");
+	$mMenu->AddMenuItem("Salutation", "javascript:RteInsertHtml('&lt;%salutation%&gt;', 
+						'editorbody');");
+	$mMenu->AddMenuItem("Todays Date", "javascript:RteInsertHtml('&lt;%TODAYSDATE%&gt;', 'editorbody');");
+	
+	$mMenu->PrintButtonMenu("Insert AutoField");
+	unset($mMenu);
+	echo "</div>";
+	echo "		</div></td>
+			</tr>
+			<tr>
+				<td height='22'>";
+	WindowFrameToolbarStart('100%');
+
+	//echo ButtonCreate("Print", "PrintDocument()");
+	
+	echo "  <div style=\"float:left;\">
+				<img id=\"save\"  src='/images/credo/save.gif' 
+					width=\"25\" alt=\"Save Changes\" title=\"Save Changes\" 
+					onClick=\"submitForm();\">
+			</div>
+			<div style=\"float:left;\">
+				<img id=\"print\"  src='/images/credo/print.gif' 
+					width=\"25\" alt=\"Print Document\" title=\"Print Document\" 
+					onClick=\"PrintDocument();\">
+			</div>
+			<div style=\"float:left;padding-left:5px;\">
+				<img src='/images/credo/blackdot.gif' width=\"1\" height=\"20\" 
+					border=\"0\" alt=\"\">
+			</div>
+			<div style=\"float:left;\">
+				<img id=\"bold\"  src='/images/credo/bold.gif' 
+					width=\"25\" alt=\"Bold\" title=\"Bold\" 
+					onClick=\"rteCommand('editorbody', 'bold', '')\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/italic.gif' width=\"25\" height=\"24\" alt=\"Italic\" 
+					title=\"Italic\" onClick=\"rteCommand('editorbody', 'italic', '')\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/underline.gif' width=\"25\" height=\"24\" alt=\"Underline\" 
+					title=\"Underline\" onClick=\"rteCommand('editorbody', 'underline', '')\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/blackdot.gif' width=\"1\" height=\"20\" 
+					border=\"0\" alt=\"\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/left_just.gif' width=\"25\" 
+					height=\"24\" alt=\"Align Left\" 
+					title=\"Align Left\" onClick=\"rteCommand('editorbody', 'justifyleft', '')\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/centre.gif' width=\"25\" height=\"24\" 
+					alt=\"Center\" title=\"Center\" 
+					onClick=\"rteCommand('editorbody', 'justifycenter', '')\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/right_just.gif' width=\"25\" height=\"24\" 
+					alt=\"Align Right\" 
+					title=\"Align Right\" onClick=\"rteCommand('editorbody', 'justifyright', '')\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/justifyfull.gif' width=\"25\" height=\"24\" 
+					alt=\"Justify Full\" 
+					title=\"Justify Full\" onclick=\"rteCommand('editorbody', 'justifyfull', '')\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/blackdot.gif' width=\"1\" height=\"20\" 
+					border=\"0\" alt=\"\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/hr.gif' width=\"25\" height=\"24\" alt=\"Horizontal Rule\" 
+					title=\"Horizontal Rule\" onClick=\"rteCommand('editorbody', 'inserthorizontalrule', '')\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/blackdot.gif' width=\"1\" height=\"20\" 
+					border=\"0\" alt=\"\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/numbered_list.gif' width=\"25\" height=\"24\" 
+					alt=\"Ordered List\" 
+					title=\"Ordered List\" onClick=\"rteCommand('editorbody', 'insertorderedlist', '')\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/list.gif' width=\"25\" height=\"24\" 
+					alt=\"Unordered List\" 
+					title=\"Unordered List\" onClick=\"rteCommand('editorbody', 'insertunorderedlist', '')\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/blackdot.gif' width=\"1\" height=\"20\" 
+					border=\"0\" alt=\"\">
+			</div>
+			<div style=\"float:left;\">
+				<div id=\"forecolor_editorbody\">
+					<img  src='/images/credo/textcolor.gif' width=\"25\" height=\"24\" 
+						alt=\"Text Color\" 
+						title=\"Text Color\" onClick=\"dlgColorPalette('editorbody', 'forecolor', '')\">
+				</div>
+			</div>
+			<div style=\"float:left;\">
+				<div id=\"hilitecolor_editorbody\">
+					<img  src='/images/credo/bgcolor.gif' width=\"25\" 
+						height=\"24\" alt=\"Background Color\" 
+						title=\"Background Color\" onClick=\"dlgColorPalette('editorbody', 'hilitecolor', '')\">
+				</div>
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/hyperlink.gif' width=\"25\" height=\"24\" 
+					alt=\"Insert Link\" 
+					title=\"Insert Link\" onClick=\"insertLink('editorbody')\">
+			</div>
+			<div style=\"float:left;\">
+				<img  src='/images/credo/image.gif' width=\"25\" height=\"24\" alt=\"Add Image\" 
+					title=\"Add Image\" onClick=\"addImage('editorbody')\">
+			</div>
+			<div style=\"float:left;\">
+				<div id=\"table_editbody\">
+					<img  src='/images/credo/insert_table.gif' width=\"25\" 
+						height=\"24\" alt=\"Insert Table\" 
+						title=\"Insert Table\" onClick=\"dlgInsertTable('editorbody', 'table', '')\">
+				</div>
+			</div>
+			<div style=\"float:left;\">
+				<div id=\"fsize_editbody\">
+					<img  src='/images/credo/insert_table.gif' width=\"25\" 
+						height=\"24\" alt=\"Insert Table\" 
+						title=\"Insert Table\" onClick=\"RteSetFontSize('editorbody', '14pt')\">
+				</div>
+			</div>
+			<div style=\"float:left;\">
+				<select tabindex=\"1000\" id=\"fontname_editorbody\" onchange=\"selectFont('editorbody', this.id)\">
+					<option value=\"Font\" selected>[Font]</option>
+					<option value=\"Arial, Helvetica, sans-serif\">Arial</option>
+					<option value=\"Georgia, Times, sans-serif\">Georgia</option>
+					<option value=\"Tahoma, Arial, Verdana, Helvetica, sans-serif\">Tahoma</option>
+					<option value=\"Courier New, Courier, mono\">Courier New</option>
+					<option value=\"Times New Roman, Times, serif\">Times New Roman</option>
+					<option value=\"Verdana, Arial, Helvetica, sans-serif\">Verdana</option>
+				</select>
+			</div>
+			<div style=\"float:left;\">
+				<select tabindex=\"1001\" unselectable=\"on\" id=\"fontsize_editorbody\"
+					 onchange=\"RteSetFontSize('editorbody', this.value);\" name='fontsize'
+					<option value=\"Size\">[Size]</option>
+					<option value=\"8pt\">8 pt</option>
+					<option value=\"10pt\">10 pt</option>
+					<option value=\"12pt\">12 pt</option>
+					<option value=\"14pt\">14 pt</option>
+					<option value=\"16pt\">16 pt</option>
+					<option value=\"18pt\">18 pt</option>
+					<option value=\"20pt\">20 pt</option>
+				</select>
+			</div>";
+			// selectFont('editorbody', this.id)
+			
+	WindowFrameToolbarEnd();
+	echo "	</td>
+			</tr>
+			<tr>
+				<td valign='top' style='padding:0px;' id='bodycontainer'>
+				<div style='background-color:#7F7F7F;padding:3px;' align='center' id='div_main'>
+					<script language=\"JavaScript\" type=\"text/javascript\">
+					<!--
+					writeRichText('editorbody', 'editorbody', '".rawurlencode($body)."',  '805', '100%', true, false);
+					//-->
+					</script>
+				</div>
+				</td>
+			</tr>
+		  </table>";
+	echo "</form>";
+	
+	// Create Print Form    
+	echo "<form name='printform' method='post' action='/lib/html_to_pdf/ant_pdf_create.awp'>
+			<input type='hidden' name='printbody' value='' />
+			<input type='hidden' name='leftmargin' value='$leftmargin' />
+			<input type='hidden' name='rightmargin' value='$rightmargin' />
+			<input type='hidden' name='topmargin' value='$topmargin' />
+			<input type='hidden' name='bottommargin' value='$bottommargin' />
+			<input type='hidden' name='pixels' value='805' />
+			<input type='hidden' name='method' value='fpdf' />
+			<input type='hidden' name='output' value='1' />
+			<input type='hidden' name='renderimages' value='1' />
+		  </form>";
+?>
+</body>

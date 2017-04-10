@@ -1,0 +1,73 @@
+10,"Atlantic Time (Goose Bay)","ADDT","America/Goose_Bay",-2
+11,"Nairobi","ADMT","Africa/Addis_Ababa",3
+12,"Kabul","AFT","Asia/Kabul",4
+3,"Alaska","AHDT","America/Anchorage",-9
+14,"Yerevan","AMST","Asia/Yerevan",4
+15,"Anadyr, Kamchatka","ANAST","Asia/Anadyr",12
+16,"Azores","AZOMT","Atlantic/Azores",0
+17,"Greenwich Mean Time : London","BDST","Europe/London",2
+18,"Hawaii-Aleutian","BDT","America/Adak",-10
+19,"La Paz","BOST","America/La_Paz",-4
+20,"Brasilia","BRST","America/Sao_Paulo",-2
+21,"Chennai, Kolkata, Mumbai, New Delhi","BURT","Asia/Kolkata",7
+22,"Adelaide","CAST","Australia/Adelaide",10
+5,"Central Time (US & Canada)","CDT","America/Chicago",-5
+24,"Chatham Islands","CHADT","Pacific/Chatham",14
+25,"Saskatchewan, Central America","CHDT","America/Belize",-6
+26,"Santiago","CLST","America/Santiago",-3
+27,"Bogota, Lima, Quito, Rio Branco","COST","America/Bogota",-4
+28,"Cape Verde Is.","CVST","Atlantic/Cape_Verde",-1
+29,"Eucla","CWST","Australia/Eucla",9
+30,"Easter Island","EASST","Chile/EasterIsland",-5
+6,"Eastern Time (US & Canada)","EDT","America/New_York",-4
+32,"Faukland Islands","FKST","Atlantic/Stanley",-3
+33,"Mid-Atlantic","FNST","America/Noronha",-1
+34,"Gambier Islands","GAMT","Pacific/Gambier",-9
+7,"Hawaii","GMT+10","Etc/GMT+10",-10
+36,"Pitcairn Islands","GMT+8","Etc/GMT+8",-8
+37,"Solomon Is., New Caledonia","GMT-11","Etc/GMT-11",11
+38,"Fiji, Kamchatka, Marshall Is.","GMT-12","Etc/GMT-12",12
+39,"Monrovia, Reykjavik","GMT","Africa/Abidjan",0
+40,"Abu Dhabi, Muscat","GST","Asia/Dubai",4
+41,"Beijing, Chongqing, Hong Kong, Urumqi","HKST","Asia/Hong_Kong",9
+42,"Cuba","HMT","America/Havana",-5
+43,"Bangkok, Hanoi, Jakarta","ICT","Asia/Bangkok",7
+44,"Jerusalem","IDDT","Asia/Jerusalem",4
+45,"Irkutsk, Ulaan Bataar","IMT","Asia/Irkutsk",7
+46,"Tehran","IRDT","Asia/Tehran",5
+47,"Osaka, Sapporo, Tokyo","JDT","Asia/Tokyo",10
+48,"Seoul","KDT","Asia/Seoul",9
+49,"Krasnoyarsk","KRAST","Asia/Krasnoyarsk",7
+50,"Lord Howe Island","LHST","Australia/Lord_Howe",11
+51,"Kiritimati","LINT","Pacific/Kiritimati",-10
+52,"Magadan","MAGST","Asia/Magadan",11
+53,"Marquesas Islands","MART","Pacific/Marquesas",-10
+54,"Moscow, St. Petersburg, Volgograd","MDST","Europe/Moscow",5
+9,"Mountain Time (US & Canada)","MDT","America/Denver",-6
+4,"Mountain Time - Arizona","MDT","America/Arizona",-6
+56,"Newfoundland","NDDT","America/St_Johns",-2
+57,"Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna","NEST","Europe/Amsterdam",1
+58,"Norfolk Island","NFT","Pacific/Norfolk",12
+59,"Novosibirsk","NOVST","Asia/Novosibirsk",7
+60,"Auckland, Wellington","NZDT","Pacific/Auckland",13
+1,"Pacific Time (US & Canada)","PDT","America/Los_Angeles",-7
+62,"Philippine Time","PHST","Asia/Manila",9
+63,"Miquelon, St. Pierre","PMDT","America/Miquelon",-2
+64,"Ekaterinburg","SVEST","Asia/Yekaterinburg",5
+65,"Windhoek","SWAT","Africa/Windhoek",2
+66,"Nuku'alofa","TOST","Pacific/Tongatapu",14
+67,"Montevideo","UYHST","America/Montevideo",-3
+68,"Caracas","VET","America/Caracas",-4
+69,"Vladivostok","VLASST","Asia/Vladivostok",10
+70,"Greenwich Mean Time : Lisbon","WEMT","Europe/Lisbon",2
+71,"Greenland","WGST","America/Godthab",-2
+72,"Perth","WST","Australia/Perth",8
+73,"Yakutsk","YAKST","Asia/Yakutsk",9
+66,"Nuku'alofa","tost","Pacific/Tongatapu","14",
+67,"Montevideo","uyhst","America/Montevideo","-3",
+68,"Caracas","vet","America/Caracas","-4",
+69,"Vladivostok","vlasst","Asia/Vladivostok","10",
+70,"Greenwich Mean Time : Lisbon","wemt","Europe/Lisbon","2",
+71,"Greenland","wgst","America/Godthab","-2",
+72,"Perth","wst","Australia/Perth","8",
+73,"Yakutsk","yakst","Asia/Yakutsk","9",

@@ -1,0 +1,77 @@
+/**
+ * Chat Messenger container
+ */
+.chatMessenger
+{
+	border: 1px solid #ccc;
+	margin-top: 5px;
+
+	background-color: transparent;
+	background-image:url(/images/themes/nova/bg2.png);
+	background-repeat: repeat;
+}
+
+.chatMessengerTitle
+{
+	height: 15px;
+	font-size: 12px;
+	font-weight: bold;
+	padding: 5px;
+	color: #fff;
+	border-bottom: solid 1px #b7b7b7;
+	background: #666;
+
+    /*alib.dom.styleSet(this.headerCon, "width", "240px");*/
+}
+
+.chatMessengerList
+{
+	height: 300px;
+	width: 250px;
+	margin: 5px 0 5px 0;
+	overflow-y: auto;
+}
+
+/**
+ * Chat window outer container
+ */
+.chatClient
+{
+	border: 1px solid #ccc;
+	margin-top: 5px;
+	background-color: transparent;
+	background-image:url(/images/themes/nova/bg2.png);
+	background-repeat: repeat;
+}
+
+.chatClientTitle
+{
+	height: 15px;
+	font-size: 12px;
+	font-weight: bold;
+	padding: 5px;
+	color: #fff;
+	border-bottom: solid 1px #b7b7b7;
+	background: #666;
+}
+
+/**
+ * Chat client message
+ */
+.chatClientMessage
+{
+	padding: 10px;
+	border: 1px solid #e3e3e3;
+	-webkit-border-radius: 5px; 
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	width: 165px;
+
+	color: inherit;
+	background: transparent;
+	/*background: #bed73b; green */
+	/*
+	background-image:url(/images/themes/nova/bg3.png);
+	background-repeat: repeat;
+	*/
+}

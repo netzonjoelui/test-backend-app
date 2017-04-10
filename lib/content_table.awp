@@ -1,0 +1,50 @@
+<?php
+	function TableContentOpen($width, $title, $height = NULL, $cellpadding = "2", $id=null)
+	{
+		global $HTTP_SERVER_VARS;
+		$docRoot = $HTTP_SERVER_VARS['DOCUMENT_ROOT'];
+
+		echo "<table class='ContentTable' style='";
+		if ($height) echo " height:$height;";	
+		if ($width) echo " width:$width;";		
+		echo	"' ";
+		if ($id) echo " id='$id' ";
+		echo "		cellpadding='0' cellspacing='0'>
+			   <tr>
+			    <td class='ContentTableTitleLeftCorn'></td>
+				<td align='left' class='ContentTableTitleCenter'>
+				 <table cellpadding='0' cellspacing='0' border='0' class=\"ContentTableTitleLabel\">
+				  <tr><td align='left'>$title</td></tr>
+			     </table>
+			    </td>
+				<td class='ContentTableTitleRightCorn'></td>
+			   </tr>
+			   <tr valign='top'>
+			    <td class='ContentTableBodyLeft'></td>
+				<td class='ContentTableBody' ".(($id)?"id=\"".$id."_bdy\"":'').">";
+	}
+						
+	
+	function TableContentClose($mdMenu = NULL)
+	{
+		global $HTTP_SERVER_VARS;
+		$docRoot = $HTTP_SERVER_VARS['DOCUMENT_ROOT'];
+
+		echo "	 </td>
+				 <td class='ContentTableBodyRight'></td>
+				</tr>
+				<tr class='ContentTableFooterHr'>
+				 <td class='ContentTableFooterHrLeft'></td>
+				 <td class='ContentTableFooterHr'></td>
+				 <td class='ContentTableFooterHrRight'></td>
+			    </tr>
+				<tr valign='bottom' class='ContentTableFooterRow'>
+				 <td class='ContentTableFooterLeftCorn'></td>
+				 <td align='left' class='ContentTableFooterCenter' nowrap>";
+		if ($mdMenu) echo $mdMenu;
+		echo "	 </td>
+				 <td class='ContentTableFooterRightCorn'></td>
+				</tr>
+			   </table>";
+	}
+?>

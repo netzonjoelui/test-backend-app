@@ -1,0 +1,26 @@
+/**************************************************************************************
+*	Page:		/lib/templates/header.awp
+*	Purpose:	Header and title file
+***************************************************************************************/
+.header
+{
+	background-color:#7EAFD6;
+	color:#FFFFFF;
+}
+
+.headerTitle
+{
+	color:#FFFFFF;
+	font-size:16px; 
+	font:Verdana, Arial, Helvetica, sans-serif;
+	font-weight:bold; 
+	font-style:italic;
+}
+
+.headerLink
+{
+	color:#FFFFFF;
+	font-weight:bold; 
+	font-size:12px; 
+	text-decoration:none;
+}

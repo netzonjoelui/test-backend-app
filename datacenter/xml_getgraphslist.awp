@@ -1,0 +1,56 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/aereus.lib.php/CChart.php");
+	require_once("../users/user_functions.php");
+	require_once("datacenter_functions.awp");
+
+	
+	$dbh = new CDatabase();
+
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$GID = $_GET['gid'];
+
+	header("Content-type: text/xml");
+
+
+	// Populate data
+	$chart = new CChart();
+
+	// If graph defined, then only get list of available graphs
+	if ($GID)
+	{
+		if (dc_graphIsMultiSeries($dbh, $GID))
+		{
+			$graphs = $chart->getListOfGraphs("multi");
+		}
+		else
+		{
+			$graphs = $chart->getListOfGraphs("single");
+		}
+	}
+	else
+	{
+		$graphs = $chart->getListOfGraphs();
+	}
+
+
+	echo "<graphs>";	
+	$lastCat = "";
+	$num = count($graphs);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$graph = $graphs[$i];
+
+		echo "<graph>";
+		echo "<name>".rawurlencode($graph['name'])."</name>";
+		echo "<title>".rawurlencode($graph['title'])."</title>";
+		echo "<category>".rawurlencode($graph['category'])."</category>";
+		echo "</graph>";
+	}
+	echo "</graphs>";
+?>
+

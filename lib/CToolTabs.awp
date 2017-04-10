@@ -1,0 +1,62 @@
+<?php
+class CToolTabs
+{
+	var $buf;
+	var $page;
+	var $fwdvals;
+	var $tname;
+	
+	function CToolTabs($tpage = NULL, $fwd = NULL, $default=NULL)
+	{
+		$this->buf = "<table border='0' cellspacing='0' cellpadding='0'><tr>";
+		$this->page = $tpage;
+		$this->fwdvals = $fwd;
+		
+		// Get user theme
+		global $_SESSION, $dbh;
+		if ($dbh && $_SESSION["USER_NAME"])
+		{
+			$USERNAME = $_SESSION["USER_NAME"];
+			$USERID = $_SESSION["USER_ID"];
+			$this->tname = UserGetTheme($dbh, $USERID, 'name');
+		}
+		else
+			$this->tname = "default";
+			
+		if ($default)
+		{
+			global $TABNAV, $_GET;
+			$TABNAV = ($_GET['tabnav']) ? $_GET['tabnav'] : $default;
+		}
+	}
+	function AddTab($name, $action, $fwdvars = NULL, $link = NULL)
+	{
+		global $TABNAV;
+		$thispage = ($this->page) ? $this->page : $_SERVER['PHP_SELF'];
+		$fwd = ($fwdvars) ? $fwdvars : $this->fwdvals;
+		$theme = $this->tname;
+		
+		if ($action == $TABNAV)
+		{
+			$this->buf .= "<td class='CTTabLeftOn'></td>
+						   <td align='center' class='CTTabCenterOn' nowrap >$name</td>
+						   <td class='CTTabRightOn'></td>";
+		}
+		else
+		{
+			$this->buf .=  "<td class='CTTabLeftOff'></td>
+							<td align='center' nowrap class='CTTabCenterOff' 
+								onclick=\"document.location='".(($link) ? $link : "$thispage?tabnav=$action$fwd")."'\">	
+								$name
+						    </td>
+						    <td class='CTTabRightOff'></td>";
+		}
+	}
+	function PrintTabs()
+	{
+		print($this->buf);
+		print("</tr></table><table border='0' cellpadding='0' cellspacing='0' width='100%'>");
+		print("<tr><td class='CTTabHr'></td></tr></table>");
+	}
+}
+?>

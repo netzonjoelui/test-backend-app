@@ -1,0 +1,3 @@
+RewriteEngine on 
+
+RewriteRule ^profile/([0-9]+)$ profile.php?cid=$1&key=$2&%{QUERY_STRING}

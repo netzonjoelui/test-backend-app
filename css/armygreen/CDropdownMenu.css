@@ -1,0 +1,68 @@
+/**************************************************************************************
+*	Page:		CDropdownMenu.awp
+*	Purpose:	Styles for dropdown menu
+***************************************************************************************/
+
+.CDropdownMenuIcon
+{
+	background-color: #C9D0E3;
+	text-align:center;
+	padding:1px;
+	border-right:solid 1px #8B97AA;
+}
+
+.CDropdownMenuIconOver
+{
+	background-color: #e2eaff;
+	text-align:center;
+	padding:1px;
+	border-right:solid 1px #e2eaff;
+}
+
+.CDropdownMenuLink
+{
+	background-color:#ffffff;
+	padding-left:3px;
+	padding-right:3px;
+	color:#000000;
+}
+
+.CDropdownMenuLinkOver
+{
+	background-color:#e2eaff;
+	padding-left:3px;
+	padding-right:3px;
+	color:#000000;
+}
+
+.CDropdownMenuRight
+{
+	background-color:#ffffff;
+	padding-left:3px;
+	padding-right:3px;
+	color:#000000;
+}
+
+.CDropdownMenuRightOver
+{
+	background-color:#e2eaff;
+	padding-left:3px;
+	padding-right:3px;
+	color:#000000;
+}
+
+.CDropdownMenuContainer
+{
+	background-color:#ffffff;
+	border:1px solid #000000;
+}
+
+.CDropdownMenuButtonPrefix
+{
+	background-image: url(/images/themes/nova/buttons/options_aarow.gif);
+	background-position:50% 50%;
+	background-repeat:no-repeat;
+	width: 10px;
+	height: 5px;
+	vertical-align: middle;
+}

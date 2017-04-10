@@ -1,0 +1,89 @@
+body.status {
+	voice-family: "\"}\""; 
+	voice-family: inherit; 
+	width: expression(document.documentElement.clientWidth - 30);
+	overflow:hidden;
+	margin:1px; 
+	background-color:#FFFFFF;
+}
+
+
+/**************************************************************************************
+*	Page:		All status pages
+***************************************************************************************/
+.StatusPageTextBoldTitle
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-size:15px; 
+	font-weight:bold; 
+	color:#333333;
+}
+.StatusPageTextTitle
+{
+	color:#6A6A6A;
+}
+.StatusPageDate
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-size:12px; 
+	color:#333333;
+}
+.StatusPageText
+{
+	color:#000099;
+}
+.StatusPageBarLeft
+{
+	background-color:#000099; 
+	float:left;
+	height:13px;
+	border-bottom:1px solid #ACACAC;
+	border-left:1px solid #ACACAC;
+	border-top:1px solid #ACACAC;
+}
+.StatusPageBarRight
+{
+	background-color:#FFFFFF; 
+	float:left;
+	height:13px;
+	border-bottom:1px solid #ACACAC;
+	border-right:1px solid #ACACAC;
+	border-top:1px solid #ACACAC;
+}
+
+.StatusPageTable 
+{
+	background-color:#FFFFFF;
+/*
+	background-image:url("../images/shadow_ant2.gif");
+	background-position:bottom right;
+	background-repeat:no-repeat;
+	background-attachment:fixed;*/
+}
+
+.EmailStatusPageTable 
+{
+	background-color:#FFFFFF;
+	/*background-image:url("../images/EmailStatusPageIcon.png");
+	background-position:bottom right;
+	background-repeat:no-repeat;
+	background-attachment:fixed;*/
+}
+
+.NotesStatusPageTable 
+{
+	background-color:#E3E3E3;
+	background-image:url("../images/NotesStatusPageIcon.png");
+	background-position:bottom right;
+	background-repeat:no-repeat;
+	background-attachment:fixed;
+}
+
+.ContactsStatusPageTable 
+{
+	background-color:#E3E3E3;
+	background-image:url("../images/ContactsStatusPageIcon.png");
+	background-position:bottom right;
+	background-repeat:no-repeat;
+	background-attachment:fixed;
+}

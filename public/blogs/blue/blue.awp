@@ -1,0 +1,444 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>Ability Flights</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+/* CSS Document */
+body {
+	margin: 0;
+	padding: 0;
+	background: #FFFFFF url("http://www.guaranty.com/abilityflight/images/skypat1.gif") top center fixed repeat-x;
+	font-family: Arial;
+	color: black;
+	text-align: center;
+}
+
+a
+{
+	color: #2667A5;
+	text-decoration: none;
+}
+a:hover
+{
+	color: #2F7FCB;
+	border-bottom: solid 1px #2667A5;
+}
+
+.container 
+{
+
+	width: 770px;
+	margin: 0 auto;
+	text-align: left;
+	position: relative;
+}
+
+#outer
+{
+	border-left: 223px solid #944300;
+	background-color: White;
+}
+
+
+#header {
+	float: left;
+	width: 100%;
+}
+
+.pageTitle {
+	font-family: Arial;
+	font-size : 1.4em;
+	letter-spacing: normal;
+	color: #3399CC;
+	padding-top: 10px;
+	font-weight: bold;
+	padding-bottom: 10px;
+}
+h1 {
+	font-family : Arial;
+	font-size : 16px;
+	font-weight : bold;
+	color: #ED940F;
+	border-bottom:1px dotted #ED940F;
+	padding-top: 5px;
+	margin: 0px;
+	clear: both;
+}
+
+#hContent {
+	padding: 0 0 0 25px;
+	float:left;
+	width:745px;
+	background-color:#FFF;
+}
+
+.mainContent {
+	font-size : 12px;
+	font-family: Arial;
+	line-height: 1.9em;
+	padding-left: 10px;
+	padding-right: 20px;
+}
+.mainBreadContent
+{
+	font-size : 12px;
+	font-family: Arial;
+	line-height: 1.9em;
+	padding-left: 50px;
+	padding-right: 30px;
+}
+sup
+{
+	color: Gray;
+}
+
+#mainHcol {
+	float:left;
+	width:66%;
+	padding-right : 10px;
+	padding-bottom : 25px;
+}
+
+#mainScol 
+{
+	width: 545px;
+	
+	float: right;
+	/*border-left: 1px dotted #944300;*/
+	padding-bottom : 25px;
+	position: relative;
+	background-repeat : no-repeat;
+	background-position: left top;
+}
+#mainScol p
+{
+	margin-left: 30px;
+	margin-right: 30px;
+}
+
+#subHTopcol {
+	float:right;
+	width:10%;
+	background: #E1E1E1;
+	border-left : 1px solid #fff;
+	border-right : 1px solid #FFF;
+	border-bottom : 1px solid #fff;
+	background-repeat:no-repeat;
+	padding-top : 25px;
+}
+#subSTopcol a:hover
+{
+	color: Black;
+	border-bottom: dotted 1px black;
+	
+	
+}
+
+#subHMidcol {
+	float:right;
+	width:10%;
+	background: #BBCCDD;
+	border-left : 1px solid #fff;
+	border-right : 1px solid #FFF;
+	border-bottom : 1px solid #fff;
+	background-repeat:no-repeat;
+	padding-top : 10px;
+}
+.subContent {
+	font-size: 8pt;
+	font-family: Arial;
+	line-height: 1.3em;
+	padding-right : 15px;
+	padding-left : 15px;
+	padding-bottom : 15px;
+}
+.subTContent 
+{
+	font-size: 10pt;
+	font-family: Arial;
+	font-weight: bold;
+	line-height: 2.2em;
+}
+.subAContent 
+{
+	line-height: normal;
+	color: #000;
+	font-weight:normal;
+}
+
+
+/*- Side Menus ============================================================================================================================================================*/
+#subSTopcol 
+{
+	width: 223px;
+	height: 250px;
+	float:left;
+	position: relative;
+	background: #944300;
+	background-image : url(images/ramp_bg.gif);
+	background-repeat : no-repeat;
+	background-position: right top;
+	padding-top : 25px;
+}
+
+.subSContent 
+{
+	font-size: 0.7em;
+	font-family: Arial;
+	line-height: 2.2em;
+	letter-spacing: 0.05em;
+	padding-right : 25px;
+	padding-left : 25px;
+	padding-bottom : 25px;
+	text-align : right;
+	color : white;
+	margin: 0px;
+	height: 100%;
+	
+	background-image: url(images/sd_btm_rght.gif);
+	background-position: bottom right;
+	background-repeat: no-repeat;
+}
+.subSContent a {
+	text-decoration : none;
+	color : white;
+}
+.subSContent a:hover {
+	border-bottom-color: 1px dotted #ED940F;
+}
+
+/*- Footer ============================================================================================================================================================*/
+#footer 
+{
+	clear:both;
+	padding-top:5px;
+	padding-bottom:5px;
+	font-family: Arial;
+	font-size: 0.7em;
+	letter-spacing: normal;
+	color: #FFF;
+	text-align:center;
+	background-color: #2667A5;
+	float:left;
+	width:100%;	
+}
+#footer a {
+	color: White;
+	text-decoration: none;
+}
+#footer a:hover {
+	color: #3399CC;
+}
+
+
+/*navigation*/
+#navBar {
+	background-color: #2667A5;
+	float:left;
+	width:100%;	
+}
+#navBar ul {
+	margin:0px;
+	list-style:none;
+	padding-left : 25px;
+}
+#navBar li {
+	float:left;
+	margin:0;
+	padding:0;
+	background-image:none;
+	line-height:1.6em;
+	text-indent:0;
+	letter-spacing: 0.1em;
+	font-size: 0.7em;
+}
+#navBar a {
+	display:block;
+	padding:4px 10px;
+	border:solid #ccc;
+	border-width:0 1px 0 0;
+	color: white;
+	text-decoration:none;
+	white-space:nowrap;
+}
+#navBar a, #navBar strong {
+  display:block;
+  padding:4px 10px;
+  border:solid #ccc;
+  border-width:0 1px 0 0;
+  color: white;
+  text-decoration:none;
+  white-space:nowrap;
+  }
+#navBar #current strong, #navBar #current a {
+  background-repeat:no-repeat;
+  }
+#navBar a:hover, #navBar #current a:hover strong, #navBar #current strong {
+  color:#3399CC;
+  }
+#navBar a:hover {
+  background-repeat:no-repeat;
+  }
+#navBar a strong, #navBar #current a strong {
+  background:none;
+  padding:0;
+  border:none;
+  }
+#navBar #h {
+  border-left-width:1px;
+  }
+
+/*FORMS*/
+
+.formField
+{
+	font-family: Arial;
+	font-size: 1.1em;
+}
+.formTitle
+{
+	font-family: Arial;
+	font-size: 1.1em;
+	line-height: 1.0em;
+	vertical-align: bottom;
+	color: Olive;
+}
+/*Copyright*/
+#copyright
+{
+	clear:both;
+	padding-top:15px;
+	padding-bottom:15px;
+	font-family: Arial;
+	font-size: 0.6em;
+	letter-spacing: 0.1em;
+	color: #3399CC;
+	text-align:center;
+	margin: auto;
+	background-color: #FFF;
+	background-image:url('http://www.guaranty.com/abilityflight/images/copyPat1.gif');
+	background-repeat:repeat-x;
+	background-position:top left;
+}
+
+#copyright2
+{
+	clear:both;
+	padding-top:15px;
+	padding-bottom:15px;
+	font-family: Arial;
+	font-size: 0.6em;
+	letter-spacing: 0.1em;
+	color: gray;
+	text-align:center;
+	margin: auto;
+	background-color: white;
+}
+
+
+#divMFam
+{
+	position: absolute;
+	width: 385px;
+	height: 625px;
+	text-align: center;
+	margin: auto;
+	z-index: 35;
+	border: solid 1px black;
+	background-color: White;
+	
+	font-size : 12px;
+	font-family: Arial;
+	line-height: 1.9em;
+	/*filter: alpha(opacity=60);*/
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+	<div id="header">
+		<img src="images/banner1.gif" width="770" height="100" border="0">
+	</div>
+	<div id="navBar">
+		<ul>
+			<li id="current"><a href="#"><strong>Home</strong></a></li>
+			<li><a href="#">About Scott</a></li>
+			<li><a href="#">The Flight</a></li>
+			<li><a href="#">Articles</a></li>
+			<li><a href="#">Links</a></li>
+			<li><a href="#">Contact</a></li>
+		</ul>
+
+	</div>
+
+	<div id="hContent">
+		<div id="mainHcol">
+			<p class="pageTitle">The Sky Is The Limit!</p>
+			<div class="mainContent">
+				Pacific Coast Wings is a world flight to draw world attention. This media event is designed to show that the sky is the limit—that you can accomplish anything you strive for, if you put your mind to it, and that you should always go after your dreams.
+				<br><br>
+				<img src="http://www.guaranty.com/abilityflight/images/scottPlane.gif" border="0">
+				<br><br>
+				Scott Cook, of Bandon, Oregon, is in the fight of his life, a fight that should not be. Although Scott is missing part of his left arm, it has not stopped him from any and every challenge in his way, including running his own timber company, cutting timber, operating cats, loaders, and other heavy equipment, sailing the wild Pacific as a commercial fisherman, and obtaining his commercial pilots license. He has now taken on the State of Oregon for violation of his civil rights. For the past 18 years he has been issued his CDL (commercial drivers license), both by the states of Oregon and Alaska, and has driven his log truck on both dangerous, narrow logging roads, and the highways and freeways of the west coast. He has never had an accident, injury, or caused property damage as a result of driving his log truck without a left arm. He maintains this clearly shows a very high level of safety and awareness, as well as excellent driving skills, ability and judgment. Now the State of Oregon has taken a strong, confident, and extremely talented man, and tried to destroy him, financially as well as emotionally. The state now contends that if he does not get a prosthetic arm, he will not even be able to demonstrate his ability to drive. Never has Scott felt more despair than when an official, who most likely could never do most of the things he’s done, decided Scott is less of a man, because he’s “different.? No longer are you able to prove your worth by doing a job, and doing it well.
+				<br><br>
+				Our Federal Government has taken steps to insure every citizens rights to show demonstrated ability, through the Americans with Disabilities Act and the U.S. Rehabilitation Act. But an alarming thing is happening. States are challenging the ADA and Rehab act citing title I and title II issues, interpreting them for their own benefit. We need to unite agency groups, not only in the U.S., but also around the world.?
+				<br><br>
+				THIS IS SCOTT’S SINCERE INTENT: “I DON’T HAVE TO DO THIS—BUT I FEEL IN MY HEART THAT I HAVE TO MAKE A DIFFERENCE. IF I DO ANYTHING IN MY LIFE FOR THE GOODNESS OF MANKIND, OF HUMANITY, THIS IS IT. WE NEED TO RIGHT THIS WRONG. THIS CAN’T HAPPEN TO ANYONE EVER AGAIN---THIS IS A CRIME?
+				<br><br>
+				Scott’s around the world flight in a C-45  (Beech 18) aircraft is projected to start in the summer of 2007. We need the world to stand behind us in this cause.
+				<br><br>
+				Thank you. 
+			</div>
+
+		<div id="subHTopcol">
+			<p class="subContent">
+
+				<span class="subTContent">How To Donate:</span><br>
+				There are a number of ways you can donate to Ability Flights NPO.<br> <a href="#">Click here to find out how!</a><br><br>
+				<span class="subTContent">P.O. Box: </span><br>
+				ABILITY FLIGHTS
+				P.O.Box 155<br>
+				Bandon, Oregon 97411<br>
+				<br><br>				
+				<span class="subTContent">Contact: </span><br>
+				1.541.347.9005
+			</p>
+		</div>
+		<div id="subHMidcol">
+
+			<p class="subContent">
+				<span class="subTContent">Articles</span>
+				<br>
+				<span class='subAContent'><a href="#">Grounded by law, one-armed trucker is taking...</a></span>
+				<br><br>
+				<span class='subAContent'><a href="#">Grounded by law, one-armed trucker is taking...</a></span>
+				<br><br>
+				<span class='subAContent'><a href="#">Grounded by law, one-armed trucker is taking...</a></span>
+				<br><br>
+				<span class='subAContent'><a href="#">Grounded by law, one-armed trucker is taking...</a></span>
+				<br><br>
+				<span class='subAContent'><a href="#">Grounded by law, one-armed trucker is taking...</a></span>
+				<br><br>
+				<span class='subAContent'><a href="#">Grounded by law, one-armed trucker is taking...</a></span>
+				<br><br>
+			</p>
+		</div>
+	</div>
+
+	</div>
+
+	<div id="footer">
+		&copy; 2006 Ability Flight. All Rights Reserved.
+	</div>
+	<div id="copyright"></div>
+</div>
+
+</body>
+</html>

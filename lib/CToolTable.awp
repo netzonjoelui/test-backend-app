@@ -1,0 +1,153 @@
+<?php
+/***********************************************************************************
+*	Class:		CToolTable
+*
+* 	Author:		joe, sky.stebnicki@aereus.com
+*
+*	Purpose:	Generate template tool table to be used as often as possible in ANT
+*
+*	Usage:		// Create new table
+*				$tbl = new CToolTable;
+*				// Create headers
+*				$tbl->StartHeaders();
+*				$tbl->AddHeader("My Header");
+*				$tbl->EndHeaders();
+*				// Now add a row
+*				$tbl->StartRow();
+*				$tbl->AddCell("cell content");
+*				$tbl->EndRow();
+*				// Now print the table
+*				$tbl->PrintTable();
+*
+*	Options:	Please reference the below function notes
+*
+***********************************************************************************/
+class CToolTable
+{
+	var $buf;
+	var $iNumRows;
+	var $rowSpacerBuf;
+	var $rowBottomBuf;
+	
+	/****************************************************************************************************
+	*	Function:	CToolTable($width='100%', $class = NULL)
+	*
+	* 	Author:		Sky Stebniki, sky.stebnicki@aereus.com
+	*
+	*	Purpose:	Construct the table class
+	*
+	*	Arguments:	1. string $width (default 100%)
+	*				2. string $class (default NULL)
+	*					Pass the optional css class name (must be included in parent doc)
+	*
+	****************************************************************************************************/
+	function CToolTable($width='100%', $class = 'CTTMainTable')
+	{
+		$this->buf = "<table border='0' cellpadding='0' cellspacing='0' width='$width' class='$class'>";
+	}
+	
+	/****************************************************************************************************
+	*	Function:	AddHeader
+	*
+	* 	Author:		Sky Stebniki, sky.stebnicki@aereus.com
+	*
+	*	Purpose:	Add a header cell
+	*
+	*	Arguments:	1. string $name - the content of the header cell
+	*				2. string $align (default left) - the alignment of the cell
+	*				3. string $width (default NULL) - the width of the cell
+	*				4. string $bgcolor (default 979797) - the background color of the cell
+	*				5. string $other (default NULL) - this can be used for any option params nowrap
+	*				6. bool $showspacer (default true) - add white spacer cell to the end of header
+	*
+	****************************************************************************************************/
+	function AddHeader($name, $align='left', $width=NULL, $class='CTTHeaderCell', $other=NULL, $showspacer=true)
+	{
+		$this->buf .= "<td align='$align'";
+		if ($width)
+			$this->buf .= " width='$width' ";
+		$this->buf .= "class='$class' $other>".(($showspacer) ? '&nbsp;' : '').
+						"$name".(($showspacer) ? '&nbsp;' : '')."</td>";
+		//if ($showspacer) 
+		//	$this->buf .= "<td width='1px' bgcolor='#FFFFFF'></td>";
+	}
+	function StartHeaders()
+	{
+		$this->buf .= "<tr>";
+	}
+	function EndHeaders()
+	{
+		$this->buf .= "</tr>";
+	}
+	function StartRow($numRows = NULL)
+	{
+		$this->rowSpacerBuf = "<tr>";
+		$this->rowBottomBuf = "<tr>";
+	}
+	function EndRow()
+	{
+		$this->buf .= $this->rowSpacerBuf . "</tr>";
+		$this->buf .= $this->rowBottomBuf . "</tr>";
+		
+		$this->rowSpacerBuf = "";
+		$this->rowBottomBuf = "";
+		
+		//$this->buf .= "</tr>";
+		$this->iNumRows++;
+	}
+	
+	/****************************************************************************************************
+	*	Function:	AddCell
+	*
+	* 	Author:		Sky Stebniki, sky.stebnicki@aereus.com
+	*
+	*	Purpose:	Add a starndard cell
+	*
+	*	Arguments:	1. string $content - the content of the cell
+	*				2. bool $bold (default false) - create bold cell for strength
+	*				3. string $align (default left) - the alignment of the cell
+	*				4. string $padding (padding-left:default 3px) - used for a default padding
+	*				5. string $width (default NULL) - width of the cell
+	*				6. string $showspacer (default true) - add white spacer cell to the end of header
+	*
+	****************************************************************************************************/
+	function AddCell($content, $bold=false, $align='left', 
+						$padding='padding-left:5px; padding-right:5px; padding-top:3px; padding-bottom:3px;', 
+						$width=NULL, $showspacer=true)
+	{
+		// Set the background color
+		if ($this->iNumRows % 2) // odd numbers white
+		{
+			if ($bold)
+				$rowclass="CTTRowOneBold";
+			else
+				$rowclass="CTTRowOne";
+		}
+		else	// even numbers grey
+		{
+			if ($bold)
+				$rowclass="CTTRowTwoBold";
+			else
+				$rowclass="CTTRowTwo";
+		}
+
+		$this->rowSpacerBuf .= "<td class='CTTRowSpacer'></td>";
+		$this->rowBottomBuf .= "<td class='$rowclass' valign='top' align='$align' 
+								style='".(($width) ? "width:$width;" : '').
+								(($padding) ? "$padding;" : '')."'>
+					   			$content</td>";
+		/*
+		if ($showspacer) 
+		{
+			$this->rowSpacerBuf .= "<td width='1px' bgcolor='#FFFFFF'></td>";
+			$this->rowBottomBuf .= "<td width='1px' bgcolor='#FFFFFF'></td>";
+		}
+		*/
+	}
+	
+	function PrintTable()
+	{
+		print($this->buf."</table>");
+	}
+}
+?>

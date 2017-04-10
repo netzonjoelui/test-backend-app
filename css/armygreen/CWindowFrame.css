@@ -1,0 +1,26 @@
+/**************************************************************************************
+*	LIB:		CWindowFrame
+*	Purpose:	aereus.lib.js class to group elements together in a visual table
+***************************************************************************************/
+.CWindowFrameOuter
+{
+	border: 1px solid #ABABAB;
+	margin-bottom: 20px;
+}
+.CWindowFrameLabel
+{
+	background-color:#BCC0AF;
+	border-bottom: 1px solid #ABABAB;
+	font-weight:bold;
+	padding-left:3px;
+}
+.CWindowFrameContext
+{
+	font-weight: normal;
+	float: right;
+	margin-right: 3px;
+}
+.CWindowFrameContent
+{
+	background-color:#FFF;
+}

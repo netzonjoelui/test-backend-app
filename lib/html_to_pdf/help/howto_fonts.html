@@ -1,0 +1,87 @@
+<html>
+<head>
+<title>html2ps/html2pdf FAQ</title>
+<link rel="stylesheet" type="text/css" medial="all" title="Default" href="css/help.css"/>
+</head>
+<body>
+<h1>HOWTO: Custom fonts</h1>
+<a href="index.html">Back to table of contents</a>
+
+<h2>Postscript output method</h2>
+Say you want to see fancy &quot;Trebuchet MS&quot; font in generated postscript,
+<ol>
+<li>
+First of all, TrueType-compatible Ghostscript is a must. 
+Most of Ghostscipt distributions are TrueType compatible.
+If you're not sure, ask your system administrator. If your GS is not
+True-Type compatible, consider building from source using require options
+</li>
+<li>
+Find the file coresponding to &quot;Trebuchet MS&quot;. Assuming you're using 
+some version of Windows on your home machine, you can do it by opening 
+&quot;Control Panel &rarr; Fonts&quot; and checking the properties of the chosen 
+font. At the top of property page you'll see the file name - <tt>trebuc.ttf</tt>,
+in our case.
+</li>
+<li> 
+Find font files corresponding to the bold, italic and bold italic 
+versions of this font.  Probably, it will be:<br/>
+ &quot;Trebuchet MS Bold&quot; &mdash; <tt>trebucbd.ttf</tt>,<br/>
+ &quot;Trebuchet MS Italic&quot; &mdash; <tt>trebucit.ttf</tt>,<br/>
+ &quot;Trebuchet MS Bold Italic&quot; &mdash; <tt>trebucbi.ttf</tt><br/>
+</li>
+<li>Copy these files from the windows fonts directory (probably C:\Windows\Fonts)
+   to the Ghostscript fonts directory (probably C:\gs\fonts). </li>
+<li>Modify Ghostscript fontmap file (probably C:\gs\gs8.51\lib\Fontmap, assuming 
+   you're using Ghostscript version 8.51), adding the folowing lines:
+<pre>
+/TrebuchetMS (trebuc.ttf) ;
+/TrebuchetMS-Italic (trebucit.ttf) ;
+/TrebuchetMS-Bold (trebucbd.ttf) ;
+/TrebuchetMS-Bold-Italic (trebucbi.ttf) ;
+</pre>
+
+   Note you can write almost anything after the / assuming it won't interfere 
+   with other font names. Say:
+<pre>
+/MyCoolFont1 (trebuc.ttf) ;
+/MyCoolFont2 (trebucit.ttf) ;
+/MyCoolFont3 (trebucbd.ttf) ;
+/MyCoolFont4 (trebucbi.ttf) ;
+</pre>
+</li>
+<li>Register the above font names in the script config file. Add the following 
+   lines to <tt>.html2ps.config</tt> in the FONT section (between <tt>&lt;fonts&gt;</tt> and 
+   <tt>&lt;/fonts&gt;</tt> tags)
+
+<pre>
+  &lt;family name=&quot;Trebuchet MS&quot;&gt;
+    &lt;normal normal=&quot;/TrebuchetMS&quot; italic=&quot;/TrebuchetMS-Italic&quot; oblique=&quot;/TrebuchetMS-Italic&quot;/&gt;
+    &lt;bold normal=&quot;/TrebuchetMS-Bold&quot; italic=&quot;/TrebuchetMS-Bold-Italic&quot; oblique=&quot;/TrebuchetMS-Bold-Italic&quot;/&gt;
+  &lt;/family&gt;
+</pre>
+
+   Of course, modified file should be uploaded to the server where the working script
+   reside.
+
+<li> Now, the following example should be rendered using Trebuchet MS font:
+
+<pre>
+&lt;BIG style=&quot;font-family: 'Trebuchet MS'&quot;&gt;ABCDEFGH&lt;/BIG&gt;&lt;br&gt;
+&lt;BIG style=&quot;font-family: 'Trebuchet MS'; font-weight: bold;&quot;&gt;ABCDEFGH&lt;/BIG&gt;&lt;br&gt;
+&lt;BIG style=&quot;font-family: 'Trebuchet MS'; font-style: italic;&quot;&gt;ABCDEFGH&lt;/BIG&gt;&lt;br&gt;
+&lt;BIG style=&quot;font-family: 'Trebuchet MS'; font-weight: bold; font-style: italic;&quot;&gt;ABCDEFGH&lt;/BIG&gt;&lt;br&gt;
+</pre>
+</li>
+</ol>
+
+<h2>PS2PDF output method</h2>
+
+Take the steps described above with the only difference: all Ghostscript-related directories
+are on your server where the script resides. Ask your hoster/system administrator regarding 
+the exact location of Ghostscript.
+
+<h2>PDFLIB output method</h2>
+
+</body>
+</html>

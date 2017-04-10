@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Test Events</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<link rel="STYLESHEET" type="text/css" href="../style.css" />
+
+	<script language="javascript" type="text/javascript" src="../jquery.min.js"></script>
+	<script language="javascript" type="text/javascript" src="../alib.js"></script>
+	<script language="javascript" type="text/javascript" src="../dom.js"></script>
+	<script language="javascript" type="text/javascript" src="../events.js"></script>
+	<script language="javascript" type="text/javascript" src="../events/EventWrapper.js"></script>
+	<script language="javascript" type="text/javascript" src="../net.js"></script>
+	<script language="javascript" type="text/javascript" src="../net/xhr.js"></script>
+</head>
+<body>
+	<h1>alib.net.xhr Demo</h1>
+
+	<h2>Common Usage</h2>
+	<div id="contentCon">Loading...</div>
+	<script language='javascript' type='text/javascript'>
+		// Test dom events
+		var con = document.getElementById("contentCon");
+
+		var xhr = new alib.net.Xhr();
+		alib.events.listen(xhr, "load", function(evt) { con.innerHTML = JSON.stringify(this.getResponse()); });
+		xhr.send("data.json");
+	</script>
+
+	<h2>Static</h2>
+	<div id="contentCon2">Loading...</div>
+	<script language='javascript' type='text/javascript'>
+		// Test dom events
+		var con2 = document.getElementById("contentCon2");
+
+		alib.net.Xhr.send("data.json", function(data) { con2.innerHTML = JSON.stringify(data); });
+	</script>
+</body>
+</html>

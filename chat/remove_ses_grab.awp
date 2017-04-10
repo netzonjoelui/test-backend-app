@@ -1,0 +1,27 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/CDropdownMenu.awp");
+	require_once("../users/user_functions.php");
+	require_once("../email/email_functions.awp");
+	require_once("../lib/Button.awp");
+	
+	$dbh = new CDatabase();
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	
+	$_SESSION['CHAT_HANDLER'] = "";
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Exiting</title>
+</head>
+
+<body onload="window.close();">
+Exiting, please wait...
+</body>
+</html>

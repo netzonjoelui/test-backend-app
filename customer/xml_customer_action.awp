@@ -1,0 +1,30 @@
+<?php
+	header("Content-type: text/xml");			// Returns XML document
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("lib/CAntObject.php");
+	require_once("lib/CAntObjectList.php");
+	require_once("lib/WorkFlow.php");
+	require_once("calendar/calendar_functions.awp");
+	require_once("customer_functions.awp");
+	require_once("CCustomer.php");
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+	$selid = $_GET['selid'];
+					
+	echo '<?xml version="1.0" encoding="UTF-8"
+	  standalone="yes"?><response>'; 
+
+	switch ($_GET['act'])
+	{
+	case 'link_contact':
+		CustSyncContact($dbh, $USERID, $selid, NULL, "create");
+		break;
+	}
+
+	echo "<row><unique_id>$selid</unique_id><perform_action>".$_GET['act']."</perform_action></row></response>";
+?>

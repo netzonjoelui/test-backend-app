@@ -1,0 +1,92 @@
+<html>
+<head>
+<title>html2ps/html2pdf FAQ</title>
+<link rel="stylesheet" type="text/css" medial="all" title="Default" href="css/help.css"/>
+</head>
+<body>
+<h1>html2ps/pdf FAQ</h1>
+<a href="index.html">Back to table of contents</a>
+
+<dl>
+
+<dt>Can I call this script from the command line?</dt>
+<dd>
+Probably yes; check if your PHP support command line interface. Also, consider reading this article on php.net:
+<a href="http://www.php.net/manual/en/features.commandline.php">Using PHP from the command line</a>
+</dd>
+
+<dt>All I'm getting is a blank page; no error messages in PHP error log. Whats happened?</dt>
+<dd>Probably script runs out of memory or execution time. Try increasing the values of 
+max_execution_time and/or memory_limit PHP configuration variables. Recommended values 
+are 120 seconds and 16 megabytes. Nevertheless, if you're using the <i>VERY</i> big images,
+probably you need to increase these values even more.</dd>
+
+<dt>I've increased the limits, but still sometimes getting a blank page immediately after script starts! 
+Some sites are parsed, though...</dt>
+<dd>Some users encountered this problem using GD library bundled with PHP. While it matched the 
+GD version requirement, it sometimes caused PHP to silently die on some images. The problem is solved 
+by recompiling the PHP using the external (recent enough) GD library. Note that NOT ALL PHP configurations
+are subject to this problem.</dd>
+
+<dt>Generated Poscript files print very slowly or even do not print at all</dt>
+<dd>
+<p>
+If you're sending PS directly to the printer, you should keep in mind that image-containing PS require a 
+lot of memory/computational resources to render due the way it is generated, so printer may just run out of
+ memory trying to print it. 
+</p>
+<p>
+You may consider using the Ghostscript ps2ps script as a printing filter, 
+this should speed up the printing process, as most computations will be done by computer instead of printer.
+</p>
+</dd>
+
+<dt>Sites are cut-off on the right side when I'm using 640 pixels page width. What can I do?</dt>
+<dd>
+Nothing. Treat this as a feature. Just increase the page width. 
+Most sites are <b>NOT</b> designed for such small resolutions and will cause 
+a horizontal scrollbar to appear in browser in such case. 
+</dd>
+
+<dt>I've disabled the &quot;Keep screen pixel/point ratio&quot; and the page layout is completely broken! 
+What can I do?</dt>
+<dd>
+Nothing. Treat this as a feature. If you want to get layout close to the image rendered by browser, <b>never</b>
+disable this option. The only case when you'll need it is the case when you need to render text having
+the <b>exact</b> size specified in points.
+</dd>
+
+<dt>How should I add headers or footers to generated Postscript?</dt>
+<dd>
+Use 'position: fixed'. <a href="samples/headfoot.html">Example</a> 
+</dd>
+
+<dt>I've added headers and footers to my HTML pages, but how I can prevent them from showing up in the browser?</dt>
+<dd>
+Use CSS @media rules; as you may specify which set of media rules script should use during conversion,
+you may optionally show or hide particular page elements like navigation bars or headers in generated files.
+<a href="">Example</a>
+</dd>
+
+<dd>
+<dt><a name="fonts"></a>How can I use fonts other than standard (Times, Helvetica and Courier)?</dt>
+<dd>
+Follow these <a href="howto_fonts.html">instructions</a>
+</dd>
+
+<dt>Cyrillic symbols are not displayed in PS/PS2PDF output</dt>
+<dd>Install <tt>sharatype-fonts</tt> package to your Ghostscript; 
+the script is configured to use these fonts out-of-the-box.
+</dd>
+
+<dt>Chinese (Japanese, Arabic, etc...) symbols do not show on the page. What I need to do?</dt>
+<dd>First of all, you'll need fonts containing these symbols; in most cases default fonts bundled with
+Ghostscript or PDFLIB will contain only Western/Central European symbols. After you find fonts containing 
+characters you need, you should install them instead of standard, using the answer for a question 
+<a href="#fonts">&laquo;How can I use fonts other than standard (Times, Helvetica and Courier)?&raquo;</a></dd>
+</dd>
+
+</dl>
+
+</body>
+</html>              

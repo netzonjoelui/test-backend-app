@@ -1,0 +1,148 @@
+<phpunit bootstrap="./Bootstrap.php" colors="true">
+    <testsuites>
+        <testsuite name="NetricTest">
+            <directory>./NetricTest</directory>
+            <exclude>./NetricTest/Application</exclude>
+        </testsuite>
+        <testsuite name="BinTest">
+            <directory>./BinTest</directory>
+        </testsuite>
+        <testsuite name="ZPushTest">
+            <directory>./ZPushTest</directory>
+        </testsuite>
+        <!--
+        <testsuite name="Library Test Suite">
+            <directory>./lib</directory>
+        </testsuite>
+        <testsuite name="Workers Test suite">
+            <directory>./workers</directory>
+        </testsuite>
+        <testsuite name="Services Test Suite">
+            <directory>./services</directory>
+        </testsuite>
+        <testsuite name="Async Test Suite">
+            <directory>./async</directory>
+        </testsuite>
+        <testsuite name="Custom Reports Test Suite">
+            <directory>./reports</directory>
+        </testsuite>
+        <testsuite name="Controllers Test Suite">
+            <directory>./controllers</directory>
+        </testsuite>
+        -->
+    </testsuites>
+
+    <!-- these are for code-coverage reports, but for some reason it is ignoring
+    the blacklist and throwing errors over code in lib/ZPush that we did not write
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory>../lib/Netric</directory>
+            <directory>../lib/ZPush/backend/netric</directory>
+        </whitelist>
+        <blacklist>
+            <directory>../vendor</directory>
+            <directory>../tests</directory>
+            <directory>../lib/ZPush/</directory>
+        </blacklist>
+    </filter>
+    -->
+
+    <logging>
+        <!-- see filter above for info as to why this is commented out
+        <log type="coverage-html" target="./tmp/coverage/"
+             highlight="true"
+             lowUpperBound="50" highLowerBound="80" />
+             -->
+        <log type="junit" target="./tmp/logfile.xml" logIncompleteSkipped="false"/>
+    </logging>
+
+    <listeners>
+        <listener class="JohnKary\PHPUnit\Listener\SpeedTrapListener">
+            <arguments>
+                <array>
+                    <element key="slowThreshold">
+                        <integer>2000</integer>
+                    </element>
+                    <element key="reportLength">
+                        <integer>10</integer>
+                    </element>
+                </array>
+            </arguments>
+        </listener>
+    </listeners>
+
+    <php>
+        <ini name="date.timezone" value="UTC"/>
+        
+        <!-- mail is added to the contianer hosts file -->
+        <env name="TESTS_NETRIC_MAIL_HOST" value="mail" />
+        <env name="TESTS_NETRIC_MAIL_DOMAIN" value="test.com" />
+        <env name="TESTS_NETRIC_MAIL_USER" value="test@test.com" />
+        <env name="TESTS_NETRIC_MAIL_PASSWORD" value="password" />
+
+
+        <!-- OB_ENABLED should be enabled for some tests to check if all
+             functionality works as expected. Such tests include those for
+             Netric\Soap and Netric\Session, which require that headers not be sent
+             in order to work. -->
+        <env name="TESTS_NETRIC_OB_ENABLED" value="false" />
+
+        <!-- Netric\Mail\Storage tests
+
+             TESTS_NETRIC_MAIL_SERVER_TESTDIR and TESTS_NETRIC_MAIL_SERVER_FORMAT
+             are used for POP3 and IMAP tests.  TESTS_NETRIC_MAIL_SERVER_FORMAT
+             is the format your test mail server uses: 'mbox' or 'maildir'. The
+             mail storage for the user specified in your POP3 or IMAP tests
+             should be TESTS_NETRIC_MAIL_SERVER_TESTDIR. Be careful: it's cleared
+             before copying the files. If you want to copy the files manually
+             set the dir to null (or anything == null).
+
+             TESTS_NETRIC_MAIL_TEMPDIR is used for testing write operations in
+             local storages. If not set (== null) tempnam() is used. -->
+        <env name="TESTS_NETRIC_MAIL_SERVER_TESTDIR" value="/var/mail/mailtest" />
+        <env name="TESTS_NETRIC_MAIL_SERVER_FORMAT" value="mbox" />
+        <env name="TESTS_NETRIC_MAIL_TEMPDIR" value="" />
+
+        <!-- Netric\Mail\Storage\Pop3 / Netric\Mail\Transport\Pop3
+
+             IMPORTANT: you need to copy ./NetricTest/Mail/_files/test.mbox to
+             your mail if you haven't set TESTS_NETRIC_MAIL_SERVER_TESTDIR -->
+        <env name="TESTS_NETRIC_MAIL_POP3_ENABLED" value="false" />
+        <env name="TESTS_NETRIC_MAIL_POP3_HOST" value="localhost" />
+        <env name="TESTS_NETRIC_MAIL_POP3_USER" value="mailtest" />
+        <env name="TESTS_NETRIC_MAIL_POP3_PASSWORD" value="test" />
+        <env name="TESTS_NETRIC_MAIL_POP3_SSL" value="true" />
+        <env name="TESTS_NETRIC_MAIL_POP3_TLS" value="true" />
+        <env name="TESTS_NETRIC_MAIL_POP3_WRONG_PORT" value="80" />
+        <env name="TESTS_NETRIC_MAIL_POP3_INVALID_PORT" value="3141" />T
+
+        <!-- Netric\Mail\Storage\Imap / Netric\Mail\Transport\Imap
+
+             IMPORTANT: you need to copy ./NetricTest/Mail/_files/test.mbox to
+             your mail if you haven't set TESTS_NETRIC_MAIL_SERVER_TESTDIR -->
+        <env name="TESTS_NETRIC_MAIL_IMAP_ENABLED" value="false" />
+        <env name="TESTS_NETRIC_MAIL_IMAP_HOST" value="localhost" />
+        <env name="TESTS_NETRIC_MAIL_IMAP_USER" value="mailtest" />
+        <env name="TESTS_NETRIC_MAIL_IMAP_PASSWORD" value="test" />
+        <env name="TESTS_NETRIC_MAIL_IMAP_SSL" value="true" />
+        <env name="TESTS_NETRIC_MAIL_IMAP_TLS" value="true" />
+        <env name="TESTS_NETRIC_MAIL_IMAP_WRONG_PORT" value="80" />
+        <env name="TESTS_NETRIC_MAIL_IMAP_INVALID_PORT" value="3141" />
+
+        <!-- Netric\Mail\Storage\Maildir test
+
+             Before enabling this test you have to unpack messages.tar in
+             ./NetricTest/Mail/_files/test.maildir/cur/ and remove the tar for this test to
+             work. That's because the messages files have a colon in the
+             filename and that's a forbidden character on Windows. -->
+        <env name="TESTS_NETRIC_MAIL_MAILDIR_ENABLED" value="false" />
+
+        <env name="TESTS_NETRIC_MAIL_SMTP_ENABLED" value="false" />
+        <env name="TESTS_NETRIC_MAIL_SMTP_HOST" value="localhost" />
+        <env name="TESTS_NETRIC_MAIL_SMTP_PORT" value="25" />
+        <env name="TESTS_NETRIC_MAIL_SMTP_USER" value="mailtest" />
+        <env name="TESTS_NETRIC_MAIL_SMTP_PASSWORD" value="test" />
+        <env name="TESTS_NETRIC_MAIL_SMTP_AUTH" value="false" />
+    </php>
+
+</phpunit>

@@ -1,0 +1,68 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+	$GETUID = ($_GET['uid']) ? $_GET['uid'] : $USERID;
+
+	$retval = 1;
+
+	if ($_GET['mystatus'])
+		$dbh->Query("update users set status_text='".rawurldecode($_GET['mystatus'])."' where id='$USERID'");
+		
+	if ($_GET['myname'])
+	{
+		UserSetPref($dbh, $USERID, 'chat_display_name', $_GET['myname']);
+		$retval = $_GET['myname'];
+	}
+
+	header("Content-type: text/xml");			// Returns XML document
+	echo '<?xml version="1.0" encoding="UTF-8"
+	  standalone="yes"?><response>';
+	
+	if (is_numeric($GETUID))
+	{
+		if ($GETUID != $USERID)
+			$add_condition = " and (status_text != 'Invisible'  or users.status_text is NULL)";
+			
+		$result = $dbh->Query("select status_text, full_name, extract('epoch' from active_timestamp) as active_timestamp 
+								from users where id='$GETUID' and 
+								users.checkin_timestamp > (timestamp 'now' - interval '5 minutes') $add_condition");
+		$num = $dbh->GetNumberRows($result);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$prefname = UserGetPref($dbh, $GETUID, 'chat_display_name');
+			$full_name = ($prefname) ? $prefname : UserGetFullName($dbh, $GETUID);
+			if ($row['status_text'])
+				$status = $row['status_text'];
+			else
+				$status = "Available";
+		}
+		else
+		{
+			$status = "Offline";
+		}
+
+		$active = $row['active_timestamp'];
+		$now = time();
+		$idle =  ($active && (($now-$active) > 600)) ? 1 : 0; // 10 minutes
+		if ($idle)
+			$status = "Inactive";
+		
+		$retval = $status;
+		echo "<status>".rawurlencode($status)."</status>";
+		echo "<full_name>".rawurlencode($full_name)."</full_name>";
+	}
+	else
+	{
+		echo "<result>1</result>";
+	}
+	
+	echo "<retval>$retval</retval>";
+	echo "</response>";
+?>

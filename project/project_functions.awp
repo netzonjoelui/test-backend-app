@@ -1,0 +1,816 @@
+<?php
+/**
+ * DEPRICATED
+ */
+
+require_once("contacts/contact_functions.awp");
+require_once("customer/customer_functions.awp");
+
+$PROJECT_DATES = array("date_deadline"=>"Deadline", "date_started"=>"Start Date");
+
+function ProjectGetDateName($toget)
+{
+	global $PROJECT_DATES;
+
+	$retval = $toget;
+
+	foreach ($PROJECT_DATES as $key=>$val)
+		if ($key == $toget) $retval = $val;
+
+	return $retval;
+}
+
+function PrintTabButton($name, $pid, $action, $cur_action)
+{
+	global $HTTP_GET_VARS;
+	$retpage = $HTTP_GET_VARS['retpage'];
+	
+	if ($action == $cur_action)
+	{
+		echo "<td width='10' bgcolor='#0099FF' align='center'><span style='color:white;font-weight:bold;'>$name</span></td>";
+	}
+	else
+	{
+		echo "<td bgcolor='#FFFFFF' align='center'>
+				<span style='font-weight:bold;'>
+				<a href='project.awp?pid=$pid&action=$action&retpage=$retpage'
+				class='tablink'>$name</a>
+				</span>
+			  </td>";
+	}
+}
+
+function ProjectGetPositionName(&$dbh, $position_id)
+{
+	if (is_numeric($position_id))
+	{
+		$result = $dbh->Query("select name from project_positions where id='$position_id'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$res = $row['name'];
+		}
+		$dbh->FreeResults($result);
+	}
+	return $res;
+}
+
+function ProjectGetMemberAttrib(&$dbh, $memid, $toget)
+{
+	if (is_numeric($memid))
+	{
+		$result = $dbh->Query("select $toget from project_membership where id='$memid'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$res = $row[$toget];
+		}
+		$dbh->FreeResults($result);
+	}
+	return $res;
+}
+
+function ProjectGetAttrib($dbh, $attrib, $PID)
+{
+	if (is_numeric($PID))
+	{
+		$result = $dbh->Query("select $attrib from projects where id='$PID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$res = $row[$attrib];
+		}
+		$dbh->FreeResults($result);
+	}
+	return $res;
+}
+
+function ProjectGetName(&$dbh, $PID)
+{
+	return GetProjectName($dbh, $PID);
+}
+
+function GetProjectName(&$dbh, $PID)
+{
+	$res = "";
+	if (is_numeric($PID))
+	{
+		$result = $dbh->Query("select name, contact_id, customer_id from projects where id='$PID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			if ($row['contact_id'])
+				$res = ContactGetName($dbh, $row['contact_id']).": ";
+			if ($row['customer_id'])
+				$res = CustGetName($dbh, $row['customer_id'], "Customer: id - name").": ";
+			$res .= $row['name'];
+		}
+		$dbh->FreeResults($result);
+	}
+	return $res;
+}
+function GetProjectContactId(&$dbh, $PID)
+{
+	if (is_numeric($PID))
+	{
+		$result = $dbh->Query("select contact_id from projects where id='$PID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$res = $row['contact_id'];
+		}
+		$dbh->FreeResults($result);
+	}
+	return $res;
+}
+function GetProjectCustId(&$dbh, $PID)
+{
+	if (is_numeric($PID))
+	{
+		$result = $dbh->Query("select name, customer_id from projects where id='$PID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$res = $row['customer_id'];
+		}
+		$dbh->FreeResults($result);
+	}
+	return $res;
+}
+function GetTemplateName(&$dbh, $TMPID)
+{
+	if (is_numeric($TMPID))
+	{
+		$result = $dbh->Query("select name from project_templates where id='$TMPID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$res = $row['name'];
+		}
+		$dbh->FreeResults($result);
+	}
+	return $res;
+}
+function GetCategoryId(&$dbh, $name, $user_id)
+{
+	$query = "select id from project_categories where name='$name' and (user_id='$user_id' or user_id is null)";
+	$result = $dbh->Query($query);
+	if($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		$id = $row["id"];
+	}
+	else
+	{
+		if ($name != '')
+		{
+			// New category, add to table
+			$query = "insert into project_categories(user_id, name) values('$user_id', '$name')";
+			$result = $dbh->Query($query);
+			$id = GetCategoryId($dbh, $name, $user_id);
+		}
+	}
+	$dbh->FreeResults($result);
+	return $id;
+}
+
+function ProjGetPriName(&$dbh, $priid)
+{
+	$query = "select name from project_priorities where id='$priid'";
+	$result = $dbh->Query($query);
+	if($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		$name = $row["name"];
+	}
+	$dbh->FreeResults($result);
+	return $name;
+}
+
+function GetCategoryNames(&$dbh, $id)
+{
+	if ($id)
+	{
+		$id_array = explode(":", $id);
+		foreach($id_array as $id_val)
+		{
+			$query = "select name from project_categories where id='$id_val'";
+			$result = $dbh->Query($query);
+			if($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				if ($name)
+					$name .= ":".$row["name"];
+				else
+					$name = $row["name"];
+			}
+			$dbh->FreeResults($result);
+		}
+	}
+	return $name;
+}
+
+function ProjectGetListOfSubProjects(&$dbh, $PID)
+{
+	if ($PID)
+	{
+		$idstring = "";
+		$query = "select id from projects where parent='$PID' order by id";
+		$result = $dbh->Query($query);
+		$num = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			if ($idstring)
+				$idstring .= ":";
+			$idstring .= $row["id"];
+			
+			$tmpids = ProjectGetListOfSubProjects($dbh, $row["id"]);
+			if ($tmpids)
+				$idstring .= ":$tmpids";
+		}
+		$dbh->FreeResults($result);
+	}
+	return $idstring;
+}
+
+function ProjectGetArrayOfSubProjects(&$dbh, $PID)
+{
+	$subprojects = array();
+
+	if ($PID)
+	{
+		$subprojects = explode(":", ProjectGetListOfSubProjects($dbh, $PID));
+	}
+
+	return $subprojects;
+}
+
+function ProjectGetNumSubpro($dbh, $PID)
+{
+	if (is_numeric($PID))
+	{
+		$result = $dbh->Query("select count(*) as cnt from projects where parent='$PID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$res = $row['cnt'];
+		}
+		$dbh->FreeResults($result);
+	}
+	return $res;
+}
+
+/*
+function ProjectRemoveFiles(&$dbh, $PID)
+{
+	global $HTTP_SERVER_VARS, $settings_account_number, $settings_data_path;
+	
+	$target_dir = $settings_data_path."/$settings_account_number/project/$PID";
+	
+	// Get existing document name
+	$result = $dbh->Query("select id, file_name from project_files where project_id='$PID'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		if (file_exists("$target_dir/".$row['file_name']))
+			unlink("$target_dir/".$row['file_name']);
+		$dbh->Query("delete from project_files where id='".$row['id']."'");
+	}
+	$dbh->FreeResults($result);
+}
+ */
+
+function ProjectGetTaskIntervalName($interval)
+{
+	switch ($interval)
+	{
+	case 1:
+		$name = "minute(s)";
+		break;
+	case 2:
+		$name = "hour(s)";
+		break;
+	case 3:
+		$name = "day(s)";
+		break;
+	case 4:
+		$name = "week(s)";
+		break;
+	case 5:
+		$name = "month(s)";
+		break;
+	}
+	return $name;
+}
+
+function ProjectTemplateTaskCount(&$dbh, $TMPID)
+{
+	if (is_numeric($TMPID))
+	{
+		$result = $dbh->Query("select count(*) as cnt from project_template_tasks where template_id='$TMPID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$res = $row['cnt'];
+		}
+		$dbh->FreeResults($result);
+	}
+	return $res;
+}
+
+function ProjectGetExeTime(&$dbh, $due_date, $count, $interval, $timeline)
+{
+	switch ($interval)
+	{
+	case 1:
+		$instr = "MINUTES";
+		break;
+	case 2:
+		$instr = "HOURS";
+		break;
+	case 3:
+		$instr = "DAYS";
+		break;
+	case 4:
+		$instr = "WEEKS";
+		break;
+	case 5:
+		$instr = "MONTHS";
+		break;
+	}
+	if ($timeline == "after")
+		$pre = "+";
+	else
+		$pre = "-";
+		
+	if ($count)
+		$cond = " $pre INTERVAL '$count $instr'";
+
+	if ($due_date)
+	{
+		$result = $dbh->Query("select '$due_date'::TIMESTAMP $cond as retdate");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$res = $row['retdate'];
+			$dbh->FreeResults($result);
+		}
+	}
+	else
+		$res = '';
+
+	return $res;
+}
+
+function ProjectCopyMembership(&$dbh, $PID, $PARENTID, $USERID)
+{
+	$result = $dbh->Query("select user_id, title, notes from project_membership where 
+						   project_id='$PARENTID' and user_id != '$USERID' and accepted='t'");
+	$num = $dbh->GetNumberRows($result);
+	for ($i=0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$dbh->Query("insert into project_membership(user_id, project_id, title, notes, accepted)
+					 values('".$row['user_id']."', '$PID', '".$row['title']."', '".$row['notes']."', 't')");
+					 
+		ProjectCopyPermissionsForUser($dbh, $PID, $PARENTID, $row['user_id']);
+	}
+	$dbh->FreeResults($result);
+}
+
+function ProjectCopyPermissionsForUser(&$dbh, $PID, $PARENT, $USERID)
+{
+	// TODO: Security
+}
+
+function ProjGetAdditionalFieldType(&$dbh, $fieldid, $userid)
+{
+	if (is_numeric($fieldid))
+	{
+		$query = "select field_type from project_fields where id='$fieldid'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$fieldtype = $row['field_type'];
+			$dbh->FreeResults($result);
+		}
+	}
+	return $fieldtype;
+}
+
+function ProjGetAdditionalFieldName(&$dbh, $fieldid, $userid)
+{
+	if (is_numeric($fieldid))
+	{
+		$query = "select name from project_fields where user_id='$userid' and id='$fieldid'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$name = $row['name'];
+			$dbh->FreeResults($result);
+		}
+	}
+	return $name;
+}
+
+function ProjGetAdditionalFieldValue($dbh, $pid, $fieldid, $userid)
+{
+	$ret = "";
+	
+
+	if (is_numeric($fieldid))
+	{
+		$type = ProjGetAdditionalFieldType($dbh, $fieldid, $userid);
+
+		$query = "select val_".$type." from project_fields_values where field_id='$fieldid' and project_id='$pid'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$ret = $row["val_".$type];
+		}
+		$dbh->FreeResults($result);
+	}
+
+	return $ret;
+}
+
+function ProjSetAdditionalFieldValue($dbh, $pid, $fieldid, $userid, $val)
+{
+	$ret = "";
+	
+	if (is_numeric($fieldid))
+	{
+		$type = ProjGetAdditionalFieldType($dbh, $fieldid, $userid);
+
+		if ($dbh->GetNumberRows($dbh->Query("select id from project_fields_values where field_id='$fieldid' and project_id='$pid'")))
+		{
+			$query = "update project_fields_values set val_".$type."='".$dbh->Escape($val)."' 
+					  where field_id='$fieldid' and project_id='$pid'";
+		}
+		else
+		{
+			$query = "insert into project_fields_values(val_".$type.", field_id, project_id) 
+					  values('".$dbh->Escape($val)."', '$fieldid', '$pid');";
+		}
+		$result = $dbh->Query($query);
+	}
+
+	return $ret;
+}
+
+function ProjAdditionalInsertOkay($type, $insval)
+{
+	switch($type)
+	{
+	case 'number':
+		if (is_numeric($insval))
+			return true;
+		else
+			return false;
+	case 'date':
+		if ($insval)
+			return true;
+		else
+			return false;
+	default:
+		return true;
+	}
+}
+
+function ProjGetRoot(&$dbh, $PID)
+{
+	$root_id = null;
+	
+	if (is_numeric($PID))
+	{
+		$query = "select parent from projects where id='$PID'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$root_id = (is_numeric($row['parent'])) ? ProjGetRoot($dbh, $row['parent']) : $PID;
+		}
+	}
+	return $root_id;
+}
+
+function ProjInitializeBugTypes(&$dbh, $PID)
+{
+	$bug_types = array(
+			array("Problem"),
+			array("Sugggestion")
+		);
+
+	if (is_numeric($PID))
+	{
+		$query = "select count(*) as cnt from project_bug_types where project_id='$PID'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			if (!$row['cnt'])
+			{
+				foreach ($bug_types as $bug)
+				{
+					$dbh->Query("insert into project_bug_types(name, project_id) 
+									values('".$dbh->Escape($bug[0])."', '$PID');");
+				}
+			}
+		}
+	}
+}
+
+function ProjInitializeBugStatus(&$dbh, $PID)
+{
+	$status_types = array(
+							array("Open", 'f'),
+							array("Closed", 't')
+						);
+	if (is_numeric($PID))
+	{
+		$query = "select count(*) as cnt from project_bug_status where project_id='$PID'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			if (!$row['cnt'])
+			{
+				foreach ($status_types as $stype)
+				{
+					$query = "insert into project_bug_status(name, project_id, f_closed) 
+									values('".$dbh->Escape($stype[0])."', '$PID', '".$stype[1]."');";
+					$dbh->Query($query);
+				}
+			}
+		}
+	}
+}
+
+function ProjGetStatusNameFromId($dbh, $sid)
+{
+	$ret = "";
+
+	if (is_numeric($sid))
+	{
+		$result = $dbh->Query("select name from project_bug_status where id='$sid'");
+		if ($dbh->GetNumberRows($result))
+			$ret = $dbh->GetValue($result, 0, "name");
+	}
+
+	return $ret;
+}
+
+function ProjInitializeBugSeverity(&$dbh, $PID)
+{
+	$sev_types = array(
+							array("Low"),
+							array("Medium"),
+							array("High")
+						);
+	if (is_numeric($PID))
+	{
+		$query = "select count(*) as cnt from project_bug_severity where project_id='$PID'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			if (!$row['cnt'])
+			{
+				foreach ($sev_types as $sev)
+				{
+					$dbh->Query("insert into project_bug_severity(name, project_id) 
+									values('".$dbh->Escape($sev[0])."', '$PID');");
+				}
+			}
+		}
+	}
+}
+
+function ProjGetBugTypeName(&$dbh, $TID)
+{
+	$name = "";
+	
+	if (is_numeric($TID))
+	{
+		$query = "select name from project_bug_types where id='$TID'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$name = $row['name'];
+		}
+	}
+	return $name;
+}
+
+function ProjGetPriorityName(&$dbh, $PID)
+{
+	$name = "";
+	
+	if (is_numeric($PID))
+	{
+		$query = "select name from project_priorities where id='$PID'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$name = $row['name'];
+		}
+	}
+	return $name;
+}
+
+function ProjGetMilestoneName(&$dbh, $mid)
+{
+	$name = "";
+	
+	if (is_numeric($mid))
+	{
+		$query = "select name from project_milestones where id='$mid'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$name = $row['name'];
+		}
+	}
+	return $name;
+}
+
+
+function ProjGetBugName(&$dbh, $bid)
+{
+	$name = "";
+	
+	if (is_numeric($bid))
+	{
+		$query = "select title from project_bugs where id='$bid'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$name = $row['title'];
+		}
+	}
+	return $name;
+}
+
+function ProjGetMsgName(&$dbh, $mid)
+{
+	$name = "";
+	
+	if (is_numeric($mid))
+	{
+		$query = "select title from project_messages where id='$mid'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$name = $row['title'];
+		}
+	}
+	return $name;
+}
+function ProjGetMilestoneAttrib(&$dbh, $mid, $attrib)
+{
+	$name = "";
+	
+	if (is_numeric($mid))
+	{
+		$query = "select $attrib from project_milestones where id='$mid'";
+		$result = $dbh->Query($query);
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$name = $row[$attrib];
+		}
+	}
+	return $name;
+}
+
+function ProjInsertLog($dbh, $PID, $type, $title, $body, $link_uid="")
+{
+	if ($PID)
+	{
+		$dbh->Query("insert into project_log(project_id, type, time_logged, title, body, link_uid)
+						values('$PID', '$type', 'now', '".$dbh->Escape($title)."', 
+						'".$dbh->Escape($body)."', '".$dbh->Escape($link_uid)."')");
+	}
+}
+
+/******************************************************************************************************************
+	Function:	ProjRecurringTaskCreateLinks($dbh, $USERID, $month, $day, $year)
+	
+	Purpose:	Check for and create tasks with link to a recurring task
+	
+	Details:	There are 4 types of recurring events
+				1:	Daily
+					Check date_start - date_end, interval, and day for match
+				2:	Weekly
+					Check date_start - date_end, interval, and week_days for match
+				3:	Monthly
+					Check date_start - date_end, (day, interval) or (relative_type, relative_section) for match
+				4:	Yearly
+					Check date_start - date_end, month, (dat) or (relative_type, relative_section) for match
+******************************************************************************************************************/
+function ProjRecurringTaskCreateLinks(&$dbh, $USERID, $month, $day, $year)
+{
+
+	$current_date_str = "$month/$day/$year";
+	$current_date = strtotime($current_date_str);
+	$dow = date("w", $current_date);
+	$wkdayinmonth =  calGetWkDayInMonth($year, $month, $day); // 2nd Monday, 1st Tuesday etc...
+	$f_lastwkdayinmonth = calDateIsLastWkDayInMonth($year, $month, $day); // Last thursday etc...
+
+	$tmpdate = strtotime("$type $weekday", strtotime("$month/1/$year"));
+
+	$query = "SELECT id, project, name, priority, interval, date_start, date_end, user_id, notes,  type, day, 
+			  month, relative_type, relative_section, customer_id,
+			  week_days[1] as day0, week_days[2] as day1, week_days[3] as day2, week_days[4] as day3, 
+			  week_days[5] as day4, week_days[6] as day5, week_days[7] as day6
+			  FROM project_tasks_recurring WHERE
+				user_id='$USERID'
+				and date_start<='$current_date_str' and (date_end>='$current_date_str' or date_end is NULL)
+				and id not in (select recur_id as id from project_tasks where start_date='$current_date_str' and recur_id is not NULL and user_id='$USERID')
+				and id not in (select recurring_id as id from project_tasks_recurring_ex where exception_date='$current_date_str' and user_id='$USERID')
+				and (";
+
+	// Add types
+	// ------------------------------------------------------------
+
+	// Daily
+	$query .= "(type='1' and (('$current_date_str'::date-date_start)%interval)='0')";
+
+	
+	$query .= " OR ";
+
+	// Weekly
+	$query .= "(type='2' and ((('$current_date_str'::date-date_start)/7)%interval)='0' and week_days[".($dow+1)."]='t')";
+
+	$query .= " OR ";
+
+	// Monthly
+	$query .= "(
+				type='3' and (((extract('years' from age('$current_date_str'::date, date_start))*12)::integer 
+				+ extract('months' from age('$current_date_str'::date, date_start)))::integer % interval)='0' 
+				and
+				(
+					((relative_type='$wkdayinmonth' ".(($f_lastwkdayinmonth)?"or relative_type='5'":'').") and relative_section='".($dow+1)."')
+					or
+					(relative_type is null and extract('day' from date_start)=extract('day' from '$current_date_str'::date))
+				)
+			   ) ";
+	
+	$query .= " OR ";
+
+	// Yearly
+	$query .= "(
+				type='4' and ((extract('years' from age('$current_date_str'::date, date_start))::integer % interval)='0' or interval is null)
+				and
+				(
+					(relative_type is null and month='$month' and day='$day')
+					or
+					((relative_type='$wkdayinmonth' ".(($f_lastwkdayinmonth)?"or relative_type='5'":'').") and relative_section='".($dow+1)."' and month='$month')
+				)
+			   )";
+
+	$query .= ");";
+
+	$result = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($result);
+	for ($i=0; $i<$num;$i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$id = $row['id'];
+		
+		// Insert new task
+		$query = "insert into project_tasks
+					(name, notes, start_date, deadline, recur_id, user_id, date_entered, priority, project, customer_id)
+					values
+					('".$dbh->Escape($row['name'])."', '".$dbh->Escape($row['notes'])."', ".db_UploadDate("$month/$day/$year").", 
+					".db_UploadDate("$month/$day/$year").", '$id', '$USERID', 'now', ".$dbh->EscapeNumber($row['priority']).", 
+					".$dbh->EscapeNumber($row['project']).", ".$dbh->EscapeNumber($row['customer_id']).");
+					select currval('project_tasks_id_seq') as id;";
+		$idres = $dbh->Query($query);
+		if ($dbh->GetNumberRows($idres))
+		{
+			$idrow = $dbh->GetNextRow($idres, 0);
+		}
+	}
+	$dbh->FreeResults($result);
+}
+?>

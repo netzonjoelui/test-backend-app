@@ -1,0 +1,56 @@
+<?php
+class CAutoCompleteCal
+{
+	var $m_buf;
+	var $m_form;
+	var $m_id;
+	
+	function CAutoCompleteCal($inpid, $form=null)
+	{
+		global $AUTOCOMPLETECALID;
+		if (!$AUTOCOMPLETECALID) 
+		{
+			$AUTOCOMPLETECALID = 1;
+			//$this->PrintJs();
+		}
+		else
+			$AUTOCOMPLETECALID++;
+			
+		$this->m_form = $form;
+		$this->m_inpid = $inpid;
+		$this->m_id = $AUTOCOMPLETECALID;
+	}
+	
+	function GetAc($link=NULL)
+	{
+		$form = $this->m_form;
+		$name = $this->m_name;
+		$id = $this->m_id;
+		
+		/*
+		$this->m_buf = "<DIV ID=\"accd_".$id."_div\" STYLE=\"position:absolute;visibility:hidden;background-color:white;layer-background-color:white;\"></DIV>
+					   <script language='javascript' type='text/javascript'>
+							//getCalendarStyles();
+							var now = new Date();
+							var accd_".$id." = new CalendarPopup(\"accd_".$id."_div\");
+					   </script>
+					   <a href='javascript:void(0);' name=\"a_acc_".$id."\" id=\"a_acc_".$id."\" 
+				   		onClick=\"accd_".$id.".select(document.forms['$form'].$name,'a_acc_".$id."','MM/dd/yyyy'); return false;\">
+						".(($link) ? $link : "<img border='0' src='/images/calendar.gif' />")."
+					   </a>";
+		 */
+					   
+		$this->m_buf = "<div style='display:none;' id=\"accd_".$id."_div\"></div>
+						<span id=\"accd_".$id."_span\"><img border='0' style='vertical-align:top;' src='/images/calendar.gif' /></span>
+						   <script language='javascript'>
+								var start_ac = new CAutoCompleteCal(document.getElementById('".$this->m_inpid."'), document.getElementById('accd_".$id."_span'), document.getElementById('accd_".$id."_div'));
+						   </script>";
+		return $this->m_buf;
+	}
+	
+	function PrintAc($link=NULL)
+	{
+		print($this->GetAc($link));
+	}
+}
+?>

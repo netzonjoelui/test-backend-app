@@ -1,0 +1,106 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CToolMenu.awp");
+	require_once("../lib/CDatabase.awp");
+	require_once("../users/user_functions.php");
+	require_once("../lib/date_time_functions.php");
+	require_once("../lib/js_iframe_resize.awp");
+	require_once("calendar_functions.awp");
+
+	$dbh = new CDatabase();
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	
+	$CALID = $_GET['calid'];
+	
+	// Set current month and year
+	$month = ($_GET['month']) ? $_GET['month'] : date("m");
+	$year = ($_GET['year']) ? $_GET['year'] : date("Y");
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Select Start Time</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme(&$dbh, $USERID, 'css'); ?>">
+<script language="javascript" type="text/javascript">
+	function AddUser()
+	{
+		var i = document.getElementById('avail_users');
+		window.parent.TPopup('invite_user', 'hidden');
+		window.parent.AddUser(i.value);
+	}
+</script>
+</head>
+<body class="whitepage" topmargin="0" bottommargin="0">
+<center>
+<form name="adduser" action="cal_invite_popup.awp?calid=<?php print($CALID."&retpage=$RETPAGE"); ?>" method="post">
+User: <input type='text' name="findname" size="18" value="<?php print($_POST['findname']); ?>"> <input type="submit" value="Seach" name='search'>
+<input type="submit" name='all' value='Show All' style="width:230px;">
+<br><br>
+<select name="avail_users" id='avail_users' SIZE=8 style="width:230px;">
+<?php
+	if (isset($_POST['search']) || isset($_POST['all']))
+	{
+		if ($settings_mya)
+		{
+			/*
+			$query = "select user_friends.friend_id as id, users.name from users, user_friends
+						where users.id not in 
+						(select calendars.user_id as id from calendars where calendars.id='$CALID'
+						union all select calendar_sharing.user_id as id from calendar_sharing where calendar_sharing.calendar!='$CALID')
+						and user_friends.friend_id = users.user_id  and user_friends.user_id = '$USERID'";
+			*/
+			$query = "select users.name, users.id, user_friends.id as fid
+						from users, user_friends where
+						users.id = user_friends.friend_id and 
+						user_friends.user_id='$USERID' 
+						and users.id not in 
+						(select calendars.user_id as id from calendars where calendars.id='$CALID')";
+		}
+		else
+		{
+			$query = "select users.id, users.name from users
+						where users.id not in 
+						(select calendars.user_id as id from calendars where calendars.id='$CALID'
+						union all select calendar_sharing.user_id as id from calendar_sharing where calendar_sharing.calendar!='$CALID')";
+		}
+		if ($_POST['findname'])
+		{
+			if (strpos($_POST['findname'], " ") != false)
+			{
+				$parts = explode(" ", $_POST['findname']);
+				if ($parts[0])
+					$query .= " and users.name ilike '".$parts[0]."%.%' ";
+				if ($parts[1])
+					$query .= " and users.name ilike '%.".$parts[1]."%' ";
+			}
+			else
+			{
+				$query .= " and users.name ilike '".$_POST['findname']."%'";
+			}
+		} 
+		$query .= " order by users.name"; 
+		echo $query;
+		$result = $dbh->Query($query);
+		$num = $dbh->GetNumberRows($result);
+		for ($i=0; $i<$num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			$name = $row["name"];
+			$id = $row["id"];
+			echo "<option value='$id'>$name</option>";
+		}
+		$dbh->FreeResults($result);
+	}
+?>
+</select>
+<br><br>
+<input type="button" name="today" value="Add" onClick="AddUser()">&nbsp;
+<input type="button" value="Cancel" onClick="window.parent.TPopup('invite_user', 'hidden');">
+</center>
+</form>
+</body>
+</html>

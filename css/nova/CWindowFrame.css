@@ -1,0 +1,27 @@
+/**************************************************************************
+ *	CWindowFrame.js
+ **************************************************************************/
+.CWindowFrameOuter
+{
+	padding:1px;
+	border: 0;
+}
+.CWindowFrameLabel
+{
+	font-weight:bold;
+	font-size: 12px;
+	padding: 2px 0 2px 3px;
+	border: 0;
+	color: #fff;
+}
+.CWindowFrameContext
+{
+	font-weight: normal;
+	float: right;
+	margin-right: 3px;
+	color: #666;
+}
+.CWindowFrameContent
+{
+}
+

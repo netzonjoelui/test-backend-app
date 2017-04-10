@@ -1,0 +1,92 @@
+% $Header: /var/cvs/ant.aereus.com/lib/html_to_pdf/text-align.ps,v 1.2 2006/01/30 00:39:22 administrator Exp $
+
+% Constants
+/max-justify-fraction {0.33} def
+
+/line-length-delta {               % Box 
+  dup line-length                  % Box LineLength
+% calculate length line to be expanded
+  exch
+  /get-width call-method           % LineLength Width
+  exch sub                         % Delta
+% Quick workaround - line delta should not be less than 0
+  0 max
+} def
+
+/text-align-left {                 % => LastLine Box
+  pop pop
+} def
+
+/text-align-center {               % => LastLine Box
+  dup line-length-delta            % => LastLine Box Delta
+  2 div                            % => LastLine Box Delta/2
+  1 index get-line                 % => LastLine Box Delta/2 Line
+  {                                % => LastLine Box Delta/2 LineElement
+    0 exch
+    2 index exch                   % => LastLine Box Delta/2 0 Delta/2 LineElement
+    /offset call-method           
+  } forall                         % => LastLine Box Delta/2
+  pop pop pop
+} def
+
+/text-align-right {                % => LastLine Box 
+  dup line-length-delta            % => LastLine Box Delta
+  1 index get-line                 % => LastLine Box Delta Line
+  {                                % => LastLine Box Delta LineElement
+    0 exch
+    2 index exch                   % => LastLine Box Delta/2 Delta/2 0 LineElement
+    /offset call-method
+  } forall                         % => LastLine Box Delta/2
+  pop pop pop
+} def
+
+/text-align-justify {              % => LastLine Box
+% last line is never justified
+  1 index not {                    % => LastLine Box
+
+% If line box contains less that two items, no justification can be done, just return
+    dup get-line length 2 ge {
+
+% Calculate extra space to be filled by this line
+      dup line-length-delta        % => LastLine Box Delta
+
+% note that if it is the very first line inside the container, 'text-indent' value
+% should not be taken into account while calculating delta value
+      1 index
+      box-container-get-first
+      get-uid                      % => LastLine Box Delta FirstUID
+      2 index get-line
+      0 get get-uid                % => LastLine Box Delta FirstUID FirstLineUID
+      eq {                         % => LastLine Box Delta 
+        1 index box-generic-calc-text-indent
+        sub
+      } if                         % => LastLine Box Delta
+
+% if line takes less that MAX_JUSTIFY_FRACTION of available space, no justtification should be done
+      1 index line-length
+      max-justify-fraction mul     % => LastLine Box Delta LL*MJF
+      1 index ge {                 % => LastLine Box Delta
+% Calculate offset for each box
+        dup 
+        2 index get-line length 
+        1 sub div                  % => LastLine Box Delta Offset
+        dup                        % => LastLine Box Delta Offset COffset
+
+% Offset all boxes in current line box
+        3 index get-line {         % => LastLine Box Delta Offset COffset Child
+          0 2 index 2 index
+          /offset call-method      % => LastLine Box Delta Offset COffset Child
+
+          pop
+          1 index add              % => LastLine Box Delta Offset COffset 
+        } forall
+
+        pop pop                    % => LastLine Box Delta 
+      } if
+      
+      pop                          % => LastLine Box 
+    } if
+  } if
+
+  pop pop
+} def

@@ -1,0 +1,477 @@
+<?php 
+    if ($_GET['pnghack'] == 't')
+		$pnghack = true;
+    else
+		$pnghack = false;
+?>	
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+	<title><%PAGETITLE%></title>
+	
+	<style type="text/css">
+
+
+	html, body
+	{
+		height:100%;
+		margin: 0px;
+		padding: 0px;
+		background: #000 url(/images/blogs/blurry.jpg) top left fixed repeat;
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		color: #222;
+		text-align: center;
+		border:none;
+	}
+		
+ 
+	/* unvisited link */
+	a:link 
+	{
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		font-size:11px;
+		color: #993300;
+		text-decoration: none;
+	}   
+		  
+	/* visited link */
+	a:visited 
+	{
+		color: #993300;
+		text-decoration: none;
+	}
+	
+	/* selected link */
+	a:active 
+	{
+		color: #993300;
+		text-decoration: none;
+	}   
+
+	/* mouse over link */
+	a:hover 
+	{
+		text-decoration: none;
+		border-bottom: dotted 1px #CC9900; 
+	}
+		
+	h1 
+	{
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		font-size : 16px;
+		font-weight : bold;
+		color: #ED940F;
+		border-bottom:1px solid #ED940F;
+		padding-top: 5px;
+		margin: 0px;
+		clear: both;
+	}
+		
+	h2 
+	{
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		font-size:12px;
+		font-weight: bold;
+		color: #993300;
+		text-transform:capitalize;
+		letter-spacing:normal;
+		padding-left:4px;
+		margin:0px;
+		clear: both;
+	}
+		
+
+	
+	blockquote 
+	{
+		align: center; 
+		line-height: 16px;
+		text-align: justify;
+		padding: 10px;
+		color: #330000;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 11px;
+		font-style: normal;
+		letter-spacing: normal;
+		border-left:2px solid #CC3300;
+	}
+	
+
+
+	
+	/* The following hack is to correct paragraph text size in IE/WIN */
+	
+	/* \*/ * html body p { font-size: 80%; } /* */
+	
+	
+	#globalContainer
+	{
+		position: relative;
+		text-align: left;
+		vertical-align: middle;
+		margin: 0 auto;
+		width: 770px; 
+		background: #F5E783;
+		border-left:2px solid #3F140D;
+		border-right:2px solid #3F140D;
+	} 
+
+	#globalColumnBody
+	{
+		width: 770px;
+	}
+		
+	#globalHeader
+	{
+		width: 770px;
+		height:202px;
+		background: #3F140D url(/images/blogs/testheader.gif) top left no-repeat;
+	}
+
+	#globalHeader div
+	{
+		font-size: 40px;
+		font-weight: normal;
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		text-align: left;
+		text-transform:none;
+		letter-spacing: -4px;
+		color: #FFF;
+		padding-top:60px;
+		padding-left:25px;		
+	}
+		
+	#globalContent
+	{
+		width: 515px;
+		padding-left:10px;
+		padding-top:10px;
+	}
+		
+
+	#globalLinkList
+	{
+		position: absolute;
+		top: 150px;
+		left: 535px;
+		width: 220px;
+		background-color: #3F140D;
+		border:2px solid #F5E783;
+	}
+		
+	#globalFooter
+	{
+		width: 770px;
+		height: 120px;
+		background: url(/images/blogs/rustic_footer.gif) bottom left no-repeat;
+		border-bottom:2px solid #3F140D;
+		padding:0px;
+	}
+
+	#globalFooter div
+	{
+		font-size: 10px;
+		font-weight: normal;
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		text-align: center;
+		padding-top:60px;
+		text-transform:none;
+		letter-spacing: 1px;
+		color: #330000;
+	}
+
+	#globalFooter div span
+	{
+		font-weight:bold;
+		color: #3F140D;
+		font-size:11px;
+	}
+
+/***********************************************************************
+*	Classes that handle sidebar boxes
+*
+*	Layout:
+*	
+*	sidebox
+*	{
+*		sidebox2 -- used for rounded corners (optional)
+*		{
+*			sidebar_title
+*			ul (no class - subclass ".sidebox ul" to style)
+*			{
+*				li ((no class - subclass ".sidebox li" to style))
+*			}
+*		}
+*	}
+*
+*	Available subclasses: profile archive links (use ".sidebox profile")
+*
+************************************************************************/
+	
+	.sidebox 
+		{
+		color: #330000;
+		font-size: 12px;
+		font-family: Arial, Helvetica, sans-serif;
+		font-weight:normal;
+		letter-spacing: normal;
+		line-height: 20px; 
+		text-align: left;
+		/*background: url(/images/blogs/square1.png) top left repeat;*/
+		/*<?php
+			if (!$pnghack)
+			{
+				echo "background: url(/images/blogs/square1.png) top left repeat;";
+			}
+			else
+			{
+				echo "background: none;\n";
+				echo "filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/blogs/square1.png, sizingMethod='scale');\n";
+				echo "background-repeat:repeat;\n";
+			}
+		?>*/
+		height:100%;
+		}
+	
+	.sidebar_title 
+		{ 
+		}
+
+	.sidebox ul
+	{ 
+		list-style: none;
+		margin: 0px;
+		padding: 0px;
+	}
+
+	.sidebox li
+	{
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		font-size:11px;
+		color: #CC9900;
+		line-height: normal;
+		padding: 6px 8px;
+	}
+	
+	.sidebox li:hover
+	{
+	}
+		
+	/* unvisited link */
+	.sidebox li a:link 
+	{		
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		font-size:11px;
+		color: #CC9900;
+		text-decoration: none;
+		display: block;
+		border: none;
+	}   
+		  
+	/* visited link */
+	.sidebox li a:visited 
+	{
+		color: #CC9900;
+		text-decoration: none;
+	}
+	
+	/* selected link */
+	.sidebox li a:active 
+	{
+		color: #CC9900;
+		text-decoration: none;
+	}   
+
+	/* mouse over link */
+	.sidebox li a:hover 
+	{
+		color: #FFCC00;
+		text-decoration:underline;
+		border:none; 
+	}
+		
+		
+
+/************************************************************
+*	Classes that handle day, post, and comments for the body
+*
+*	Layout:
+*	
+*	post_day_container
+*	{
+*		post_date_header
+*		post_container
+*		{
+*			post_header
+*			post_body
+*			post_footer
+*			post_comment_container
+*			{
+*				post_comment
+*				post_comment_add
+*			}
+*		}
+*	}
+*
+*
+*************************************************************/
+	
+	/* Each post is printed inside a div container for each day*/
+	.post_day_container
+	{
+	padding: 0px;
+	margin-bottom: 10px;
+	/*<?php
+		if (!$pnghack)
+		{
+			echo "background: url(/images/blogs/square1.png) top left repeat;";
+		}
+		else
+		{
+			echo "background: none;\n";
+			echo "filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/blogs/square1.png, sizingMethod='scale');\n";
+			echo "background-repeat:repeat;\n";
+		}
+	?>*/
+	height:100%;
+	}
+	
+	/* Date Header Div */
+	.post_date_header 
+		{ 
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		font-size:12px;
+		font-weight:bold;
+		color: #000;
+		font-style:italic;
+		padding:10px;
+		text-align:left;
+		}
+	/* A container for each post (inside post_day_container) */
+	.post_container 
+	{
+		padding:10px;
+		text-align:left;
+	}
+		
+	/* The title of each article */
+	.post_header
+		{
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		font-size:14px;
+		font-weight:bold;
+		color: #000;
+		letter-spacing:normal;
+		padding-bottom:10px;
+		padding-top:10px;
+		text-align:left;
+		/*background: url(/images/blogs/skypat5.gif) top left repeat-x;*/
+		}
+		
+	/* Where the body of the post article/post is printed */
+	.post_body
+		{	
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		font-size: 12px;
+		color: #000;
+		letter-spacing:normal;
+		line-height:1.9em;
+		text-align: justify;
+		margin:0px;
+		}
+	
+	/* Comes after post_body inside post_container */
+	.post_footer
+		{
+		text-align: left;
+		padding-top:5px;
+		padding-bottom:10px;
+		font-size: 11px;
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		text-align:center;
+		}
+		
+	/* This div resides in the day container and is printed directly after the footer */
+	.post_comment_container
+		{
+		border-bottom:1px solid #999999;
+		border-right:1px solid #999999;
+		border-left:1px solid #999999;
+		}
+	
+	/* Contains each and ever comment */
+	.post_comment
+		{
+		border-top:1px solid #999999;
+		text-align:left;
+		padding:10px;
+		font-size: 11px;
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		}
+		
+	.post_comment strong
+		{
+		display:table;
+		}
+
+	/* Contains the add new comment form */
+	.post_comment_add
+		{
+		border-top:1px solid #999999;
+		text-align:left;
+		padding:10px;
+		font-size: 11px;
+		font-family: Georgia, Arial, Helvetica, sans-serif;
+		}
+	
+	.post_comment_add input
+		{
+		border:1px solid #999999;
+		}
+	
+	.post_comment_add textarea
+		{
+		border:1px solid #999999;
+		}
+	</style>
+	<script type="text/javascript">
+	<!--
+	function ToggleComments(id)
+	{
+		var dv = document.getElementById('cmts_' + id);
+		if (dv && dv.style.display == 'block')
+			dv.style.display = 'none';
+		else
+			dv.style.display = 'block';
+	}
+	-->
+	</script>
+</head>
+
+<body>
+
+<div id="globalContainer">
+	<div id="globalColumnBody">
+		<div id="globalHeader">
+			<div>
+				<%TITLE_HEADER_DIV%>
+			</div>
+		</div>
+		<div id="globalContent">
+			<%BLOG_BODY%>		
+		</div>
+	</div>
+	<div id="globalFooter">
+		<div>
+			<span><%TITLE_HEADER_DIV%></span>
+			<%FOOTER_BAR%>
+		</div>
+	</div>
+	<div id="globalLinkList">
+		<%SIDE_BAR%>
+	</div>
+</div>
+
+</body>
+</html>

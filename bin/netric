@@ -1,0 +1,33 @@
+#!/usr/bin/env php
+<?php
+/**
+ * This is the console interface for running foreground processes from the command line
+ *
+ * Commands are in the form controller/action and map to a url [controller]/[action]
+ *
+ *  # To install netric on a server and create the default account (with admin user)
+ *  netric setup/install --username=admin --password=password1
+ *
+ *  # To update netric (application + all accounts) to the latest version
+ *  netric setup/update
+ */
+
+ini_set("display_errors", "On");
+ini_set("memory_limit", "2G");
+
+// Setup autoloader
+include(__DIR__ . "/../init_autoloader.php");
+
+// Get system config
+//$config = new Netric\Config\Config();
+
+$configLoader = new Netric\Config\ConfigLoader();
+$applicationEnvironment = (getenv('APPLICATION_ENV')) ? getenv('APPLICATION_ENV') : "production";
+
+// Setup the new config
+$config = $configLoader->fromFolder(__DIR__ . "/../config", $applicationEnvironment);
+
+// Run the application - arguments will be parsed in run
+Netric\Application\Application::init($config)->run();
+
+exit();

@@ -1,0 +1,122 @@
+/**************************************************************************************
+*	LIB:		CWindowFrame
+*	Purpose:	aereus.lib.js class split sections of a page into tabs
+***************************************************************************************/
+.CTTabLeftOn
+{
+	width: 0px;
+}
+.CTTabLeftOff
+{
+	width: 0px;
+}
+.CTTabCenterOn
+{
+	font-weight: bold;
+	font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
+	background-color: #d8dfea;
+	font-size:10px;
+	color:#3b59b4;
+	padding:4px;
+	cursor: pointer;
+}
+
+.CTTabCenterOff
+{
+	font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
+	background-color: white;
+	font-size:10px;
+	color:#000;
+	padding:4px;
+	cursor: pointer;
+	border-top: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	border-right: 1px solid #ccc;
+}
+
+.CTTabRightOn
+{
+	width: 2px;
+}
+
+.CTTabRightOff
+{
+	width: 2px;
+}
+
+.CTTabHr
+{
+	height: 1px;
+	background-color: #d8dfea;
+}
+/* Where the content is placed */
+.CTTabBody
+{
+}
+/*
+.CTTabLeftOn
+{
+	background-image:url(/images/themes/skygrey/tab_on_left.gif);
+	background-position: bottom right;
+	background-repeat:no-repeat;
+	width: 2px;
+}
+.CTTabLeftOff
+{
+	background-image:url(/images/themes/skygrey/tab_off_left.gif);
+	background-position: bottom right;
+	background-repeat:no-repeat;
+	width: 2px;
+}
+.CTTabCenterOn
+{
+	background: url('/images/themes/skygrey/tab_on_mid.gif');
+	background-repeat: repeat-x;
+	background-position: bottom left;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:10px;
+	color:#000;
+	padding:4px;
+	cursor: pointer;
+}
+.CTTabCenterOff
+{
+	background: url('/images/themes/skygrey/tab_off_mid.gif');
+	background-repeat: repeat-x;
+	background-position: bottom left;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:10px;
+	color:#000;
+	padding:4px;
+	cursor: pointer;
+}
+
+.CTTabRightOn
+{
+	background-image:url(/images/themes/skygrey/tab_on_right.gif);
+	background-position: bottom left;
+	background-repeat:no-repeat;
+	width: 3px;
+}
+
+.CTTabRightOff
+{
+	background-image:url(/images/themes/skygrey/tab_off_right.gif);
+	background-position: bottom left;
+	background-repeat:no-repeat;
+	width: 3px;
+}
+
+.CTTabHr
+{
+	height: 1px;
+	background-color: #ccc;
+}
+*/
+/* Where the content is placed *
+.CTTabBody
+{
+	margin-top: 0px;
+}
+*/
+

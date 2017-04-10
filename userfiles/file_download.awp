@@ -1,0 +1,73 @@
+<?php
+require_once("../lib/AntConfig.php");
+require_once("ant.php");
+require_once("users/user_functions.php");
+require_once("lib/aereus.lib.php/CAnsClient.php");
+require_once("lib/aereus.lib.php/AnsClient.php");
+require_once("lib/CAntFs.awp");
+require_once("file_functions.awp");
+
+$dbh = $ANT->dbh;
+$ans = new CAnsCLient();
+
+$FILEID = $_GET['fid'];
+$FNAME = $_GET['fname']; // used to set a file name for downloads of unnamed/tmp named files
+$CATID = $_GET['catid'];
+$VIEW = $_GET['view']; // Output images to the browser in raw format
+
+if ($FNAME)
+	$FNAME = rawurldecode($FNAME);
+
+if (is_numeric($FILEID))
+{
+	// Check to see if the file exists - new files get dircted to AntFs
+	if (!$dbh->GetNumberRows($dbh->Query("select id from user_files where id = '$FILEID'")))
+	{
+		// Redirect to new file system
+		//$url = "/antfs/$FILEID";
+		$url = "/public/antfs/download_file.php?fid=$FILEID";
+		if ($_GET['fname'])
+			$url .= "&fname=" . $_GET['fname'];
+		header("Location: $url");
+		exit;
+	}
+
+	$file = new CAntFsFile($dbh, $FILEID);
+
+	$filename = $file->name;
+	if ($file->type == 'adf')
+		$filename = str_replace(".adf", ".html", $filename);
+
+	if ($FNAME)
+		$filename = $FNAME;
+
+	if ((!$filename || $filename == "Untitiled"  || $filename == "Untitled") && $_GET['fname'])
+	{
+		$dbh->Query("update user_files set file_title='$filename' where id='$FILEID'");
+	}
+	
+	if ($VIEW)
+	{
+		header("Content-Disposition: inline; filename=\"".str_replace("'", '', $filename)."\"");
+		if ($tyfile->type == "jpg" || $file->type == "jpeg")
+			header("Content-Type: image/jpeg");
+		else
+			header("Content-Type: image/".$file->type);
+	}
+	else
+	{
+		header("Content-Disposition: attachment; filename=\"".str_replace("'", '', $filename)."\"");
+		header("Content-Type: application/octet-stream");
+	}		   
+
+	header("Pragma: public"); // required 
+	header("Expires: 0"); 
+	header("Cache-Control: private", false); // required for certain browsers 
+	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+	header("Content-Transfer-Encoding: binary"); 
+	if ($row['file_size'])
+		header("Content-Length: " . $file->size);
+
+	// Stream contents of file to browser
+	$file->stream();
+}

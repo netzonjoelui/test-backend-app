@@ -1,0 +1,33 @@
+<?php
+	print("<br><br><strong>SEARCH TIPS</strong><br>
+		  <table border=\"0\" cellpadding=\"10\" cellspacing=\"1\" style=\"background-color:#666666;\">
+			 <tr style=\"background-color:#EEEEEE;\">
+				 <td valign=\"top\">
+					 <table align=\"center\" cellpadding=\"3\" cellspacing=\"0\" border=\"0\">
+					  <tr>
+						<td valign='top' style='font-weight:bold;'>1.</td>
+						<td>You can use <font color='red'>*</font> wildcards for any text fields.
+						<br>Example: <font color='red'>Country Co*</font> would find all Country Coaches.</td>
+					  </tr>
+					  <tr>
+						<td valign='top' style='font-weight:bold;'>2.</td>
+						<td>In numeric fields you can use <font color='red'>-</font> to specify ranges.
+						<br>Example: <font color='red'>2-50</font> would return all numbers from 2-50.</td>
+					  </tr>
+					  <tr>
+						<td valign='top' style='font-weight:bold;'>3.</td>
+						<td><font color='red'>&lt;</font> or <font color='red'>&gt;</font> 
+						query greater than or less than in numeric fields.
+						<br>Example: <font color='red'><20</font> would return results with values less than 20.</td>
+					  </tr>
+					   <tr>
+						<td valign='top' style='font-weight:bold;'>4.</td>
+						<td>Entering <font color='red'>NULL</font> (all caps) will return records 
+							where the selected field is empty
+							<br>Example: <font color='red'>NULL</font> in specifications would return results with no specifications defined.</td></td>
+					  </tr>
+					  </table>
+				  </td>
+			  </tr>
+		  </table>");
+?>

@@ -1,0 +1,42 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("email_functions.awp");
+	header("Content-type: text/xml");			// Returns XML document
+
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+	$inbx_id = EmailGetSpecialBoxId($dbh, $USERID, "Inbox");
+	
+	// Get users prefs from the database for display mode (normal or threaded)
+	$mode = UserGetPref($dbh, $USERID, "email_list_mode");
+	$BOX = $_GET['box'];
+	
+	// Set defaults if not defined
+	if (!$mode)
+		 $mode = "threads";
+		 
+	echo '<?xml version="1.0" encoding="UTF-8"
+	  standalone="yes"?><response>'; 
+	
+	$query = "select id, name from email_mailboxes where user_id='$USERID'";
+	if ($BOX)
+		$query .= " and id='$BOX'";
+		
+	$result = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		//if ($row['id'] == $inbx_id)
+			//EmailProcessFilters($dbh, $EMAILUSERID, $row['id']);
+
+		echo "<mailbox><boxid>".$row['id']."</boxid><newm>".EmailGetNumNewMessages($dbh, $row['id'], $mode)."</newm></mailbox>";
+	}
+	$dbh->FreeResults($result);
+
+	echo "</response>";
+?>

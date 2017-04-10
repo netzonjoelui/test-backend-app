@@ -1,0 +1,67 @@
+<?php
+	echo "<script type=\"text/javascript\">
+			function DeletePost(id, name)
+			{
+				if (confirm(\"Are you sure you want to delete \"+unescape(name)+\"?\"))
+				{
+					document.location = \"blog_edit.awp?tabnav=posts&bid=$BID&did=\"+id;
+				}
+			}
+		  </script>";
+	
+	// Check for post deletion
+	if ($_GET['did'])
+		$dbh->Query("delete from blog_articles where id='".$_GET['did']."'");
+		
+	WindowFrameToolbarStart("100%");
+	echo ButtonCreate("New Post", "document.location='blog_edit_post.awp?bid=$BID'", "b2");
+	echo ButtonCreate("View Blog", "window.open('http://".BlogGetURL(&$dbh, $BID)."')");
+	WindowFrameToolbarEnd();
+	
+	echo "<div style='padding-top:0px;'>";
+	
+	// Create new tool table
+	$tbl = new CToolTable;
+	
+	// Create table headers
+	$tbl->StartHeaders();
+	$tbl->AddHeader("#", 'center', '25px');
+	$tbl->AddHeader("Title");
+	$tbl->AddHeader("Date", 'center', '140px');
+	$tbl->AddHeader("Time", 'center', '80px');
+	$tbl->AddHeader("Published", 'center', '80px');
+	$tbl->AddHeader("Comments", 'center', '80px');
+	$tbl->AddHeader("Edit", 'center', '40px');
+	$tbl->AddHeader("Delete", 'center', '50px');
+	$tbl->EndHeaders();
+	
+	$result = $dbh->Query("select id, title, data, publish, 
+							to_char(time_entered, 'MONTH DD YYYY') as date,
+							to_char(time_entered, 'HH12:MI:SS am') as time
+							from blog_articles where blog_id='$BID'
+							order by time_entered DESC");
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$id = $row['id'];
+		$title = $row['title'];
+		$deletelink = "<a href=\"JavaScript:DeletePost('$id', '".rawurlencode($title)."')\" class='TableLinksAlert'>";
+		
+		$tbl->StartRow();
+		$tbl->AddCell($i+1, NULL, 'center');
+		$tbl->AddCell($title);
+		$tbl->AddCell($row['date'], NULL, 'center');
+		$tbl->AddCell($row['time'], NULL, 'center');
+		$tbl->AddCell(($row['publish'] == 't') ? 'yes' : 'no', NULL, 'center');
+		$tbl->AddCell(BlogGetNumArticleComments(&$dbh, $id), NULL, 'center');
+		$tbl->AddCell(ButtonCreate("edit", "document.location='blog_edit_post.awp?bid=$BID&postid=$id'"));
+		$tbl->AddCell($deletelink."<img src='/images/themes/".UserGetTheme(&$dbh, $USERID, 'name')."/deleteTask.gif' border='0' title='Delete'></a>", true, 'center');
+		$tbl->EndRow();
+	}
+	$dbh->FreeResults($result);
+	
+	$tbl->PrintTable();
+
+	echo "</div>";
+?>

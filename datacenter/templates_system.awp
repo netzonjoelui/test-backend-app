@@ -1,0 +1,91 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../users/user_functions.php");
+	require_once("datacenter_functions.awp");
+
+	$dbh = new CDatabase();
+
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	
+	$ADC_TEMPLATES = array();
+
+	$ADC_TEMPLATES['web_usage'] = array(
+		
+		"CREATE TABLE zudb_$DBID.page_views(id serial NOT NULL, date date, count int8, 
+		 page text, CONSTRAINT page_views_pkey PRIMARY KEY (id))",
+
+		"CREATE TABLE zudb_$DBID.referrers(id serial NOT NULL, date date, site text, variables text,
+		 count int8, CONSTRAINT referrers_pkey PRIMARY KEY (id))",
+		
+		"CREATE TABLE zudb_$DBID.visits(date date, type_id int4, count int8,
+		 id serial NOT NULL, CONSTRAINT visits_pkey PRIMARY KEY (id))",
+
+		"insert into dc_database_users(database_id, name, password) values('$DBID', 'public', 'password')",
+
+		"insert into dc_database_report_graphs(database_id, name, query, caption, xaxisname, yaxisname, graph_name, series_num) 
+		  values('$DBID', 'Visits by New and Returning', '".$dbh->Escape("select 'new' as type, year, month, sum(count) as count
+				 from (select extract('year' from visits.date) as year, extract('month' from visits.date) as month,
+				 extract('day' from visits.date) as day, count from visits where type_id='1' 
+				 and extract('month' from visits.date) = extract('month' from now())
+				 and extract('year' from visits.date) = extract('year' from now())) as t group by t.year, t.month
+					union all
+				 select 'returning' as type, year, month, sum(count) as count from (select extract('year' from visits.date) as year, 
+				 extract('month' from visits.date) as month, extract('day' from visits.date) as day, count from visits where 
+				 type_id='2' and extract('month' from visits.date) = extract('month' from now())
+				 and extract('year' from visits.date) = extract('year' from now())) as t
+				 group by t.year, t.month")."', 'Visits This Month', '', '', 'Pie3D', '2');
+		 insert into dc_database_report_graph_cols(graph_id, name, type) values(currval('dc_database_report_graphs_id_seq'),
+				'count', '2');
+		 insert into dc_database_report_graph_cols(graph_id, name, type) values(currval('dc_database_report_graphs_id_seq'),
+				'year', '1');",
+			
+		"insert into dc_database_report_graphs(database_id, name, query, caption, xaxisname, yaxisname, graph_name, series_num) 
+		  values('$DBID', 'Monthly Usage', '".$dbh->Escape("select visits_t.year, visits_t.month, sum(visits_t.count) as visits,
+					sum(views_t.count) as views from (select extract('year' from visits.date) as year, 
+					extract('month' from visits.date) as month, extract('day' from visits.date) as day,
+					sum(count) as count from visits where extract('month' from visits.date) = extract('month' from now())
+					and extract('year' from visits.date) = extract('year' from now()) group by visits.date
+					) as visits_t, (select extract('year' from page_views.date) as year, 
+					extract('month' from page_views.date) as month, extract('day' from page_views.date) as day,
+					sum(count) as count from page_views where extract('month' from page_views.date) = extract('month' from now())
+					and extract('year' from page_views.date) = extract('year' from now()) group by page_views.date
+					) as views_t where views_t.year = visits_t.year and views_t.month = visits_t.month and views_t.day = visits_t.day
+					group by visits_t.year, visits_t.month order by year, month limit 12")."', 'Monthly Usage', '', '', 'MSLine', '1');
+		 insert into dc_database_report_graph_cols(graph_id, name, type) values(currval('dc_database_report_graphs_id_seq'),
+				'views', '2');
+		 insert into dc_database_report_graph_cols(graph_id, name, type) values(currval('dc_database_report_graphs_id_seq'),
+				'visits', '2');
+		 insert into dc_database_report_graph_cols(graph_id, name, type) values(currval('dc_database_report_graphs_id_seq'),
+				'month', '1');
+		 insert into dc_database_report_graph_cols(graph_id, name, type) values(currval('dc_database_report_graphs_id_seq'),
+				'year', '1');",
+
+		"insert into dc_database_report_graphs(database_id, name, query, caption, xaxisname, yaxisname, graph_name, series_num) 
+		  values('$DBID', 'Daily Usage', '".$dbh->Escape("select visits_t.year, visits_t.month, visits_t.day, sum(visits_t.count) as visits,
+					sum(views_t.count) as views from (select extract('year' from visits.date) as year, extract('month' from visits.date) as month,
+					extract('day' from visits.date) as day, sum(count) as count from visits where 
+					extract('month' from visits.date) = extract('month' from now()) and extract('year' from visits.date) = extract('year' from now())
+					group by visits.date) as visits_t, (select extract('year' from page_views.date) as year, 
+					extract('month' from page_views.date) as month, extract('day' from page_views.date) as day,
+					sum(count) as count from page_views where extract('month' from page_views.date) = extract('month' from now())
+					and extract('year' from page_views.date) = extract('year' from now()) group by page_views.date) as views_t
+					where views_t.year = visits_t.year and views_t.month = visits_t.month and views_t.day = visits_t.day
+					group by visits_t.year, visits_t.month, visits_t.day order by year, month, day
+					limit 5")."', 'Daily Usage', '', '', 'MSLine', '5');
+	 	 insert into dc_database_report_graph_cols(graph_id, name, type) values(currval('dc_database_report_graphs_id_seq'),
+				'views', '2');
+		 insert into dc_database_report_graph_cols(graph_id, name, type) values(currval('dc_database_report_graphs_id_seq'),
+				'visits', '2');
+		 insert into dc_database_report_graph_cols(graph_id, name, type) values(currval('dc_database_report_graphs_id_seq'),
+			 	'year', '1');
+		 insert into dc_database_report_graph_cols(graph_id, name, type) values(currval('dc_database_report_graphs_id_seq'),
+				'month', '1');
+		 insert into dc_database_report_graph_cols(graph_id, name, type) values(currval('dc_database_report_graphs_id_seq'),
+				'day', '1');"
+		
+	);
+?>

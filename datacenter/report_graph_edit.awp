@@ -1,0 +1,773 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("datacenter_functions.awp");
+
+	$dbh = new CDatabase();
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+
+	$GID = $_GET['gid'];
+	$DBID = $_GET['dbid'];
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+	<title>Table Properties</title>
+	<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme($dbh, $USERID, 'css'); ?>">
+
+	<?php
+		include("../lib/aereus.lib.js/js_lib.php");
+	?>
+	<script language='javascript' type='text/javascript'>
+	var g_gid = <?php print(($GID) ? $GID : 'null'); ?>;
+	var g_dbid = <?php print($DBID); ?>;
+	var g_theme = "<?php echo UserGetTheme($dbh, $USERID, 'name'); ?>";
+
+	// Get series colors
+	<?php
+	$buf = "";
+	foreach ($dc_graphcolors as $cname=>$cvalue)
+	{
+		if ($buf) $buf .= ",";
+
+		$buf .= "[\"$cname\", \"$cvalue\"]";
+	}
+	?>	
+	var g_seriesColors = [<?php print($buf); ?>];	
+	// database database
+	var dbh = new CAdcClient("/datacenter/xml_query.awp", g_dbid);
+
+	// Add table
+	var g_tbl = new CToolTable("100%");
+	var g_cols = new Array();	// Array of col attribs
+	var g_numrows = 1;			// Total number of rows
+	var g_txtQuery = null;		// textarea holding query
+	var g_rescon = null;		// Results container
+	var g_graphcon = null;		// Container holding swf graph
+	var g_colcon = null;		// Columns container
+	var g_colorcon = null;		// Color container
+	var g_addcon = null;		// Container for additional options
+	var g_stylecon = null;		// Style container
+	var g_graphTabs = null;		// Graph details tabs
+	var g_previewTabs = null;	// Graph and data preview tabs
+	var g_graphData = new Object();
+	var con_right = null;
+	var con_main = null;
+	var g_series_arr_colors = new Array();
+
+	function checkforid()
+	{
+		if (!g_gid)
+		{
+			var cb_fun = function(id)
+			{
+				g_gid = id;
+				loadData();
+			};
+			var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "report_creat_tmp_graph", [["dbid", g_dbid]], cb_fun);
+		}
+		else
+		{
+			loadData();
+		}
+	}
+
+	function renameGraph()
+	{
+		var showname = (g_graphData.name != "~tmpgraph") ? g_graphData.name : "my graph";
+		var name = prompt("Graph name", showname);
+		if (name)
+		{
+			var cb = function(res)
+			{
+				g_graphData.name = name;
+
+				// Save changes to opener window
+				if(opener.top.location)
+				{
+					if (opener.top)
+					{
+						var app = opener.top.Ant.getPopupHandle("adc_open_db");
+					}
+					else
+						var app = opener.Ant.getPopupHandle("adc_open_db");
+
+					app.tabReports(app.m_conRpt);
+				}
+			}
+			var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "report_rename_graph", 
+								   [["dbid", g_dbid], ["gid", g_gid], ["name", name]], cb);
+		}
+	}
+
+	function loadData()
+	{
+		var ajax = new CAjax();
+		ajax.onload = function(root)
+		{
+			var name = "";
+			var query = "";
+			var caption = "";
+			var subcaption = "";
+			var xaxisname = "";
+			var yaxisname = "";
+			var number_prefix = "";
+			var decimal_precision = "";
+			var graph_name = "";
+			var query = "";
+
+			var num = root.getNumChildren();
+			for (i = 0; i < num; i++)
+			{
+				var child = root.getChildNode(i);
+				switch (child.m_name)
+				{
+				case "name":
+					name = (child.m_text) ? unescape(child.m_text) : "";
+					break;
+				case "query":
+					query = (child.m_text) ? unescape(child.m_text) : "";
+					break;
+				case "caption":
+					caption = (child.m_text) ? unescape(child.m_text) : "";
+					break;
+				case "subcaption":
+					subcaption = (child.m_text) ? unescape(child.m_text) : "";
+					break;
+				case "xaxisname":
+					xaxisname = (child.m_text) ? unescape(child.m_text) : "";
+					break;
+				case "yaxisname":
+					yaxisname = (child.m_text) ? unescape(child.m_text) : "";
+					break;
+				case "number_prefix":
+					number_prefix = (child.m_text) ? unescape(child.m_text) : "";
+					break;
+				case "decimal_precision":
+					decimal_precision = (child.m_text) ? unescape(child.m_text) : "";
+					break;
+				case "graph_name":
+					graph_name = (child.m_text) ? unescape(child.m_text) : "";
+					break;
+				case "query":
+					query = (child.m_text) ? unescape(child.m_text) : "";
+					break;
+				}				
+			}
+			
+			g_graphData.name = name;
+			g_graphData.caption = caption;
+			g_graphData.subcaption = subcaption;
+			g_graphData.xaxisname = xaxisname;
+			g_graphData.yaxisname = yaxisname;
+			g_graphData.numberPrefix = number_prefix;
+			g_graphData.decimalPrecision = decimal_precision;
+			g_graphData.graphName = graph_name;
+			g_graphData.query = query;
+
+			main();
+			if (query)
+				runQuery();
+		};
+
+		ajax.exec("/datacenter/xml_getgraph.awp?gid="+g_gid);
+
+	}
+
+	function main()
+	{
+		var tb = new CToolbar();
+		var btn = new CButton("Close", "window.close();", null, "b1");
+		tb.AddItem(btn.getButton(), "left");
+		var btn = new CButton("Save Graph", renameGraph, null, "b2");
+		tb.AddItem(btn.getButton(), "left");
+		tb.print(document.getElementById('toolbar'));
+
+		var con = document.getElementById("bdy");
+
+		var appcon = new CSplitContainer();
+		appcon.resizable = true;
+	
+		con_main = appcon.addPanel("*");;
+		con_right = appcon.addPanel("200px");
+		appcon.print(con);
+
+		buildBody(con_main);
+
+		buildRight(con_right);
+	}
+
+	function buildBody(con)
+	{
+		var frm1 = new CWindowFrame("Build Graph", null, "3px", "100%");
+		var frmcon = frm1.getCon();
+		frm1.print(con);
+		
+		g_graphTabs = new CTabs();
+
+		// Query
+		var tabcon1 = g_graphTabs.addTab("Query");
+		tabQuery(tabcon1);
+		// Columns
+		g_colcon = g_graphTabs.addTab("Columns");
+		tabColumns(g_colcon);
+		// Title
+		var tabcon3 = g_graphTabs.addTab("Captions");
+		tabCaptions(tabcon3);
+		// Style
+		g_stylecon = g_graphTabs.addTab("Graph Style");
+		tabGraphStyles(g_stylecon);
+		// Colors
+		g_colorcon = g_graphTabs.addTab("Colors");
+		tabColors(g_colorcon);
+		// Additional
+		g_addcon = g_graphTabs.addTab("Additional Options");
+		tabAdditional(g_addcon);
+
+		g_graphTabs.print(frmcon);
+
+		buildPreview(con);	
+	}
+
+	function buildPreview(con)
+	{
+		var frm = new CWindowFrame("Graph Preview", null, "3px");
+		var frmcon = frm.getCon();
+		frm.print(con);
+
+		// Creat tabs
+		g_previewTabs = new CTabs();
+		// Query
+		g_rescon = g_previewTabs.addTab("Data");
+		g_rescon.innerHTML = "Preview will show here once parameters are defined above";
+		// Columns
+		g_graphcon = g_previewTabs.addTab("Graph");
+		g_graphcon.innerHTML = "Columns must be selected above before a graph can be built.";
+		g_previewTabs.print(frmcon);
+	}
+
+	function tabQuery(con)
+	{
+		// Add Toolbar
+		var tb = new CToolbar();
+		var btn = new CButton("Apply", function(){runQuery(1);}, null, "b2");
+		tb.AddItem(btn.getButton(), "left");
+		var btn = new CButton("Run Query", function(){runQuery();}, null, "b1");
+		tb.AddItem(btn.getButton(), "left");
+		tb.print(con);
+
+		g_txtQuery = ALib.m_document.createElement("textarea");
+		g_txtQuery.rows = '15';
+		if (g_graphData.query)
+			g_txtQuery.value = g_graphData.query;
+		else
+			g_txtQuery.value = "-- Enter query here";
+		alib.dom.styleSet(g_txtQuery, "width", "99%");
+		con.appendChild(g_txtQuery);
+	}
+	
+	function tabColumns(con)
+	{
+		// Clear container
+		con.innerHTML = "";
+
+		// Add Toolbar
+		var tb = new CToolbar();
+		
+		var btn = new CButton("Apply", function(){loadGraph();tabGraphStyles(g_stylecon);g_graphTabs.selectTab(2);}, null, "b2");
+		tb.AddItem(btn.getButton(), "left");
+		tb.print(con);
+
+		if (g_cols.length)
+		{
+			var tbl = new CToolTable("100%");
+			tbl.addHeader("Column");
+			tbl.addHeader("Type", "center", "100px");
+			tbl.addHeader("Ignore", "center", "75px");
+			tbl.addHeader("Series Name", "center", "75px");
+			tbl.addHeader("Graph Value", "center", "75px");
+
+			num = g_cols.length;
+			for (var i = 0; i < num; i++)
+			{
+				var rw = tbl.addRow();
+				rw.addCell(g_cols[i].name);
+				rw.addCell(g_cols[i].type_name, false, "center");
+
+				rw.addCell("<input type='radio' name='col"+i+"' value='' onclick=\"updateColValue('"+g_cols[i].name+"', this.value)\" checked />", false, "center");
+				rw.addCell("<input type='radio' name='col"+i+"' value='name' onclick=\"updateColValue('"+g_cols[i].name+"', this.value)\" />", false, "center");
+				// Try to limit data col to numbers
+				var inp = "<input type='radio' name='col"+i+"' value='data' ";
+				inp += "onclick=\"updateColValue('"+g_cols[i].name+"', this.value)\" ";
+				if (g_cols[i].type_id && (g_cols[i].type_id == '1' || g_cols[i].type_id == '3'
+					|| g_cols[i].type_id == '4' || g_cols[i].type_id == '6'))
+				{
+					inp += " disabled";
+				}
+				rw.addCell(inp+" />", false, "center");
+			}
+
+			tbl.print(con);
+		}
+		else
+		{
+			var dv = ALib.m_document.createElement("div");
+			dv.innerHTML = "Please define your query first and click 'Next'";
+			con.appendChild(dv);
+		}
+	}
+
+	function updateColValue(col, value)
+	{
+		var type = -1;
+		switch(value)
+		{
+		case 'name':
+			type = 1;
+			break;
+		case 'data':
+			type = 2;
+			break;
+		}
+
+		var cb_fun = function(id)
+		{
+			//loadGraph(); // Now handled with apply button
+		};
+		var args = [["dbid", g_dbid], ["colname", col], ["gid", g_gid], ["type", type]];
+		var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "report_graph_ucol", args, cb_fun);
+	}
+
+	function tabCaptions(con)
+	{
+		// Add Toolbar
+		var tb = new CToolbar();
+		var btn = new CButton("Apply", saveCaptions, null, "b2");
+		tb.AddItem(btn.getButton(), "left");
+		tb.print(con);
+
+		var tbl = new CToolTable("100%");
+		// Main caption
+		var rw = tbl.addRow();
+		rw.addCell("Main Caption:");
+		var txtInput = ALib.m_document.createElement("input");
+		txtInput.type = "text";
+		txtInput.value = g_graphData.caption;
+		txtInput.onchange = function() { g_graphData.caption = this.value;};
+		rw.addCell(txtInput);
+		rw.addCell("Main graph caption");
+		// Sub Caption
+		var rw = tbl.addRow();
+		rw.addCell("Sub Caption:");
+		var txtInput = ALib.m_document.createElement("input");
+		txtInput.type = "text";
+		txtInput.value = g_graphData.subcaption;
+		txtInput.onchange = function() { g_graphData.subcaption = this.value;};
+		rw.addCell(txtInput);
+		rw.addCell("Desc");
+		// Xaxis name
+		var rw = tbl.addRow();
+		rw.addCell("X Axis Name:");
+		var txtInput = ALib.m_document.createElement("input");
+		txtInput.type = "text";
+		txtInput.value = g_graphData.xaxisname;
+		txtInput.onchange = function() { g_graphData.xaxisname = this.value;};
+		rw.addCell(txtInput);
+		rw.addCell("Desc");
+		// Yaxis name
+		var rw = tbl.addRow();
+		rw.addCell("Y Axis Name:");
+		var txtInput = ALib.m_document.createElement("input");
+		txtInput.type = "text";
+		txtInput.value = g_graphData.yaxisname;
+		txtInput.onchange = function() { g_graphData.yaxisname = this.value;};
+		rw.addCell(txtInput);
+		rw.addCell("Desc");
+		// Number prefix
+		var rw = tbl.addRow();
+		rw.addCell("Number Prefix:");
+		var txtInput = ALib.m_document.createElement("input");
+		txtInput.type = "text";
+		txtInput.value = g_graphData.numberPrefix;
+		txtInput.onchange = function() { g_graphData.numberPrefix = this.value;};
+		rw.addCell(txtInput);
+		rw.addCell("Desc");
+		// Decimal Precision
+		var rw = tbl.addRow();
+		rw.addCell("Decimal Precision:");
+		var txtInput = ALib.m_document.createElement("input");
+		txtInput.type = "text";
+		txtInput.value = g_graphData.decimalPrecision;
+		txtInput.onchange = function() { g_graphData.decimalPrecision = this.value;};
+		rw.addCell(txtInput);
+		rw.addCell("Desc");
+		tbl.print(con);
+	}
+
+	function saveCaptions()
+	{
+		// Save captions to database and apply changes to graph
+		var cb_fun = function(res)
+		{
+			loadGraph();
+			g_graphTabs.selectTab(3);
+		};
+		var args = [["gid", g_gid], ["dbid", g_dbid], ["caption", g_graphData.caption], ["subcaption", g_graphData.subcaption], 
+					["xaxisname", g_graphData.xaxisname], ["yaxisname", g_graphData.yaxisname], 
+					["numberPrefix", g_graphData.numberPrefix], ["decimalPrecision", g_graphData.decimalPrecision]];
+		var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "report_graph_save_caption", args, cb_fun);
+	}
+
+	function tabGraphStyles(con)
+	{
+		con.innerHTML = "";
+
+		// Add Toolbar
+		var tb = new CToolbar();
+		var btn = new CButton("Apply", function(){tabColors(g_colorcon);g_graphTabs.selectTab(4);}, null, "b2");
+		tb.AddItem(btn.getButton(), "left");
+		tb.print(con);
+	
+		if (g_cols.length)
+		{
+			var tbl = new CToolTable("100%");
+			tbl.print(con);
+			tbl.addHeader("Type", "left", "100px");
+			tbl.addHeader("Title");
+			tbl.addHeader("Use", "center", "25px");
+
+			var ajax = new CAjax();
+			ajax.m_tbl = tbl;
+			ajax.onload = function(root)
+			{
+				var num = root.getNumChildren();
+				for (i = 0; i < num; i++)
+				{
+					var name = "";
+					var title = "";
+					var category = "";
+
+					var child = root.getChildNode(i);
+					if (child.m_name == "graph")
+					{
+						var rw = this.m_tbl.addRow();
+
+						var num_vars = child.getNumChildren();
+						for (j = 0; j < num_vars; j++)
+						{
+							var dbattr = child.getChildNode(j);
+							switch (dbattr.m_name)
+							{
+							case "name":
+								name = (dbattr.m_text) ? unescape(dbattr.m_text) : "";
+								break;
+							case "title":
+								title = (dbattr.m_text) ? unescape(dbattr.m_text) : "";
+								break;
+							case "category":
+								category = (dbattr.m_text) ? unescape(dbattr.m_text) : "";
+								break;
+							}
+						}
+
+						rw.addCell(category);
+						rw.addCell(title);
+						var inpt = ALib.m_document.createElement("input");
+						inpt.type = "radio";
+						inpt.name = "use_graph";
+						inpt.value = name;
+						if (g_graphData.graph_name == name)
+							inpt.checked = true;
+
+						inpt.onchange = function()
+						{
+							var cb = function(id)
+							{
+								loadGraph();
+							}
+
+							var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "report_graph_set", 
+									   			   [["dbid", g_dbid], ["gid", g_gid], ["graph", this.value]], cb);
+
+						}
+						rw.addCell(inpt);
+					}
+				}
+			};
+
+			ajax.exec("/datacenter/xml_getgraphslist.awp?gid="+g_gid);
+		}
+		else
+		{
+			var dv = ALib.m_document.createElement("div");
+			dv.innerHTML = "Please define your query first";
+			con.appendChild(dv);
+		}
+	}
+
+	function tabColors(con)
+	{
+		con.innerHTML = "";
+
+		// Add Toolbar
+		var tb = new CToolbar();
+		var btn = new CButton("Apply", function() {tabAdditional(g_addcon);g_graphTabs.selectTab(5);}, null, "b2");
+		tb.AddItem(btn.getButton(), "left");
+		tb.print(con);
+
+		if (g_cols.length)
+		{
+			// Get colors array
+			var cb = function(data)
+			{
+				// Assign data
+				g_series_arr_colors = eval(data);
+				if (g_series_arr_colors.length)
+				{
+					var tbl = new CToolTable("100%");
+					tbl.print(g_colorcon);
+
+					// Build option table
+					for (var i = 0; i < g_series_arr_colors.length; i++)
+					{
+						var name = g_series_arr_colors[i][0];
+						var color = g_series_arr_colors[i][1];
+						var action = g_series_arr_colors[i][2];
+						
+						// Build color dropdown
+						sel = ALib.m_document.createElement("select");
+						for (var j = 0; j < g_seriesColors.length; j++)
+						{
+							var isact = (g_seriesColors[j][1] == color) ? true : false;
+							var opt = new Option(g_seriesColors[j][0], g_seriesColors[j][1], isact);
+							sel[sel.length] = opt;
+							alib.dom.styleSet(opt, "background-color", '#'+g_seriesColors[j][1]);
+						}
+						
+						if ("report_set_ms_color" == action)
+						{
+							sel.m_name = name;
+							sel.onchange = function()
+							{
+								g_graphcon.innerHTML = "Loading...";
+								var args = [["dbid", g_dbid], ["gid", g_gid], ["colname", this.m_name], ["color", this.value]];
+								var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", action, args, loadGraph);
+							}
+						}
+						else
+						{
+							sel.m_index = i;
+							sel.onchange = function()
+							{
+								g_graphcon.innerHTML = "Loading...";
+								var args = [["dbid", g_dbid], ["gid", g_gid], ["index", this.m_index], ["color", this.value]];
+								var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", action, args, loadGraph);
+							}
+						}
+
+						var rw = tbl.addRow();
+						rw.addCell(name);
+						rw.addCell(sel);
+					}
+				}
+			}
+			var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "report_graph_get_colors", 
+								   [["dbid", g_dbid], ["gid", g_gid]], cb);
+
+		}
+		else
+		{
+			var dv = ALib.m_document.createElement("div");
+			dv.innerHTML = "Please define your query";
+			con.appendChild(dv);
+		}
+	}
+
+	function tabAdditional(con)
+	{
+		con.innerHTML = "";
+
+		// Add Toolbar
+		var tb = new CToolbar();
+		var btn = new CButton("Apply", loadGraph, null, "b2");
+		tb.AddItem(btn.getButton(), "left");
+		tb.print(con);
+
+		if (g_cols.length)
+		{
+			// Get options array
+			var cb = function(data)
+			{
+				// Assign data
+				var options = eval(data);
+				if (options.length)
+				{
+					var tbl = new CToolTable("100%");
+					tbl.print(g_addcon);
+
+					// Build option table
+					for (var i = 0; i < options.length; i++)
+					{
+						var rw = tbl.addRow();
+						rw.addCell(options[i][1]);
+						switch (options[i][3])
+						{
+						default:
+							if (options[i][4].length)
+							{
+								var inp = ALib.m_document.createElement("select");
+								for (var j = 0; j < options[i][4].length; j++)
+								{
+									var isact = (options[i][2] == options[i][4][j][1]) ? true : false;
+									inp[j] = new Option(options[i][4][j][0], options[i][4][j][1], isact);
+								}
+								inp.m_name = options[i][0];
+								inp.onchange = function()
+								{
+									var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "report_graph_set_option", 
+														   [["dbid", g_dbid], ["gid", g_gid], ["name", this.m_name], ["value", this.value]]);
+								}
+							}
+							else
+							{
+								var inp = ALib.m_document.createElement("input");
+								inp.type = "text";
+								inp.value = options[i][2];
+								inp.m_name = options[i][0];
+								inp.onchange = function()
+								{
+									var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "report_graph_set_option", 
+														   [["dbid", g_dbid], ["gid", g_gid], ["name", this.m_name], ["value", this.value]]);
+								}
+							}
+							break;
+						}
+						rw.addCell(inp);
+						rw.addCell(options[i][3]);
+					}
+				}
+			}
+			var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "report_graph_get_options", 
+								   [["dbid", g_dbid], ["gid", g_gid]], cb);
+
+		}
+		else
+		{
+			var dv = ALib.m_document.createElement("div");
+			dv.innerHTML = "Please define your query";
+			con.appendChild(dv);
+		}
+	}
+
+	function buildRight(con)
+	{
+		var frm1 = new CWindowFrame("More Info", null, "3px");
+		var frmcon = frm1.getCon();
+		frm1.print(con);
+
+		frmcon.innerHTML = "Chart styles go here";
+	}
+
+	function runQuery(advance)
+	{
+		if (g_txtQuery.value)
+		{
+			loadTable(g_txtQuery.value);
+			g_graphData.query = g_txtQuery.value;
+
+			if (advance)
+			{
+				// Save changed
+				var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "report_graph_save_query", 
+									   [["dbid", g_dbid], ["gid", g_gid], ["query", g_txtQuery.value]]);
+				
+				g_graphTabs.selectTab(1);
+			}
+		}
+	}
+	
+	function loadTable(query)
+	{	
+		g_numrows = 1;
+
+		// Clean table con
+		clearTable();
+		
+		// Create table
+		g_tbl = new CToolTable("100%");
+		g_cols = new Array();
+
+		dbh.onload = function()
+		{
+			var num = null;
+			
+			num = this.getNumCols();
+			for (var i = 0; i < num; i++)
+			{
+				var col = this.getCol(i);
+				g_tbl.addHeader(col.name);
+
+				var ind = g_cols.length;
+				g_cols[ind] = new Object();
+				g_cols[ind].uid = col.id;
+				g_cols[ind].name = col.name;
+				g_cols[ind].notes = col.notes;
+				g_cols[ind].type_name = col.type_name;
+				g_cols[ind].type_id = col.type_id;
+			}	
+
+			num = this.getNumRows();
+			for (var i = 0; i < num; i++)
+			{
+				var rw = g_tbl.addRow();
+
+				// Loop through cols (skip id, start with 1)
+				for (var j = 0; j < this.getNumCols(); j++)
+				{
+					var col = this.getCol(j);
+					rw.addCell(unescape(this.getValue(i, j)));
+				}
+			}
+
+			// clear onload
+			this.onload = function() {}
+			g_tbl.print(g_rescon);
+
+			// Populate columns & styles
+			tabColumns(g_colcon);
+		}
+		dbh.query(query);
+	}
+	
+	function clearTable()
+	{	
+		g_tbl = null;
+		g_cols = null;
+		g_rescon.innerHTML = "";
+	}
+
+	
+	
+	function loadGraph()
+	{	
+		g_graphcon.innerHTML = "Loading...";
+
+		var cb_fun = function(obj)
+		{
+			g_graphcon.innerHTML = obj;
+			g_previewTabs.selectTab(1);
+		};
+		var rpc = new CAjaxRpc("/datacenter/xml_actions.awp", "report_graph_get_obj", [["gid", g_gid], ["width", 500]], cb_fun);
+	}
+	</script>
+</head>
+
+<body onload='checkforid()' class='popup'>
+<div id='toolbar' class='popup_toolbar'></div>
+<div id='bdy' class='popup_body'></div>
+</body>
+</html>

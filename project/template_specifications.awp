@@ -1,0 +1,47 @@
+<?php
+	if ($_POST['save_template'])
+	{
+		if ($_POST['tname'])
+		{
+			$query = "update project_templates set name='".$_POST['tname']."', notes='".$_POST['notes']."' where id='$TMPID'";
+			$dbh->Query($query);
+			$status_message = "Changes saved!";
+		}
+		else
+			$status_message = "Please enter a name!";
+	}
+	
+	$query = "select name, notes from project_templates where id='$TMPID'";
+	$result = $dbh->Query($query);
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		$name = $row['name'];
+		$notes = $row['notes'];
+		$dbh->FreeResults($result);
+	}
+	
+	echo "<form name='edit_template' action='template.awp?$FWDVARS' method='post'>"; 
+	
+	WindowFrameToolbarStart('100%');
+	echo "<div>
+			".ButtonCreate("Save Changes", "SUBMIT:edit_template:save_template");
+	if ($RETPAGE)		
+		echo ButtonCreate("Go Back", "document.location='".base64_decode($RETPAGE)."'", "b2");
+	echo "<div style='float:right;color:#990000;padding-right:3px;font-weight:bold;font-size:14px;'>$status_message</div>";		
+	echo "</div>";
+	WindowFrameToolbarEnd();	
+
+		//Begin layout table
+		echo "<div style='padding-top:10px;'>
+			  <table cellspacing='0' cellpadding='0' align='center' border='0' width='100%'>
+				<tr>
+					<td valign='top'>";
+		WindowFrameStart("Details", "100%");
+		echo "<table cellpadding='0' cellspacing='5' align='left' border='0' width='100%' class='field'>
+		  	  <tr valign='top'><td width='90' nowrap align='right' style='font-weight:bold;'>Template Name:</td><td><input type='text' name='tname' style='width:100%;' value='$name'></td></tr>
+		  	  <tr valign='top'><td width='90' nowrap align='right' style='font-weight:bold;'>Description:</td><td><textarea name='notes' style='width:100%;' rows='6'>$notes</textarea></td></tr></table>";
+		WindowFrameEnd();
+		echo "</td></tr></table></div>";	
+	echo "</form>";
+?>

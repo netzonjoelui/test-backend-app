@@ -1,0 +1,1231 @@
+<?php
+global $DEFINE_FILE_FUNCTIONS;
+
+if (!$DEFINE_FILE_FUNCTIONS)
+{
+	$ANTFS_FOLDER_ACLS = array("View Files", "Edit Files", "Delete Files", "View Folders", "Edit Folders", "Delete Folders", "Manage Permissions");
+
+	$DEFINE_FILE_FUNCTIONS = true;
+	
+	$g_special_categories = array("Email Attachments", "Contact Files", "Project Files", "Temporary Files");
+
+	require_once(dirname(__FILE__).'/../lib/aereus.lib.php/CAnsClient.php');
+	require_once(dirname(__FILE__).'/../lib/Dacl.php');
+	
+	function UserFilesRemoveFile(&$dbh, $file_id, $USERID, $replace=false, $harddelete=false)
+	{
+		global $settings_account_number, $ALIB_ANS_SERVER;
+        $dbh->Query("update user_files set f_deleted='t', time_updated='now' where id='$file_id' ");
+		if ($replace)
+		{
+			$result = $dbh->Query("insert into user_files(file_name, file_title, user_id, category_id, file_size, time_updated, 
+															file_type, revision, f_deleted, ans_key)
+									 select file_name, file_title, user_id, category_id, file_size, time_updated, file_type, revision, f_deleted, ans_key 
+									 from user_files where id='$file_id'; select currval('user_files_id_seq') as fid;");
+			if ($dbh->GetNumberRows($result))
+			{
+				$new_file_id = $dbh->GetValue($result, 0, "fid");
+
+				$result = $dbh->Query("select remote_file, category_id from user_files where id='$new_file_id'");
+				$row = $dbh->GetRow($result, 0);
+
+				$acid = UserFilesGetCatAccount($dbh, $row['category_id']);
+
+				if ($row['remote_file'] && $ALIB_ANS_SERVER)
+				{
+					$ans = new CAnsCLient();
+
+					// TODO: the below is only temp until all ans files are moved to /folder/acct from acct/key
+					// Only the first option is really the viable solution
+					UserFilesFixAns($row['remote_file'], $file_id, $acid);
+					$ans->fileRenameKey($row['remote_file'], $file_id, "/userfiles/$acid", $new_file_id);
+				}
+			}
+		}
+
+		if ($harddelete)
+		{
+			$result = $dbh->Query("select file_name, file_title, user_id, category_id, ans_key,
+							   		remote_file from user_files where id='$file_id'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$acid = UserFilesGetCatAccount($dbh, $row['category_id']);
+				$target_dir = AntConfig::getInstance()->data_path."/$settings_account_number/userfiles";
+
+				if ($row['user_id'])
+					$target_dir .= "/".$row['user_id'];
+					
+				if ($row['file_name'])
+				{
+					if (file_exists("$target_dir/".$row['file_name']))
+					{
+						unlink("$target_dir/".$row['file_name']);
+					}
+				}
+
+				if ($row['remote_file'] && $acid && $ALIB_ANS_SERVER)
+				{
+					$ans = new CAnsCLient();
+					$ans->deleteFile($row['remote_file'], $file_id, "/userfiles/$acid");
+				}
+
+				if ($row['ans_key'] && $ALIB_ANS_SERVER)
+				{
+					$ans = new AnsCLient();
+					$ans->delete($row['ans_key']);
+				}
+			}
+			$dbh->FreeResults($result);
+
+			$dbh->Query("update user_files set f_deleted='t', f_purged='t', remote_file=NULL where id='".$file_id."'");
+		}
+	}
+
+	function UserFilesUndelete($dbh, $file_id, $userid)
+	{
+		$dbh->Query("update user_files set f_deleted='f' where id='$file_id'");
+	}
+
+	function UserFilesFixAns($title, $file_id, $acid)
+	{
+		$ans = new CAnsCLient();
+		if ($ans->fileVerify($title, $file_id, "/userfiles/$acid"))
+		{
+			return true;
+		}
+		else if ($ans->fileVerify($title, $acid."/".$file_id, "/userfiles"))
+		{
+			$ans->fileMove($title, $acid."/".$file_id, "/userfiles", "/userfiles/$acid");
+			$ans->fileRenameKey($title, $acid."/".$file_id, "/userfiles/$acid", $file_id);
+			//$dbh->Query("update user_files set f_ans_cleaned='t' where id='".$file_id."'");
+		}
+		else
+		{
+			$ans->fileMove($title, $file_id, "/userfiles", "/userfiles/$acid");
+			$ans->fileRenameKey($title, $file_id, "/userfiles/$acid", $file_id);
+			//$dbh->Query("update user_files set f_ans_cleaned='t' where id='".$file_id."'");
+		}	
+	}
+		
+	function UserFilesCheckDirectory($USERID, $aid=null)
+	{
+		global $settings_account_number ;
+
+		if (!$aid)
+			$aid = $settings_account_number;
+
+		$target_dir = AntConfig::getInstance()->data_path;
+		if (!file_exists($target_dir))
+		{
+			mkdir($target_dir, 0777);
+			chmod($target_dir, 0777);
+		}
+
+		$target_dir = AntConfig::getInstance()->data_path."/$aid";
+		if (!file_exists($target_dir))
+		{
+			mkdir($target_dir, 0777);
+			chmod($target_dir, 0777);
+		}
+			
+		$target_dir = AntConfig::getInstance()->data_path."/$aid/userfiles";
+		if (!file_exists($target_dir))
+		{
+			mkdir($target_dir, 0777);
+			chmod($target_dir, 0777);
+		}
+			
+		$target_dir .= "/$USERID";
+		if (!file_exists($target_dir))
+		{
+			mkdir($target_dir, 0777);
+			chmod($target_dir, 0777);
+		}
+	}
+	function UserFilesRemoveMD5($file_name)
+	{
+		// Get real name or document by removing file-XXXXX-
+		$name_without_report = substr($file_name, 5);
+
+		// Srip everything up to the second dash
+		$pos = strpos($name_without_report, "-");
+		$name_without_stash = substr($name_without_report, ($pos+1));
+		
+		return $name_without_stash;
+	}
+	function UserFilesUploadFile($USERID, &$filesize, $FILE, $process_function="")
+	{
+		global  $_FILES, $HTTP_POST_FILES,
+			   $settings_db_intranet_name,
+			   $settings_account_number;
+		
+		if (!count($FILE)) // make sure file array has real data
+			return NULL;
+
+		// Check if cat id dir exists
+		UserFilesCheckDirectory($USERID);
+		
+		$target_dir = AntConfig::getInstance()->data_path."/$settings_account_number/userfiles/$USERID";
+		
+		// Get File name
+		$fname = str_replace(' ', '_', $FILE["name"]);
+		$fname = str_replace("'", "", $fname);
+		$fname = str_replace("\\", "", $fname);
+		
+		if ($fname)
+		{
+			// Get temp file name to prevent douplicates
+			$seed = substr(md5(microtime()), 0, 8);
+			$newname = "ufile-".$seed."-".$fname;
+			
+			// Upload the file to correct directory
+			move_uploaded_file($FILE['tmp_name'], "$target_dir/$newname");
+			@chmod("$target_dir/$newname",0777);
+			//$newname = UserFilesProcess($target_dir, $newname, &$FILE, $process_function);
+
+			$FILE['full_local_path'] = "$target_dir/$newname";
+			$FILE['local_path'] = "$target_dir";
+
+			// Get file size (pointer or reference)
+			$filesize = filesize("$target_dir/$newname");
+			
+			return $newname;
+		}
+		else
+			return NULL;
+	}
+
+	function UserFilesProcess($path, $fileName, $fileTitle, $function)
+	{
+		$ret = $fileName;
+
+		switch ($function)
+		{
+		case 'toflv':
+			$postfix = substr($fileName, strrpos($fileName, ".")+1);
+			switch(strtolower($postfix))
+			{
+			case 'wmv':
+			case 'mpg':
+			case 'mpeg':
+			case 'avi':
+			case 'mp4':
+			case 'm4v':
+				$filenopost = substr($fileName, 0, strrpos($fileName, "."));
+				exec("/usr/local/bin/ffmpeg -i ".$path."/$fileName -ar 44100 -b 300k -qscale 5 ".$path."/".$filenopost.".flv"); // -sameq (lossless but big)
+				if (file_exists("$path/$filenopost.flv") && filesize("$path/$filenopost.flv"))
+				{
+					@chmod("$path/$filenopost.flv",0777);
+					unlink($path."/".$fileName);
+					$ret = $filenopost.".flv";
+
+					$fileTitle = substr($fileTitle, 0, strrpos($fileTitle, ".")).".flv";
+				}
+				break;
+			}
+			break;
+		}
+		
+		return $ret;
+	}
+
+	function UserFilesGetContentType($filename)
+	{
+		$ext = "";
+		$pos = strrpos($filename, ".");
+		if ($pos !== FALSE)
+			$ext = substr($filename, $pos + 1);
+		else
+			$ext = $filename;
+
+		switch ($ext)
+		{
+		case 'jpg':
+		case 'jpeg':
+			$type = "image/jpeg";
+			break;
+		case 'png':
+			$type = "image/png";
+			break;
+		case 'bmp':
+			$type = "image/bmp";
+			break;
+		case 'gif':
+			$type = "image/gif";
+			break;
+		default:
+			$type = "application/octet-stream";
+			break;	
+		}
+		
+		return $type;
+	}
+	
+	function UserFilesGetCatAccount(&$dbh, $CATID)
+	{
+		global $ANT;
+		if ($ANT)
+		{
+			$retval = $ANT->accountId;
+		}
+		else
+		{
+			$asys = new AntSystem();
+			$ainfo = $asys->getAccountInfoByDb($dbh->dbname);
+			return $ainfo['id'];
+		}
+
+		/*
+		$retval = NULL;
+		if (is_numeric($CATID))
+		{
+			$result = $dbh->Query("select parent_id from user_file_categories where id='$CATID'");
+			$num = $dbh->GetNumberRows($result);
+			for ($i = 0; $i < $num; $i++)
+			{
+				$row = $dbh->GetNextRow($result, $i);
+				if ($ANT)
+				{
+					$retval = $ANT->accountId;
+				}
+				else
+				{
+					if ($row['parent_id'])
+						$retval = UserFilesGetCatAccount($dbh, $CATID);
+				}
+			}
+			$dbh->FreeResults($result);
+		}
+		 */
+		return $retval;
+	}
+	
+	function UserFilesCategoryGetNumFiles(&$dbh, $CATID)
+	{
+		// Get Number of files
+		$result = $dbh->Query("select count(*) as cnt from user_files where category_id='$CATID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$retval = $row['cnt'];
+		}
+		$dbh->FreeResults($result);
+		
+		return $retval;
+	}
+	
+	function UserFilesGetTypeIcon($ext)
+	{
+		switch ($ext)
+		{
+		case 'doc':
+			$ret = 'doc.gif';
+			break;
+		case 'docx':
+			$ret = 'doc.gif';
+			break;
+		case 'xls':
+			$ret = 'excel.gif';
+			break;
+		case 'xlsx':
+			$ret = 'excel.gif';
+			break;
+		case 'gif':
+			$ret = 'gif.gif';
+			break;
+		case 'bmp':
+			$ret = 'bmp.gif';
+			break;		
+		case 'exe':
+			$ret = 'exe.gif';
+			break;			
+		case 'jpg':
+			$ret = 'jpg.gif';
+			break;						
+		case 'png':
+			$ret = 'png.gif';
+			break;
+		case 'ico':
+			$ret = 'ico.gif';
+			break;			
+		case 'txt':
+			$ret = 'txt.gif';
+			break;						
+		case 'adf':
+			$ret = 'adf.png';
+			break;
+		case 'emt':
+			$ret = 'emt.png';
+			break;
+		default:
+			$ret = 'generic.gif';
+			break;
+		}
+		
+		return $ret;
+	}
+	
+	function UserFilesGetSubcatArr($dbh, $CATID, &$subsArr = NULL)
+	{
+		if (NULL == $subsArr)
+			$subsArr = array();
+		
+		if (is_numeric($CATID))
+		{
+			$result = $dbh->Query("select id from user_file_categories where parent_id='$CATID'");
+			$num = $dbh->GetNumberRows($result);
+			for ($i = 0; $i < $num; $i++)
+			{
+				$row = $dbh->GetNextRow($result, $i);
+				$subsArr[] = $row['id'];
+				UserFilesGetSubcatArr($dbh, $row['id'], $subsArr);
+			}
+			$dbh->FreeResults($result);
+		}
+		return $subsArr;
+	}
+	
+	function UserFilesGetCatName(&$dbh, $CATID)
+	{
+		if (is_numeric($CATID))
+		{
+			$result = $dbh->Query("select name from user_file_categories where id='$CATID'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$retval = $row['name'];
+			}
+			$dbh->FreeResults($result);
+		}
+		return $retval;
+	}
+	
+	function UserFilesGetCatLastModified(&$dbh, $CATID, $toget="string")
+	{
+		if (is_numeric($CATID))
+		{
+			// Gather sub-categories
+			$subsArr = UserFilesGetSubcatArr($dbh, $CATID);
+			if (is_array($subsArr) && count($subsArr))
+			{
+				foreach ($subsArr as $scid)
+					$sbs_qry .= " or category_id='$scid'";
+			}
+
+			switch ($toget)
+			{
+			case 'epoch':
+				$get_query = "extract(epoch FROM time_updated) as strtime";
+				break;
+			default:
+				$get_query = "to_char(time_updated, 'MM/DD/YYYY HH24:MI:SS') as strtime";
+				break;
+			}
+			
+			$result = $dbh->Query("select $get_query,
+								   time_updated from user_files where (category_id='$CATID' $sbs_qry)
+								   order by time_updated DESC LIMIT 1");
+
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$retval = $row['strtime'];
+			}
+			$dbh->FreeResults($result);
+		}
+		return $retval;
+	}
+	
+	function UserFilesGetCatSize(&$dbh, $CATID)
+	{
+		if (is_numeric($CATID))
+		{
+			// Get local files (to category)
+			$result = $dbh->Query("select sum(file_size) as amnt from user_files where category_id='$CATID'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$retval = $row['amnt'];
+			}
+			$dbh->FreeResults($result);
+			
+			$share_to = UserFilesIsSharedDir($dbh, $CATID);
+			if ($share_to)
+			{
+				$retval += UserFilesGetCatSize($dbh, $share_to);
+			}
+			else
+			{
+				// Now check for any subfolders/subcategories
+				$result = $dbh->Query("select id from user_file_categories where parent_id='$CATID'");
+				$num = $dbh->GetNumberRows($result);
+				for ($i = 0; $i<$num; $i++)
+				{
+					$row = $dbh->GetNextRow($result, $i);
+					$retval += UserFilesGetCatSize($dbh, $row['id']);
+				}
+				$dbh->FreeResults($result);
+			}
+		}
+		return $retval;
+	}
+	
+	function UserFilesGetCatParent($dbh, $CATID, $USERID = NULL)
+	{
+		$retval = NULL;
+		if (is_numeric($CATID))
+		{
+			if (!UserFilesIsOwnerDir($dbh, $USERID, $CATID))
+			{
+				$result = $dbh->Query("select id from user_file_categories where share_to='$CATID' and user_id = '$USERID'");
+				if ($dbh->GetNumberRows($result))
+				{
+					$row = $dbh->GetNextRow($result, 0);
+					$retval = $row['id'];
+					$dbh->FreeResults($result);
+					$retval = UserFilesGetCatParent($dbh, $row['id'], $USERID);
+				}
+				else
+				{
+					$result = $dbh->Query("select parent_id from user_file_categories where id='$CATID'");
+					if ($dbh->GetNumberRows($result))
+					{
+						$row = $dbh->GetNextRow($result, 0);
+						$retval = $row['parent_id'];
+					}
+					$dbh->FreeResults($result);
+				}
+			}
+			else
+			{
+				$result = $dbh->Query("select parent_id from user_file_categories where id='$CATID'");
+				if ($dbh->GetNumberRows($result))
+				{
+					$row = $dbh->GetNextRow($result, 0);
+					$retval = $row['parent_id'];
+				}
+				$dbh->FreeResults($result);
+			}
+		}
+		return $retval;
+	}
+	
+	function UserFilesDeleteCategory(&$dbh, $CATID, $USERID, $prev = null)
+	{
+		if (!is_array($prev))
+			$prev = array();
+
+		if (is_numeric($CATID) && is_numeric($USERID))
+		{
+			$isspecial = UserFilesIsSpecialDir($dbh, $CATID);
+			if (!UserFilesIsSharedDir($dbh, $CATID) && !$isspecial)
+			{
+				// Delete any files under this category
+				$result = $dbh->Query("select id from user_files where category_id='$CATID' and f_deleted is not true;");
+				$num = $dbh->GetNumberRows($result);
+				for ($i= 0; $i < $num; $i++)
+				{
+					$row = $dbh->GetNextRow($result, $i);
+					if ($row['id'])
+						UserFilesRemoveFile($dbh, $row['id'], $USERID);
+				}
+				$dbh->FreeResults($result);
+			
+				// Now delete any subdirectories
+				$result = $dbh->Query("select id from user_file_categories where parent_id='$CATID' and f_deleted is not true;");
+				$num = $dbh->GetNumberRows($result);
+				for ($i= 0; $i < $num; $i++)
+				{
+					$row = $dbh->GetNextRow($result, $i);
+					if ($row['id'] && !in_array($row['id'], $prev))
+					{
+						$prev[] = $row['id']; // make sure we don't ever have circular references
+						UserFilesDeleteCategory($dbh, $row['id'], $USERID, $prev);
+					}
+				}
+				$dbh->FreeResults($result);
+				
+				/*
+				// Remove DACL entries
+				$toget = "dacl_read_files, dacl_read_folders, dacl_create_files, dacl_create_folders, dacl_delete_files, dacl_delete_folders";
+				$result = $dbh->Query("select $toget from user_file_categories where id='$CATID'");
+				if ($dbh->GetNumberRows($result))
+				{
+					$row = $dbh->GetNextRow($result, $i);
+					if ($row['dacl_read_files'])
+						SecDelDacl($dbh, $row['dacl_read_files']);
+					if ($row['dacl_read_folders'])
+						SecDelDacl($dbh, $row['dacl_read_folders']);
+					if ($row['dacl_create_files'])
+						SecDelDacl($dbh, $row['dacl_create_files']);
+					if ($row['dacl_create_folders'])
+						SecDelDacl($dbh, $row['dacl_create_folders']);
+					if ($row['dacl_delete_files'])
+						SecDelDacl($dbh, $row['dacl_delete_files']);
+					if ($row['dacl_delete_folders'])
+						SecDelDacl($dbh, $row['dacl_delete_folders']);
+				}
+				$dbh->FreeResults($result);
+				*/
+			}
+			
+			// now delete this category db entry
+			//if (!$isspecial)
+			//	$dbh->Query("delete from user_file_categories where id='$CATID'");
+			$dbh->Query("update user_file_categories set f_deleted='t' where id='$CATID'");
+		}
+	}
+
+	function UserFilesUndeleteCategory(&$dbh, $CATID, $USERID, $prev = null)
+	{
+		if (!is_array($prev))
+			$prev = array();
+
+		if (is_numeric($CATID) && is_numeric($USERID))
+		{
+			$isspecial = UserFilesIsSpecialDir($dbh, $CATID);
+			if (!UserFilesIsSharedDir($dbh, $CATID) && !$isspecial)
+			{
+				// Undelete any files under this category
+				$dbh->Query("update user_files set f_deleted='f' where id in
+								(select id from user_files this where category_id='$CATID' and 
+								revision = (select max(revision) from user_files version where 
+								version.file_title=this.file_title and version.category_id='$CATID'))");
+			
+				// Now undelete any subdirectories
+				$result = $dbh->Query("select id from user_file_categories where parent_id='$CATID'");
+				$num = $dbh->GetNumberRows($result);
+				for ($i= 0; $i < $num; $i++)
+				{
+					$row = $dbh->GetNextRow($result, $i);
+					if ($row['id'] && !in_array($row['id'], $prev))
+					{
+						$prev[] = $row['id']; // make sure we don't ever have circular references
+						UserFilesUndeleteCategory($dbh, $row['id'], $USERID, $prev);
+					}
+				}
+				$dbh->FreeResults($result);
+			}
+			
+			// now delete this category db entry
+			//if (!$isspecial)
+			$dbh->Query("update user_file_categories set f_deleted='f' where id='$CATID'");
+		}
+	}
+	
+	function UserFilesGetCatPath(&$dbh, $CATID)
+	{
+		global $USERID;
+		$retval = NULL;
+		if (is_numeric($CATID))
+		{
+			if (UserFilesIsOwnerDir($dbh, $USERID, $CATID))
+				$result = $dbh->Query("select name, parent_id from user_file_categories where id='$CATID'");
+			else
+			{
+				if ($dbh->GetNumberRows($dbh->Query("select id from user_file_categories where share_to='$CATID' and user_id='$USERID'")))
+					$result = $dbh->Query("select name, parent_id from user_file_categories where share_to='$CATID' and user_id='$USERID'");
+				else
+					$result = $dbh->Query("select name, parent_id from user_file_categories where id='$CATID'");
+			}
+				
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				
+				//$retval = "<span style='color:#FFFFFF;'>&nbsp;/&nbsp;</span>";
+				//if ($row['name'] != '/')
+				
+				$retval = $row['name'];
+				
+				if ($row['parent_id'])
+				{
+					$pre = UserFilesGetCatPath($dbh, $row['parent_id']);
+					if ($pre == '/')
+						$retval = $pre."&nbsp;".$retval;
+					else
+						$retval = $pre."&nbsp;/&nbsp;".$retval;
+				}
+			}
+			$dbh->FreeResults($result);
+		}
+
+		return $retval;
+	}
+	
+	function UserFilesRemoveDirectory($dirname)
+	{
+		// Sanity check
+		if (!file_exists($dirname)) 
+			return false;
+	 
+		// Simple delete for a file
+		if (is_file($dirname)) 
+			return unlink($dirname);
+	 
+		// Loop through the folder
+		$dir = dir($dirname);
+		while (false !== $entry = $dir->read()) 
+		{
+			// Skip pointers
+			if ($entry == '.' || $entry == '..' || is_link($dirname."/".$entry)) 
+			{
+				continue;
+			}
+	 
+			// Recurse
+			UserFilesRemoveDirectory("$dirname/$entry");
+		}
+	 
+		// Clean up
+		$dir->close();
+		return rmdir($dirname);
+	}
+	
+	function UserFilesCreateDirTree(&$dbh, $CATID, $path)
+	{
+		global $settings_account_number;
+		if (is_numeric($CATID))
+		{
+			$result = $dbh->Query("select name from user_file_categories where id='$CATID'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$path .= "/".$row['name'];
+				mkdir($path);
+				$dbh->FreeResults($result);
+
+				// Create all subdirectories
+				$result = $dbh->Query("select id from user_file_categories where parent_id='$CATID'");
+				$num = $dbh->GetNumberRows($result);
+				for ($i = 0; $i < $num; $i++)
+				{
+					$row = $dbh->GetNextRow($result, $i);
+					UserFilesCreateDirTree($dbh, $row['id'], $path);
+				}
+				$dbh->FreeResults($result);
+				unset($row);
+				
+				// Create all files
+				$result = $dbh->Query("select id, file_name, file_title, user_id, file_type, remote_file from 
+										user_files where category_id='$CATID'");
+				$num = $dbh->GetNumberRows($result);
+				for ($i= 0; $i < $num; $i++)
+				{
+					$row = $dbh->GetNextRow($result, $i);
+					if ($row['id'])
+					{
+						if ($row['remote_file'])
+						{
+							// Create Object
+							$ans = new CAnsCLient();
+							$acid = UserFilesGetCatAccount($dbh, $CATID);
+							UserFilesFixAns($remote_file, $FILEID, $acid);
+					
+							// Get URL to download the file
+							$page = $ans->getFileUrl($remote_file, $FILEID, "/userfiles/$acid", ($VIEW) ? 1:0);
+						}
+						else if ($row['file_name']) // Local Files Only
+						{
+							$source_dir = AntConfig::getInstance()->data_path."/$settings_account_number/userfiles/".$row['user_id'];
+							@copy($source_dir."/".$row['file_name'], 
+								  $path . "/".((strpos($row['file_title'], '.')) ? $row['file_title'] : $row['file_title'].".".$row['file_type'] ));
+						}
+					}
+				}
+				$dbh->FreeResults($result);
+			}
+		}
+	}
+	
+	function  UserFilesGetViewMode(&$dbh, $CATID, $USERID)
+	{
+		global $_GET;
+		
+		if ($CATID)
+		{
+			if (is_numeric($_GET['view_mode']))
+			{
+				$dbh->Query("update user_file_categories set view_mode='".$_GET['view_mode']."' where id='$CATID'");
+				$view_mode = $_GET['view_mode'];
+			}
+			else
+			{
+				$result = $dbh->Query("select view_mode from user_file_categories where id='$CATID'");
+				if ($dbh->GetNumberRows($result))
+				{
+					$row = $dbh->GetNextRow($result, 0);
+					$view_mode = $row['view_mode'];
+				}
+				$dbh->FreeResults($result);
+			}
+		}
+		
+		return ($view_mode) ? $view_mode : 1;
+	}
+	
+	function  UserFilesGetRootId(&$dbh, $USERID, $second=false)
+	{
+		global $ANTFS_FOLDER_ACLS;
+		$id = null;
+
+		if ($USERID)
+		{
+			$result = $dbh->Query("select id from user_file_categories where user_id='$USERID' and name='/'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$dbh->FreeResults($result);
+				$id = $row['id'];
+			}
+			else
+			{
+				$dbh->Query("insert into user_file_categories(user_id, name) values('$USERID', '/')");
+				if (!$second)
+					$id = UserFilesGetRootId($dbh, $USERID, true);
+			}
+
+			// Get root DACL
+			if ($id)
+			{
+				$dacl = new Dacl($dbh, "/antfs/folders/".$id, false);
+				if (!$dacl->id)
+				{
+					$dacl = new Dacl($dbh, "/antfs/folders/".$id, true, $ANTFS_FOLDER_ACLS);
+					$dacl->grantGroupAccess("-1");
+					$dacl->grantUserAccess($USERID);
+					$dacl->grantUserAccess("-4", "View Files");
+				}
+			}
+		}
+		
+		return $id;
+	}
+	
+	function UserFilesGetAccountRootId(&$dbh, $ACCOUNT, $second=false)
+	{
+		global $ANTFS_FOLDER_ACLS;
+
+		$result = $dbh->Query("select id from user_file_categories where name='/' and user_id is NULL");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$id = $row['id'];
+		}
+		else
+		{
+			
+			$dbh->Query("insert into user_file_categories(name) values('/')");
+			if (!$second)
+				$id = UserFilesGetAccountRootId($dbh, $ACCOUNT, true);
+		}
+
+		// Get root DACL
+		if ($id)
+		{
+			$dacl = new Dacl($dbh, "/antfs/folders/".$id, false);
+			if (!$dacl->id)
+			{
+				$dacl = new Dacl($dbh, "/antfs/folders/".$id, true, $ANTFS_FOLDER_ACLS);
+				$dacl->grantGroupAccess("-1");
+				$dacl->grantUserAccess("-4", "View Files");
+			}
+		}
+		
+		return $id;
+	}
+	
+	function UserFilesCreateMoveDropdown(&$dbh, &$mMenu, $USERID, $CATID = NULL, $ACCOUNT)
+	{	
+		global $settings_mya;
+		
+		if (!$CATID) // Create Root
+		{
+			$CATID = UserFilesGetRootId($dbh, $USERID);
+			if (!$settings_mya)
+				$GCATID = UserFilesGetAccountRootId($dbh, $ACCOUNT);
+		}
+		
+		// Handle catid (myfiles or global)
+		$result = $dbh->Query("select id, name from user_file_categories where id='$CATID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$name = $row['name'];
+			$id = $row['id'];
+			$dbh->FreeResults($result);
+		}
+		
+		$result = $dbh->Query("select id, name from user_file_categories where parent_id='$CATID' order by name");
+		$num = $dbh->GetNumberRows($result);
+				
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			if ($i == 0) // Create new submenu first time around
+			{
+				$mySubMenu = new CDropMenu("sub_move_menu_".$row['id'], 'right', 'over', $mMenu->menuName);
+				$mySubMenu->maxheight = false;
+			}
+			
+			UserFilesCreateMoveDropdown($dbh, $mySubMenu, $USERID, $row['id'], $ACCOUNT);
+		}
+		$dbh->FreeResults($result);
+		
+		if ($name == '/' && $id != 1)
+			$name = $name." My Files";
+		
+		$name = $name."&nbsp;";
+				
+		if ($num && $name)
+			$mMenu->AddSubmenuItem($mySubMenu, $name, "MoveFiles('$id')");	
+		else if (!$num && $name)
+			$mMenu->AddMenuItem($name, "javascript:MoveFiles('$id');");
+			
+		// Handle Global files (if exists)
+		if ($GCATID)
+		{
+			$result = $dbh->Query("select id, name from user_file_categories where id='$GCATID'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$name = $row['name'];
+				$id = $row['id'];
+				$dbh->FreeResults($result);
+			}
+			
+			$result = $dbh->Query("select id, name from user_file_categories where parent_id='$GCATID' order by name");
+			$num = $dbh->GetNumberRows($result);
+					
+			for ($i = 0; $i < $num; $i++)
+			{
+				$row = $dbh->GetNextRow($result, $i);
+				if ($i == 0) // Create new submenu first time around
+					$mySubMenu = new CDropMenu("sub_move_menu_".$row['id'], 'right', 
+												'over', $mMenu->menuName);
+				
+				UserFilesCreateMoveDropdown($dbh, $mySubMenu, $USERID, $row['id'], $ACCOUNT);
+			}
+			$dbh->FreeResults($result);
+			
+			if ($id == 1)
+				$name = $name." Global Files";
+			$name = $name."&nbsp;";
+					
+			if ($num && $name)
+				$mMenu->AddSubmenuItem($mySubMenu, $name, "MoveFiles('$id')");	
+			else if (!$num && $name)
+				$mMenu->AddMenuItem($name, "javascript:MoveFiles('$id');");
+		}
+	}
+	
+	function UserFilesCheckCatSec(&$dbh, &$DACL, $USERID, $CATID, $toget)
+	{
+		if ($CATID)
+		{
+			$result = $dbh->Query("select $toget from user_file_categories where id='$CATID'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$res = $row[$toget];
+				$dbh->FreeResults($result);
+			}
+			
+			if ($res)
+			{
+				// TODO: return security
+				//if ($DACL->CheckAccess($res, $USERID))
+					return $res;
+				//else
+					//return false;
+			}
+			else
+			{
+				// TODO: Security
+				return true;
+			}
+		}
+		else
+			return false;
+
+	}
+	
+	function UserFilesIsOwnerDir(&$dbh, $USERID, $CATID)
+	{
+		$result = $dbh->Query("select id from user_file_categories where id='$CATID' and user_id='$USERID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$dbh->FreeResults($result);
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	function UserFilesIsSharedDir(&$dbh, $CATID)
+	{
+		$result = $dbh->Query("select share_to from user_file_categories where id='$CATID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			return $row['share_to'];
+		}
+		else
+			return false;
+	}
+
+	function UserFilesIsSpecialDir(&$dbh, $CATID)
+	{
+		$result = $dbh->Query("select id from user_file_categories where id='$CATID' and f_special='t'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	function UserFilesCreateShareLink(&$dbh, $USERID)
+	{
+		$result = $dbh->Query("select id from user_file_categories where id='$CATID' and user_id='$USERID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$dbh->FreeResults($result);
+			return true;
+		}
+		else
+			return false;
+	}
+	function UserFilesCategoryOwner(&$dbh, $CATID)
+	{
+		$result = $dbh->Query("select user_id from user_file_categories where id='$CATID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			return $row['user_id'];
+		}
+		else
+			return false;
+	}
+	function UserFilesCategoryCopyPermissions(&$dbh, $CATID)
+	{
+		if ($CATID)
+		{
+			$result = $dbh->Query("select parent_id from user_file_categories where id='$CATID'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$dbh->FreeResults($result);
+				return $row['user_id'];
+			}
+			else
+				return false;
+		}
+	}
+	
+	function UserFilesGetFileName(&$dbh, $FID)
+	{
+		if ($FID)
+		{
+			$result = $dbh->Query("select file_title from user_files where id='$FID'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$dbh->FreeResults($result);
+				return $row['file_title'];
+			}
+			else
+				return false;
+		}
+
+		return "";
+	}
+	
+	function UserFilesGetFileType(&$dbh, $FID)
+	{
+		if ($FID)
+		{
+			$result = $dbh->Query("select file_type from user_files where id='$FID'");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$dbh->FreeResults($result);
+				return $row['file_type'];
+			}
+			else
+				return false;
+		}
+	}
+	
+	function UserFilesGetFileContents(&$dbh, $FID, $maxlength=-1, $offset=0, $tofile=null)
+	{
+		global $_SERVER;
+		$content = NULL;
+
+
+		// tofile is used as a tmp file buffer to stream
+		// if not send then just print contents
+		if (!$tofile)
+		{
+			return file_get_contents("http://".AntConfig::getInstance()->localhost."/files/$FID");
+		}
+		else
+		{
+			$fsize = 0;
+
+			$handle = fopen("http://".AntConfig::getInstance()->localhost."/files/$FID", 'rb');
+
+			$hrefTo = fopen($tofile, "w");
+
+			if ($handle)
+			{
+				while (!feof($handle))
+				{
+					$buf = fread($handle, 8192);
+					$fsize += sizeof($buf);
+					fwrite($hrefTo, $buf);
+				}
+				
+				fclose($handle);
+			}
+			
+			fclose($hrefTo);
+			
+			return $fsize;
+		}
+
+	}
+
+	function UserFilesGetLocalFileContents($path)
+	{
+		global $_SERVER;
+		$content = NULL;
+
+		$file_dir = AntConfig::getInstance()->application_path."/images/".$path;
+
+		$len = filesize($file_dir);
+		$handle = @fopen($file_dir, 'r');
+
+		if ($handle)
+		{
+			if ($offset)
+				fseek($handle, $offset);
+			$content = fread($handle, $len);
+		}
+		
+		@fclose($handle);
+		
+		return $content;
+	}
+
+	function UserFilesInitSpecialCategories(&$dbh, $USERID, $ROOTID)
+	{
+		global $g_special_categories, $settings_account_number;
+		
+		$cache = CCache::getInstance();
+
+		foreach ($g_special_categories as $fname)
+		{
+			$cval = $cache->get($dbh->dbname."/antfs/specialdirs/$USERID/".str_replace(" ", "_", $fname));
+			if (!$cval)
+			{
+				$result = $dbh->Query("select id from user_file_categories where f_special='t' and user_id='$USERID' and name='$fname'");
+				$num = $dbh->GetNumberRows($result);
+				if (!$num)
+				{
+					$dbh->Query("insert into user_file_categories(user_id, name, parent_id, f_special) 
+								values('$USERID', '$fname', '$ROOTID', 't')");
+				}
+				else
+				{
+					$cache->set($dbh->dbname."/antfs/specialdirs/$USERID/".str_replace(" ", "_", $fname), $dbh->GetValue($result, 0, "id"));
+				}
+			}
+		}
+	}
+
+	function UserFilesFixDupCats(&$dbh, $PARENT_CAT)
+	{
+		$result = $dbh->Query("select name, count(*) from user_file_categories where parent_id='$PARENT_CAT'
+								and f_deleted is not true group by name having count(*) > 1;");
+		$num = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetRow($result, $i);
+            $res2 = $dbh->Query("select id, name from user_file_categories where parent_id='$PARENT_CAT' 
+                                    and name='".$dbh->Escape($row['name'])."' order by id");
+			$num2 = $dbh->GetNumberRows($res2);
+			for ($j = 1; $j < $num2; $j++) // Skip the original
+			{
+				$row2 = $dbh->GetRow($res2, $j);
+				$dbh->Query("update user_file_categories set name='".$dbh->Escape($row2['name'])." (".($j + 1).")' where id='".$row2['id']."'");
+			}
+		}
+	}
+
+	function UserFilesGetSpecialCatId(&$dbh, $USERID, $FNAME)
+	{
+		if ($FNAME && $USERID)
+		{
+			$cache = CCache::getInstance();
+
+			$cval = $cache->get($dbh->dbname."/antfs/specialdirs/$USERID/".str_replace(" ", "_", $FNAME));
+			if ($cval)
+			{
+				return $cval;
+			}
+			else
+			{
+				$result = $dbh->Query("select id from user_file_categories where name='$FNAME' and user_id='$USERID' and f_special='t'");
+				if ($dbh->GetNumberRows($result))
+				{
+					$row = $dbh->GetNextRow($result, 0);
+					$dbh->FreeResults($result);
+					$cache->set($dbh->dbname."/antfs/specialdirs/$USERID/".str_replace(" ", "_", $FNAME), $row['id']);
+					return $row['id'];
+				}
+				else
+				{
+					UserFilesInitSpecialCategories($dbh, $USERID, UserFilesGetRootId($dbh, $USERID));
+					return UserFilesGetSpecialCatId($dbh, $USERID, $FNAME);
+				}
+			}
+		}
+	}
+
+	function afsFileGetLocalPath($dbh, $said, $fid)
+	{
+	}
+
+	function afsExplodePath($id, $recur=false)
+	{
+		$perdir = 3;
+
+		$len = strlen($id);
+		$first = substr($id, 0, 1);
+
+		if (!$recur)
+			$path = "files/".$first."";
+		else
+			$path = $first."";
+
+		for ($i = 1; $i < $len; $i++)
+			$path .= "0";
+
+		if ($len <= $perdir)
+		{
+			return $path;
+		}
+		else
+		{
+			return $path . "/" . ansExplodePath(substr($id, 1), true);
+		}
+	}
+}
+?>

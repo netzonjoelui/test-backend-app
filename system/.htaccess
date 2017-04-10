@@ -1,0 +1,73 @@
+DirectoryIndex  index.awp index.htm index.php index.html
+#SetEnvIf User-Agent ".*MSIE.*" nokeepalive
+
+#php_value error_reporting  E_ALL & ~E_NOTICE & ~E_STRICT
+php_value display_errors On
+php_value magic_quotes_gpc Off
+
+#AddType application/x-httpd-php .js
+
+#php_value auto_prepend_file /var/www/html/ant.aereus.com/system/profiler_header.php
+#php_value auto_append_file /var/www/html/ant.aereus.com/system/profiler_footer.php
+
+# compress text, html, javascript, css, xml:
+AddOutputFilter DEFLATE css js png jpg jpeg
+AddOutputFilterByType DEFLATE text/plain
+AddOutputFilterByType DEFLATE text/html
+AddOutputFilterByType DEFLATE text/xml
+AddOutputFilterByType DEFLATE text/css
+AddOutputFilterByType DEFLATE application/xml
+AddOutputFilterByType DEFLATE application/xhtml+xml
+AddOutputFilterByType DEFLATE application/rss+xml
+AddOutputFilterByType DEFLATE application/javascript
+AddOutputFilterByType DEFLATE application/x-javascript
+
+ExpiresActive On
+ExpiresByType image/gif "access plus 2 hours"
+ExpiresByType image/png "access plus 2 hours"
+ExpiresByType application/javascript "access plus 1 hour"
+ExpiresByType text/css "access plus 1 day"
+
+RewriteEngine on 
+
+# main application
+RewriteRule ^main$ main.php [QSA]
+RewriteRule ^login$ login.php [QSA]
+RewriteRule ^app/(.*)$ app.php?app=$1 [QSA]
+
+RewriteRule Microsoft-Server-ActiveSync$ /async/index.php
+RewriteRule Autodiscover/Autodiscover.xml$ /async/autodiscover.php
+RewriteRule AutoDiscover/AutoDiscover.xml$ /async/autodiscover.php
+
+# AntFs
+RewriteRule ^antfs/images/([0-9]+)$ /controllerLoader.php?controller=AntFs&function=streamImage&fid=$1 [QSA]
+RewriteRule ^antfs/images/([0-9]+)/([0-9]+)$ /controllerLoader.php?controller=AntFs&function=streamImage&fid=$1&w=$2 [QSA]
+RewriteRule ^antfs/images/([0-9]+)/([0-9]+)/([0-9]+)$ /controllerLoader.php?controller=AntFs&function=streamImage&fid=$1&w=$2&h=$3 [QSA]
+RewriteRule ^antfs/([0-9]+)$ /controllerLoader.php?controller=AntFs&function=downloadFile&fid=$1 [QSA]
+RewriteRule ^antfs/([0-9]+)/(.*)$ /controllerLoader.php?controller=AntFs&function=downloadFile&fid=$1&fname=$2 [QSA]
+
+# Old User Files (replaced by antfs above)
+RewriteRule files/images/([0-9]+)$ /userfiles/getthumb_by_id.awp?fid=$1
+RewriteRule files/images/([0-9]+)/([0-9]+)$ /userfiles/getthumb_by_id.awp?fid=$1&iw=$2
+RewriteRule files/images/([0-9]+)/([0-9]+)/([0-9]+)$ /userfiles/getthumb_by_id.awp?fid=$1&iw=$2&ih=$3
+RewriteRule files/([0-9]+)$ /userfiles/file_download.awp?fid=$1 [QSA]
+RewriteRule files/([0-9]+)/(.*)$ /userfiles/file_download.awp?fid=$1&fname=$2
+RewriteRule files/webdav$ /userfiles/webdav.php
+RewriteRule files/webdav/$ /userfiles/webdav.php
+RewriteRule files/webdav/(.*)$ /userfiles/webdav.php?path=$1
+RewriteRule files/userimages/current/([0-9]+)/([0-9]+)$ /controller/User/loadUserImage?w=$2&h=$3
+RewriteRule files/userimages/([0-9-]+)/([0-9]+)/([0-9]+)$ /controller/User/loadUserImage?uid=$1&w=$2&h=$3
+RewriteRule files/userimages/([a-zA-Z_.]+)/([0-9]+)/([0-9]+)$ /controller/User/loadUserImage?uname=$1&w=$2&h=$3
+
+RewriteRule wapi/([a-zA-Z-_']+)$ /$1/wapi.php
+RewriteRule wapi/([a-zA-Z-_']+)/([a-zA-Z-_']+)$ /$1/wapi.php?function=$2
+RewriteRule app/([0-9a-zA-Z-_']+)$ /apploader.php?app=$1
+RewriteRule app/([0-9a-zA-Z-_']+)/([0-9a-zA-Z-_']+)$ /apploader.php?app=$1&view=$2
+RewriteRule ^obj/([0-9a-zA-Z-_'.]+)$ /objloader.php?obj_type=$1 [QSA]
+RewriteRule ^obj/([0-9a-zA-Z-_'.]+)/([0-9a-zA-Z-_'.:]+)$ /objloader.php?obj_type=$1&oid=$2 [QSA]
+RewriteRule ^objb/([0-9a-zA-Z-_'.]+)$ /objbrowser.php?obj_type=$1 [QSA]
+RewriteRule ^chatloader/([0-9a-zA-Z-_'.]+)$ /chat/chatloader.php?chat_type=$1 [QSA]
+RewriteRule ^videomail$ /email/vmail_player.php [QSA]
+RewriteRule ^videomail/([0-9a-zA-Z-_']+)$ /email/vmail_player.php?mid=$1 [QSA]
+RewriteRule ^controller/([0-9a-zA-Z-_'.]+)/([0-9a-zA-Z-_'.]+)$ /controllerLoader.php?controller=$1&function=$2 [QSA]
+RewriteRule ^api/([0-9a-zA-Z-_'.]+)/([0-9a-zA-Z-_'.]+)/([0-9a-zA-Z-_'.]+)$ /controllerLoader.php?apim=$1&controller=$2&function=$3 [QSA]

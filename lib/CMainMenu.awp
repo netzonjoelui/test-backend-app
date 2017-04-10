@@ -1,0 +1,46 @@
+<?php
+class CMainMenu
+{
+	var $buffer;
+	
+	function PrintMenu($width = NULL, $height = NULL) 
+	{
+		print("<table bgcolor='999999' border='0' cellpadding='1' cellspacing='0'><tr><td><table bgcolor=\"#FFFFFF\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\"");
+		if ($width) print(" width='$width' ");
+		if ($height) print(" height='$height' ");
+		print(">");
+		print($this->buffer);	
+		print("<tr><td height=\"100%\"></td></tr></table></td></tr></table>");
+	}
+	
+	function StartSub($title)
+	{
+		$this->buffer .= "<tr valign=\"top\">
+						  	<td width=\"200px\">
+						  		<table border=\"0\" cellpadding=\"3\" cellspacing=\"0\" width=\"100%\">
+						  			<tr valign=\"top\">
+										<td style='font-family:Arial, Helvetica, sans-serif; font-size:11px; color:#333333; background-color:#FFFFFF;'>
+											<table border='0' cellpadding='5' cellspacing='0'>";
+		if ($title) $this->buffer .= "<tr><td align='left' colspan='2'><span style=\"color:336699; font-size: 12px; font-family:Arial, Verdana, Helvetica, Geneva;\"><strong>$title</strong></span></td></tr>";
+	}
+	
+	function CloseSub()
+	{
+		$this->buffer .= "</table></td></tr></table></td></tr>";
+	}
+	
+	function AddNewSubItem($link, $title, $mouseover, $target = NULL, $icon = NULL, $rowheight = NULL)
+	{
+		$this->buffer .= "<tr><td align='left'";
+		if ($rowheight) $this->buffer .= " height='$rowheight'";
+		$this->buffer .= ">$icon</td><td><a class='CleanLink' href=\"$link\" title=\"$mouseover\"";
+		if ($target) $this->buffer .= " target='$target' ";
+		$this->buffer .= ">$title</a></td></tr>";
+	}
+	
+	function AddToBuffer($stringtoadd)
+	{
+		$this->buffer .= "<tr><td colspan='2'>$stringtoadd</td></tr>";
+	}
+}
+?>

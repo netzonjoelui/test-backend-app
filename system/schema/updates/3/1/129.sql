@@ -1,0 +1,1 @@
+ALTER TABLE app_object_types ADD COLUMN head_commit_id bigint;

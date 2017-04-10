@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<rss version="2.0">
+  <channel>
+    <title>AEREUS.com</title>
+    <description>ANT Beta Project News and Updates</description>
+    <link>http://www.aereus.com/</link>
+    <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+    <lastBuildDate>Wed, 28 Sep 2005 14:06:39 -0700</lastBuildDate>
+    <pubDate>Wed, 28 Sep 2005 14:03:19 -0700</pubDate>
+    <generator>FeedForAll v1.0 (1.0.2.0) unlicensed version</generator>
+    <image>
+      <url>http://ant.aereus.com/rss/images/screen1.png</url>
+	  <enclosure url="http://www.feedforall.com/image/emblem.jpg" length="16024" type="image"></enclosure>
+      <title>Test Image Title</title>
+      <link>http://www.aereus.com/</link>
+      <description>This is a description</description>
+      <width>46</width>
+      <height>31</height>
+    </image>
+    <item>
+      <title>ANT Help - How do I compose a new message?</title>
+      <description>Click here to find out how to compose a new message using 
+ANT&apos;s web-based email tools.</description>
+      <link>http://ant.aereus.com/help/helpdoc.awp?docid=8</link>
+      <pubDate>Wed, 28 Sep 2005 13:55:26 -0700</pubDate>
+    </item>
+    <item>
+      <title>Updated Chat Emoticons</title>
+      <description>Just a quick note. Emoticons for Team America and Capitan 
+Chaos have been removed indefinetly.</description>
+      <link>http://ant.aereus.com/rss_favorites.awp?catid=38</link>
+      <pubDate>Wed, 28 Sep 2005 13:55:26 -0700</pubDate>
+    </item>
+  </channel>
+</rss>

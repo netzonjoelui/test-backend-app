@@ -1,0 +1,1 @@
+02/04/2016 00:56:57 [ 5049] [FATAL] FatalMisconfigurationException: The BASE_PATH is not configured. Check if the config.php file is in place. - code: 0 - file: /var/www/html/netric/lib/ZPush/lib/core/zpush.php:210

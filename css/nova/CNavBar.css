@@ -1,0 +1,61 @@
+/**************************************************************************
+ *	CNavBar.js and CToolMenu.awp
+ *
+ *	Notes:	CNavBar.js will eventually replace CToolMenu entirely so
+ *			CTM classes are left in place only for backwards compat.
+ **************************************************************************/
+.CNavBar
+{
+	border: 0;
+	color: #666;
+}
+
+.CTMBody
+{
+	color: #666;
+}
+
+.CNavBarItem
+{
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	padding:5px 0px 5px 0px;
+	color:#fff;
+}
+.CNavBarItemOver
+{
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	color:#FFFF00;
+	padding:5px 0px 5px 0px;
+}
+.CNavBarItemOn
+{
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	color:#fff;
+	padding:5px 0px 5px 0px;
+	background-color:#666;
+	border-left: 0;
+}
+.CNavBarItemIcon
+{
+	width:18px;
+	height:16px;
+	margin-left:3px;
+	margin-right:1px;
+	padding-right:3px;
+}
+.CNavBarBorderBottom
+{
+	height:1px;
+}
+
+.CNavBarSectionHeader /* The actual title of the header */
+{
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:10px;
+	color:#FFFFFF;
+}
+
+.CNavBarSectionBody /* The actual title of the header */
+{
+
+}

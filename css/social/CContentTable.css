@@ -1,0 +1,108 @@
+/**************************************************************************************
+*	LIB:		CContentTable
+*	Purpose:	aereus.lib.js class used throughout ant for each content table
+***************************************************************************************/
+/* outer table */
+.ContentTable
+{
+	border-width:1px;
+	border-style:solid; 
+	border-left-color:#B7B7B7; 
+	border-left-width:1px; 
+	border-top-width:1px; 
+	border-top-color:#94A3C4; 
+	border-bottom-color:#B7B7B7; 
+	border-bottom-width:1px;  
+	border-right-color:#B7B7B7; 
+	border-right-width:1px;
+}
+/* Upper Left Corner */
+.ContentTableTitleLeftCorn
+{
+	width:0px;
+}
+/* Center of title bar */
+.ContentTableTitleCenter
+{
+	background-color:#FFF;
+	height:15px;
+	background-color:#ECEFF5;
+}
+/* Upper Right Corner */
+.ContentTableTitleRightCorn
+{
+	width:0px;
+}
+/* Label Container - For title */
+.ContentTableTitleLabel
+{
+	font-family: 'lucida grande', tahoma, verdana, arial, sans-serif;
+	font-size:11px; 
+	font-weight:bold;
+	color:#333; 
+	padding: 3px 5px 3px 5px;
+}
+/* Context Container - For title */
+.ContentTableTitleContext
+{
+}
+/* The body where content is placed */
+.ContentTableBody 
+{
+	background-color:#FFFFFF; 
+	padding:5px; 
+	/*background-image:url(/images/themes/lite/windowBodyShade.gif); 
+	background-position:0px 0px; 
+	background-repeat:repeat-x;*/
+	height:100%
+}
+
+.ContentTableBodyRight
+{
+	width:0px;
+}
+
+/* Small 1px hr at the bottom of the table */
+.ContentTableFooterHrLeft
+{
+	width:0px;
+}
+.ContentTableFooterHr 
+{
+	background-color:#FFFFFF;
+	height:1px;
+}
+.ContentTableFooterHrRight
+{
+	width:0px;
+}
+
+/* The fotter row where the menu might optionally be placed */
+.ContentTableFooterLeftCorn
+{
+	width:0px;
+}
+
+.ContentTableFooterRow
+{
+	height:10px;
+	background-color:#FFFFFF;
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/lite/windowFooterShade.png);
+				background-position:0px 0px;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/lite/windowFooterShade.png, sizingMethod='scale');";
+	}
+	?>
+}
+
+.ContentTableFooterRightCorn
+{
+	width:0px;
+}

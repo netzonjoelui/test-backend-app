@@ -1,0 +1,8 @@
+# This cron handles executing netric background routines where supervisord is used for continual services
+
+#*/5 * * * * root /root/cron/tempant.sh
+* * * * * aereus php /var/www/html/ant.aereus.com/system/routines/reminders.php > /var/log/netric-reminders.log 2>&1
+* * * * * aereus php /var/www/html/ant.aereus.com/system/routines/sys_incoming_mail.php > /var/log/netric-sys_incoming_mail.log 2>&1
+* * * * * aereus php /var/www/html/ant.aereus.com/system/routines/workers.php > /var/log/netric-workers.log 2>&1
+30 23 * * * aereus php /var/www/html/ant.aereus.com/system/routines/object_maint.php > /var/log/netric-object-maint.log 2>&1
+45 2 * * * aereus php /var/www/html/ant.aereus.com/system/routines/email_cleanup.php > /var/log/netric-email-cleanup.log 2>&1

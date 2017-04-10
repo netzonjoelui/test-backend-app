@@ -1,0 +1,22 @@
+<?php
+	header("Content-type: text/xml");			// Returns XML document
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+
+	echo '<?xml version="1.0" encoding="UTF-8"
+	  standalone="yes"?><response>'; 
+
+	if ($_GET['contact_list_height'])
+		UserSetPref($dbh, $USERID, "contact_browse_list_height", $_GET['contact_list_height']);
+	
+	if ($_GET['contact_list_width'])
+		UserSetPref($dbh, $USERID, "contact_browse_list_width", $_GET['contact_list_width']);
+
+	echo "<result>1</result></response>";
+?>

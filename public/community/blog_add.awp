@@ -1,0 +1,187 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");
+	require_once("../lib/content_table.awp");
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/CToolTabs.awp");
+	require_once("../lib/WindowFrame.awp");
+	require_once("../users/user_functions.php");
+	require_once("../lib/CToolTable.awp");
+	require_once("../lib/CDropdownMenu.awp");
+	require_once("../lib/Button.awp");
+	require_once("blog_functions.awp");
+	
+	$dbh = new CDatabase();
+									  
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$THNAME  = UserGetTheme(&$dbh, $USERID, 'name');
+	
+	// Handle creation of new blog
+	if ($_POST['title'] && $_POST['name'])
+	{
+		BlogAddPublicInterface($_POST['name']);
+		
+		$result = $dbh->Query("insert into blogs(title, user_id, name)
+								values ('".$dbh->Escape($_POST['title'])."', '$USERID',
+								'".$_POST['name']."');
+								select currval('blogs_id_seq') as id;");
+		
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			header("Location: blog_edit.awp?new=1&bid=".$row['id']);
+		}
+	}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme(&$dbh, $USERID, 'css'); ?>" />
+<title>Create/Edit Post</title>
+<script language="javascript" type="text/javascript">
+	// Below is for checking a user name
+	var req;	
+	var bGoodName = false;
+	
+	function loadXMLDoc(url)
+	{
+		// branch for native XMLHttpRequest object
+		if (window.XMLHttpRequest) 
+		{
+			req = new XMLHttpRequest();
+			req.onreadystatechange = processReqChange;
+			req.open("GET", url, true);
+			req.send(null);
+			// branch for IE/Windows ActiveX version
+		} 
+		else if (window.ActiveXObject) 
+		{
+			req = new ActiveXObject("Microsoft.XMLHTTP");
+			if (req) 
+			{
+				req.onreadystatechange = processReqChange;
+				req.open("GET", url, true);
+				req.send();
+			}
+		}
+	}
+	
+	function processReqChange()
+	{
+		//alert (reg.readyState);
+		// only if req shows "complete"
+		if (req.readyState == 4) 
+		{
+			// only if "OK"
+			if (req.status == 200) 
+			{
+				response  = req.responseXML.documentElement;
+				method    = response.getElementsByTagName('method')[0].firstChild.data;
+				result    = response.getElementsByTagName('result')[0].firstChild.data;
+				//alert (method) //checkName('',result)
+				eval(method + '(\'\', result)');
+			} 
+			else 
+			{
+				alert("There was a problem retrieving the XML data:\n" + req.statusText);
+			}
+		}
+	}
+	
+	function checkName(input,response)
+	{
+		message   = document.getElementById('nameCheckMessage');
+		if (response!='')
+		{
+			switch (response)
+			{
+			case '1':
+				message.innerHTML = '(Name Already in Use)';
+				//message.style.color = 'red';
+				message.style.fontWeight = 'bold';
+				bGoodName = false;
+				break;
+			case '2':
+				message.innerHTML = 'Only use: 1-9, A-Z or _';
+				//message.style.color = 'red';
+				message.style.fontWeight = 'bold';
+				bGoodName = false;
+				break;
+			default:
+				message.innerHTML = '(Available)';
+				//message.style.color = 'green';
+				message.style.fontWeight = 'normal';
+				bGoodName = true;
+				break;
+			}
+		}
+		else
+		{
+			if (input != '')
+			{
+				// Input mode
+				url  = 'xml_check_name.awp?q=' + input;
+				message.innerHTML = "Checking name...";
+				loadXMLDoc(url);
+			}
+			else
+			{
+				message.innerHTML = ".myablogs.com";
+				bGoodName = false;
+			}
+		}
+	}   
+	
+	function SubmitForm(pub) 
+	{
+		if (bGoodName)
+		{
+			if (document.blogadd.title.value != "")
+				document.blogadd.submit();
+			else
+				alert("Please enter a title for this blog!");
+		}
+		else
+		{
+			alert("Please enter a free and valid name into \"Blog URL\"!");
+		}
+	}
+</script>
+</head>
+
+<body class='appTopSpacer'>
+<?php
+	echo "<form name='blogadd' method='post' action='blog_add.awp'>";
+					 
+	TableContentOpen('100%', "Create New Blog");
+	WindowFrameToolbarStart("100%");
+	echo ButtonCreate("Create Blog!", "SubmitForm()");
+	WindowFrameToolbarEnd();
+	
+	echo "<div tyle='padding-top:10px;width:100%;'>
+			<table border='0'>
+				<tr>
+					<td>Blog Title</td>
+					<td><input type='text' name='title' value=''></td>
+					<td>Enter a descriptive but short title.</td>
+				</tr>
+				<tr>
+					<td>Blog URL</td>
+					<td style='width:300px;'>
+						<input type='text' name='name' value='' onkeyup=\"checkName(this.value,'')\" />
+						<span id='nameCheckMessage' style='font-size:11px;'>.myablogs.com</span>
+					</td>
+					<td>This is the URL/address that will be used to access your blog.</td>
+				</tr>
+			</table>
+		  </div>";
+	TableContentClose();
+	
+	echo "</form>";
+?>
+</body>
+</html>

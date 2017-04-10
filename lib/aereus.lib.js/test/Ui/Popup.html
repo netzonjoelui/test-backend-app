@@ -1,0 +1,88 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Test Menus in ANT</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<link rel="STYLESHEET" type="text/css" href="../../style.css" />
+
+	<script language="javascript" type="text/javascript" src="../../jquery.min.js"></script>
+	<script language="javascript" type="text/javascript" src="../../alib.js"></script>
+	<script language="javascript" type="text/javascript" src="../../dom.js"></script>
+	<script language="javascript" type="text/javascript" src="../../events.js"></script>
+	<script language="javascript" type="text/javascript" src="../../events/EventWrapper.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/Popup.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/Menu.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/MenuItem.js"></script>
+	<script language="javascript" type="text/javascript" src="../../userAgent.js"></script>
+
+	<style>
+	.popup 
+	{
+		position:absolute;
+		background-color:#e0ecff;
+		color:black;
+		display:none;
+		width:100px;
+		height:100px;
+		font-size: 80%;
+		border:solid red 1px;
+		-moz-outline:0;
+		outline:0;
+	}
+	</style>	
+</head>
+<body>
+	<h1>Popup Demo</h1>
+
+	<h2>Buton Popup</h2>
+	<button id='btn'>Toggle</button>
+	<div id='popup' class='popup' style='height:100px;'>popup</div>
+
+	<script type='text/javascript'>
+		var btn = document.getElementById("btn");
+
+		var popup = new alib.ui.Popup(document.getElementById("popup"));
+
+		btn.onclick = function()
+		{
+			// Set anchord position to this button
+			popup.anchorToEl(this, "down");
+
+			// Toggle
+			popup.setVisible();
+		}
+	</script>
+
+	<h2>Child Popups</h2>
+	<button id='btn2'>Toggle</button>
+	<div id='parentPopup' class='popup' style='height:100px;'>parentPopup (click to open child)</div>
+	<div id='childPopup' class='popup' style='height:100px;'>childPopup</div>
+
+	<script type='text/javascript'>
+		var btn = document.getElementById("btn2");
+
+		var popParent = new alib.ui.Popup(document.getElementById("parentPopup"));
+		var popChild = new alib.ui.Popup(document.getElementById("childPopup"), {parent:popParent});
+
+		btn.onclick = function()
+		{
+			// Set anchord position to this button
+			popParent.anchorToEl(this, "down");
+
+			// Toggle
+			popParent.setVisible();
+
+			document.getElementById("parentPopup").onclick = function()
+			{
+				// Show
+				popChild.anchorToEl(this, "side", "right");
+				popChild.setVisible();
+			}
+		}
+	</script>
+
+
+</body>
+</html>

@@ -1,0 +1,65 @@
+<?php
+	// ANT
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	require_once("lib/CAntObject.php");
+	require_once("lib/CAntObjectList.php");
+	require_once("email/email_functions.awp");
+	// ALIB
+	require_once("lib/aereus.lib.php/CCache.php");
+	//require_once("lib/aereus.lib.php/CSessions.php");
+	
+	header("Content-type: text/xml");			// Returns XML document
+
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+
+	echo '<?xml version="1.0" encoding="iso-8859-1"?>';
+	echo "\n<tnode>\n";
+
+	$olist = new CAntObjectList($dbh, "contact_personal", $USER);
+	$olist->addCondition('and', "user_id", "is_equal", $USERID);
+	$olist->getObjects(0, 1000);
+	$num = $olist->getNumObjects();
+	for ($i=0; $i < $num; $i++)
+	{
+		$obj = $olist->getObject($i);
+		$dsp_name = $obj->getName();
+		
+		if ($obj->getValue('email'))
+		{
+			if ($dsp_name)
+			{
+				echo "<item>".rawurlencode("\"".$dsp_name."\" <".$obj->getValue('email').">")."</item>\n";
+			}
+			else
+				echo "<item>".rawurlencode($obj->getValue('email'))."</item>\n";
+		}
+		if ($obj->getValue('email2')) 
+		{
+			if ($dsp_name)
+			{
+				echo "<item>". rawurlencode("\"".$dsp_name."\" <".$obj->getValue('email2').">")."</item>\n";
+			}
+			else
+				echo "<item>".rawurlencode($obj->getValue('email2'))."</item>\n";
+		}
+		if ($obj->getValue('email_spouse')) 
+		{
+			if ($obj->getValue('spouse_name'))
+				$dsp_name = $obj->getValue('spouse_name');
+				
+			if ($dsp_name)
+			{
+				echo "<item>".rawurlencode("\"".$dsp_name."\" <".$obj->getValue('email_spouse').">")."</item>\n";
+			}
+			else
+				echo "<item>".rawurlencode($obj->getValue('email_spouse'))."</item>\n";
+		}
+	}
+	
+	echo "\n</tnode>";
+?>

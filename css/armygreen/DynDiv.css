@@ -1,0 +1,170 @@
+/**************************************************************************************
+*	Page:		Dynamically Generated List Pages message_list.awp
+***************************************************************************************/
+.ConDivTop
+{
+	border-top-width:1px;
+	border-top-style:solid;
+	border-top-color:#CCC;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#CCC;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#CCC;
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#CCC;
+	
+	background-color:#E7E7E7;
+}
+
+.ConDivBottom
+{
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#CCC;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#CCC;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#CCC;
+	
+	background-color:#FFF;
+}
+
+.DynDivAct
+{
+	font-family:Arial, Helvetica, sans-serif;
+	cursor:pointer;
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	background-color:#CCCCCC;
+}
+
+.DynDivInact
+{
+	font-family:Arial, Helvetica, sans-serif;
+	cursor:pointer;
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	background-color:transparent;
+}
+
+.DynDivAlert
+{
+	font-family:Arial, Helvetica, sans-serif;
+	cursor:pointer;
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	background-color:#66FFFF;
+}
+
+.DynDivBold
+{
+	color:#666666;
+	font-weight:bold;
+}
+.DynDivTopLeft
+{
+	color:#666666;
+	font-size:11px;
+}
+
+.DynDivTopRight
+{
+	color:#666666;
+	font-size:11px;
+}
+
+.DynDivMain
+{
+	
+	border-left-color:#CCCCCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-top-color:#CCCCCC; 
+	border-top-style:solid; 
+	border-top-width:1px;
+	
+	border-right-color:#CCCCCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+}
+
+.orderdiv
+{
+	border-bottom-color:#CCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	
+	border-left-color:#CCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#CCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+	
+	width:auto;
+	
+	background-color:#E3E3E3;
+}
+
+.MessageListSearch
+{
+	border-bottom-color:#CCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	
+	border-left-color:#CCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#CCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+
+	color:#000000;	
+	background-color:#E3E3E3;
+}
+
+.DynDivPaginate
+{
+	border-left-color:#CCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#CCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+}
+
+
+.DynDivPage
+{
+	border-top-color:#CCC; 
+	border-top-style:solid; 
+	border-top-width:1px;
+	
+	border-bottom-color:#CCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	
+	border-left-color:#CCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#CCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+	
+	width:auto;
+	
+	background-color:#E3E3E3;
+}

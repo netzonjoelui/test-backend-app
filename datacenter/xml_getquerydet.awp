@@ -1,0 +1,36 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");		
+	require_once("../lib/CDatabase.awp");
+	require_once("../users/user_functions.php");
+	require_once("datacenter_functions.awp");
+
+	$dbh = new CDatabase();
+	$dbh_dc = new CDatabase($settings_db_server, $settings_db_datacenter, 
+						    $settings_db_user, $settings_db_password, "pgsql");
+
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$QID = $_GET['qid'];
+
+	header("Content-type: text/xml");			// Returns XML document
+	echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'; 
+
+	echo "<qlist>";
+
+	$result = $dbh->Query("select name, query from dc_database_queries where id='$QID'");
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		// Get name
+		echo "<query>";
+		echo "<id>".rawurlencode($row['id'])."</id>";
+		echo "<name>".rawurlencode(stripslashes($row['name']))."</name>";
+		echo "<query>".rawurlencode(stripslashes($row['query']))."</query>";
+		echo "</query>";
+	}
+	echo "</qlist>";
+?>
+

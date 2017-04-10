@@ -1,0 +1,144 @@
+<?php
+	require_once("lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+	
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+
+	// New method
+	$FUNCTION = $_GET['function'];
+	if ($FUNCTION)
+	{
+		switch ($FUNCTION)
+		{
+		// Home page column widths
+		//-----------------------------------------------------
+		case "set_col_width_0":
+			UserSetPref(&$dbh, $USERID, "home_col_1_width", $_GET['val']);
+			break;
+		case "set_col_width_1":
+			UserSetPref(&$dbh, $USERID, "home_col_2_width", $_GET['val']);
+			break;
+		case "set_col_width_2":
+			UserSetPref(&$dbh, $USERID, "home_col_3_width", $_GET['val']);
+			break;
+		case "set_col_width_3":
+			UserSetPref(&$dbh, $USERID, "home_col_4_width", $_GET['val']);
+			break;
+		// Set timezone
+		//-----------------------------------------------------
+		case "set_timezone":
+			$dbh->Query("update users set timezone_id='".$_GET['val']."' where id='$USERID'");
+			break;
+		// Set zipcode
+		//-----------------------------------------------------
+		case "set_zipcode":
+			UserSetPref(&$dbh, $USERID, "userdata/zipcode", $_GET['zipcode']);
+			$retval = $_GET['zipcode'];
+			break;
+		// Calendar Options
+		//-----------------------------------------------------
+		case "set_cal_timespan":
+			UserSetPref(&$dbh, $USERID, 'calendar/home/span', $_GET['val']);
+			if ($VAL > 1)
+				$retval = date("m/d/Y", strtotime("+ ".($_GET['val']-1)." days"));
+			else
+				$retval = date("m/d/Y");
+			break;
+		// Welcome Center Options
+		//-----------------------------------------------------
+		case "set_wel_color":
+			UserSetPref(&$dbh, $USERID, "hompage_messagecntr_txtclr", $_GET['val']);
+			break;
+		case "set_wel_img":
+			UserSetPref(&$dbh, $USERID, "hompage_messagecntr_image", $_GET['val']);
+			break;
+		case "set_wel_img_def":
+			UserDeletePref(&$dbh, $USERID, 'hompage_messagecntr_image');
+			UserDeletePref(&$dbh, $USERID, 'hompage_messagecntr_txtclr');
+			break;
+		// Window Layout Options
+		//-----------------------------------------------------
+		case "widget_remove":
+			$remove_id = $_GET['id'];
+			if ($remove_id)
+				$dbh->Query("delete from user_home_layout where id='$remove_id'");
+			break;
+		case "widget_move":
+			$remove_id = $_GET['id'];
+			$col = $_GET['col'];
+			$pos = $_GET['pos'];
+			if ($remove_id && $col && $pos)
+				$dbh->Query("update user_home_layout set col='$col', position='$pos' where id='$remove_id'");
+			break;
+		}
+
+		$res = "<retval>" . rawurlencode($retval) . "</retval>";
+		$res .= "<cb_function>".$_GET['cb_function']."</cb_function>";
+	}
+
+	// Legacy method
+	$ACTION = $_GET['act'];
+
+	if ($ACTION)
+	{
+		$VAL = rawurldecode($_GET['val']);
+		
+		$retval = "OK";
+		
+		switch ($ACTION)
+		{
+		// Home page column widths
+		//-----------------------------------------------------
+		case "set_col_width_0":
+			UserSetPref(&$dbh, $USERID, "home_col_1_width", $VAL);
+			break;
+		case "set_col_width_1":
+			UserSetPref(&$dbh, $USERID, "home_col_2_width", $VAL);
+			break;
+		case "set_col_width_2":
+			UserSetPref(&$dbh, $USERID, "home_col_3_width", $VAL);
+			break;
+		case "set_col_width_3":
+			UserSetPref(&$dbh, $USERID, "home_col_4_width", $VAL);
+			break;
+		// Set timezone
+		//-----------------------------------------------------
+		case "set_timezone":
+			$dbh->Query("update users set timezone_id='".$VAL."' where id='$USERID'");
+			break;
+		// Calendar Options
+		//-----------------------------------------------------
+		case "set_cal_timespan":
+			UserSetPref(&$dbh, $USERID, 'calendar/home/span', $VAL);
+			if ($VAL > 1)
+				$retval = date("m/d/Y", strtotime("+ ".($VAL-1)." days"));
+			else
+				$retval = date("m/d/Y");
+			break;
+		// Welcome Center Options
+		//-----------------------------------------------------
+		case "set_wel_color":
+			UserSetPref(&$dbh, $USERID, "hompage_messagecntr_txtclr", $VAL);
+			break;
+		case "set_wel_img":
+			UserSetPref(&$dbh, $USERID, "hompage_messagecntr_image", $VAL);
+			break;
+		case "set_wel_img_def":
+			UserDeletePref(&$dbh, $USERID, 'hompage_messagecntr_image');
+			UserDeletePref(&$dbh, $USERID, 'hompage_messagecntr_txtclr');
+			break;
+		}
+		
+		$res = $retval;
+	}
+
+	header("Content-type: text/xml");			// Returns XML document
+	echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+
+	echo "<response>$res</response>";
+?>
+

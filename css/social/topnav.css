@@ -1,0 +1,84 @@
+/**************************************************************************************
+*	Page:		topNav.awp
+*	Purpose:	Navigation filler for button line
+***************************************************************************************/
+.topNavbarBG 
+{
+	background-color:#627aad;
+	padding-left: 5px;
+}
+
+.topNavbarShadow 
+{
+	display: none;
+}
+
+.topNavbarHr
+{
+	display: none;
+}
+
+.topNavTabOut
+{
+	cursor:pointer;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:12px;
+	font-weight:normal;
+	height:25px;
+	padding-left:1px;
+	padding-right:1px;
+}
+.topNavTabOut div 
+{ 
+	padding-left:5px; 
+	padding-top:4px;
+	height:16px;
+	margin-top:2px;
+	color: white;
+	padding-right:5px;
+}
+
+.topNavTabOver
+{
+	cursor:pointer;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:12px;
+	font-weight:normal;
+	color:white;
+	background-color: #829cd3;
+	height:25px;
+	padding-left:1px;
+	padding-right:1px;
+}
+.topNavTabOver div 
+{ 
+	padding-left:5px; 
+	padding-top:4px;
+	padding-right:5px;
+	margin-top:2px;
+}
+
+.topNavTabOn
+{
+	cursor:pointer;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:12px;
+	font-weight:bold;
+	color:#000000;
+	background-color:#EDEFF4;
+	height:25px;
+	border-right:1px solid #EDEFF4;
+	border-top:1px solid #EDEFF4;
+	border-left:1px solid #EDEFF4;
+}
+.topNavTabOn div 
+{
+	padding-left:5px; 
+	padding-top:4px;
+	padding-right:5px;
+}
+
+.topNavEndCell
+{
+	/*border-bottom:1px solid #B7B7B7;*/
+}

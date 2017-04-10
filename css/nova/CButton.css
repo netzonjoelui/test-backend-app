@@ -1,0 +1,723 @@
+/**************************************************************************
+ *	CButton.js
+ **************************************************************************/
+.CButton
+{
+	display:inline-block;
+	background:none;
+	margin:0;
+	padding:3px 0;
+	border-width:0;
+	overflow:visible;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	font-weight:bold; 
+	text-decoration:none;
+	text-align: left;
+}
+* html .CButton
+{
+	padding-bottom:3px;
+}
+/* Gecko adds 3px margin */
+@-moz-document url-prefix() 
+{
+     button.CButton { margin:0 -3px; }
+}
+/*
+html:not([lang*=""]) button.CButton 
+{
+	margin:0 -3px;
+}
+*/
+
+.CButton span span
+{
+	white-space: nowrap;
+}
+
+/* disabled
+ * ------------------------------*/
+.CButton[disabled]
+{
+	color: #666;
+}
+
+.CButton[disabled] span 
+{
+	/* background:#ddd url(img/bg-button.gif) repeat-x 0 0; */
+	background-color: #EEE;
+	margin:0;
+	padding:3px 0;
+	border-left:1px solid #bbb;
+	border-right:1px solid #aaa;
+}
+
+* html .CButton[disabled] span 	/* IE seems to add its own padding*/
+{
+	padding-top:0;
+}
+
+.CButton[disabled] span span 
+{
+	position:relative;
+	padding:3px 3px 3px 2px;
+	border-width:0;
+	border-top:1px solid #bbb;
+	border-bottom:1px solid #aaa;
+}
+
+/* only needed if implementing separate hover/focus/active state for buttons */
+.CButton[disabled]:hover span, .CButton[disabled]:hover span span, .CButton[disabled]:focus span, .CButton[disabled]:focus span span, .CButton[disabled]:active span, .CButton[disabled]:active span span 
+{
+	border-color:#bbb !important;
+} 
+
+.CButton[disabled]:focus, .CButton[disabled]:active 
+{
+	outline:none; /* doesn't seem to be respected for <button>, only <a> */
+}
+
+
+/* b1 scheme 
+ * ------------------------------*/
+button.b1
+{
+}
+
+button.b1 span 
+{
+	/* background:#ddd url(/images/themes/skygrey/buttons/background.gif) repeat-x 0 0; */
+	background-color : black;
+	color: white;
+	margin:0;
+	padding:3px 0;
+	border-left:1px solid #000000;
+	border-right:1px solid #000000;
+}
+
+* html button.b1 span 	/* IE seems to add its own padding*/
+{
+	padding-top:0;
+}
+
+button.b1 span span 
+{
+	position:relative;
+	padding:3px 3px 3px 2px;
+	border-width:0;
+	border-top:1px solid #000000;
+	border-bottom:1px solid #000000;
+}
+
+/* only needed if implementing separate hover/focus/active state for buttons */
+button.b1:hover span, button.b1:hover span span, button.b1:focus span, button.b1:focus span span 
+{
+	cursor:pointer; /* important for any clickable/pressable element */
+	border-color:#000000 !important;
+	color: #FF6600;
+}
+button.b1:active span, button.b1:active span span 
+{
+	/*background-position:0 -400px;*/
+	outline:none;
+	color: #FF6600;
+}
+button.b1:focus, button.b1:active 
+{
+	outline:none; /* doesn't seem to be respected for <button>, only <a> */
+}
+
+/* b2 scheme 
+ * ------------------------------*/
+button.b2
+{
+}
+
+button.b2 span 
+{
+	/* background:#ddd url(img/bg-button.gif) repeat-x 0 0; */
+	background-color: #529A52;
+	color: white;
+	margin:0;
+	padding:3px 0;
+	border-left:1px solid #529A52;
+	border-right:1px solid #529A52;
+}
+
+* html button.b2 span 	/* IE seems to add its own padding*/
+{
+	padding-top:0;
+}
+
+button.b2 span span 
+{
+	position:relative;
+	padding:3px 3px 3px 2px;
+	border-width:0;
+	border-top:1px solid #529A52;
+	border-bottom:1px solid #aaa;
+}
+
+/* only needed if implementing separate hover/focus/active state for buttons */
+button.b2:hover span, button.b2:hover span span, button.b2:focus span, button.b2:focus span span 
+{
+	cursor:pointer; /* important for any clickable/pressable element */
+	border-color:#7F8786 !important;
+	color: #333;
+}
+button.b2:active span, button.b2:active span span 
+{
+	/*background-position:0 -400px;*/
+	outline:none;
+	background-color: #7F8786;
+	color: black;
+}
+button.b2:focus, button.b2:active 
+{
+	outline:none; /* doesn't seem to be respected for <button>, only <a> */
+}
+
+/* b3 scheme 
+ * ------------------------------*/
+button.b3
+{
+}
+
+button.b3 span 
+{
+	/* background:#ddd url(img/bg-button.gif) repeat-x 0 0; */
+	background-color: #CC0000;
+	color: #fff;
+	margin:0;
+	padding:3px 0;
+	border-left:1px solid #CC0000;
+	border-right:1px solid #CC0000;
+}
+
+* html button.b3 span 	/* IE seems to add its own padding*/
+{
+	padding-top:0;
+}
+
+button.b3 span span 
+{
+	position:relative;
+	padding:3px 3px 3px 2px;
+	border-width:0;
+	border-top:1px solid #CC0000;
+	border-bottom:1px solid #CC0000;
+}
+
+/* only needed if implementing separate hover/focus/active state for buttons */
+button.b3:hover span, button.b3:hover span span, button.b3:focus span, button.b3:focus span span 
+{
+	cursor:pointer; /* important for any clickable/pressable element */
+	border-color:#CC0000 !important;
+	color: #000000;
+}
+button.b3:active span, button.b3:active span span 
+{
+	/*background-position:0 -400px;*/
+	outline:none;
+	background-color: #fff;
+	color: black;
+	border-color:#ccc !important;
+}
+button.b3:focus, button.b3:active 
+{
+	outline:none; /* doesn't seem to be respected for <button>, only <a> */
+}
+
+
+/* DEPRECATED 
+ * ================================================================================================*/
+
+/* DEPRECATED 
+ * ================================================================================================*/
+/* global settings */
+.CButton_b1, .CButton_b2, .CButton_b3
+{
+	margin: 1px;
+}
+
+/* b1 scheme */
+.CButton_b1
+{
+	cursor: pointer;
+}
+.CButtonTopLeft_b1
+{
+	background-image:url(/images/themes/nova/buttons/tl1_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonTopLeft_b1Over
+{
+	background-image:url(/images/themes/nova/buttons/tl1_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonTopCenter_b1
+{
+	background-image:url(/images/themes/nova/buttons/bt1_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:2px;
+}
+.CButtonTopCenter_b1Over
+{
+	background-image:url(/images/themes/nova/buttons/bt1_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:2px;
+}
+.CButtonTopRight_b1
+{
+	background-image:url(/images/themes/nova/buttons/tr1_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonTopRight_b1Over
+{
+	background-image:url(/images/themes/nova/buttons/tr1_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonBodyLeft_b1
+{
+	background-image:url(/images/themes/nova/buttons/ml1_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-y;
+	width:2px;
+}
+.CButtonBodyLeft_b1Over
+{
+	background-image:url(/images/themes/nova/buttons/ml1_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-y;
+	width:2px;
+}
+.CButtonBody_b1
+{
+	background-image:url('/images/themes/nova/buttons/bg1.gif');
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:16px;
+	color:#FFFFFF;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	font-weight:bold; 
+	padding-left:4px; 
+	padding-right:4px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBody_b1Over
+{
+	background-image:url('/images/themes/nova/buttons/bg2.gif');
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:16px;
+	color:#FF6600;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	font-weight:bold; 
+	padding-left:4px; 
+	padding-right:4px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBodyRight_b1
+{
+	background-image:url(/images/themes/nova/buttons/mr1_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-y;
+	height:2px;
+	width:2px;
+}
+.CButtonBodyRight_b1Over
+{
+	background-image:url(/images/themes/nova/buttons/mr1_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-y;
+	height:2px;
+	width:2px;
+}
+.CButtonBottomLeft_b1
+{
+	background-image:url(/images/themes/nova/buttons/bl1_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonBottomLeft_b1Over
+{
+	background-image:url(/images/themes/nova/buttons/bl1_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonBottomCenter_b1
+{
+	background-image:url(/images/themes/nova/buttons/bm1_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:2px;
+}
+.CButtonBottomCenter_b1Over
+{
+	background-image:url(/images/themes/nova/buttons/bm1_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:2px;
+}
+.CButtonBottomRight_b1
+{
+	background-image:url(/images/themes/nova/buttons/br1_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonBottomRight_b1Over
+{
+	background-image:url(/images/themes/nova/buttons/br1_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+
+/* b2 scheme */
+.CButton_b2
+{
+	cursor: pointer;
+}
+.CButtonTopLeft_b2
+{
+	background-image:url(/images/themes/nova/buttons/tl2_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonTopLeft_b2Over
+{
+	background-image:url(/images/themes/nova/buttons/tl2_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonTopCenter_b2
+{
+	background-image:url(/images/themes/nova/buttons/bt2_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:2px;
+}
+.CButtonTopCenter_b2Over
+{
+	background-image:url(/images/themes/nova/buttons/bt2_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:2px;
+}
+.CButtonTopRight_b2
+{
+	background-image:url(/images/themes/nova/buttons/tr2_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonTopRight_b2Over
+{
+	background-image:url(/images/themes/nova/buttons/tr2_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonBodyLeft_b2
+{
+	background-image:url(/images/themes/nova/buttons/ml2_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-y;
+	width:2px;
+}
+.CButtonBodyLeft_b2Over
+{
+	background-image:url(/images/themes/nova/buttons/ml2_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-y;
+	width:2px;
+}
+.CButtonBody_b2
+{
+	background-image:url('/images/themes/nova/buttons/bg5.gif');
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:16px;
+	color:#FFFFFF;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	font-weight:bold; 
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBody_b2Over
+{
+	background-image:url('/images/themes/nova/buttons/bg6.gif');
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:16px;
+	color:#FF6600;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	font-weight:bold; 
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBodyRight_b2
+{
+	background-image:url(/images/themes/nova/buttons/mr2_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-y;
+	height:2px;
+	width:2px;
+}
+.CButtonBodyRight_b2Over
+{
+	background-image:url(/images/themes/nova/buttons/mr2_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-y;
+	height:2px;
+	width:2px;
+}
+.CButtonBottomLeft_b2
+{
+	background-image:url(/images/themes/nova/buttons/bl2_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonBottomLeft_b2Over
+{
+	background-image:url(/images/themes/nova/buttons/bl2_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonBottomCenter_b2
+{
+	background-image:url(/images/themes/nova/buttons/bm2_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:2px;
+}
+.CButtonBottomCenter_b2Over
+{
+	background-image:url(/images/themes/nova/buttons/bm2_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:2px;
+}
+.CButtonBottomRight_b2
+{
+	background-image:url(/images/themes/nova/buttons/br2_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonBottomRight_b2Over
+{
+	background-image:url(/images/themes/nova/buttons/br2_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+
+
+/* b3 scheme */
+.CButton_b3
+{
+	cursor: pointer;
+}
+.CButtonTopLeft_b3
+{
+	background-image:url(/images/themes/nova/buttons/tl3_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonTopLeft_b3Over
+{
+	background-image:url(/images/themes/nova/buttons/tl3_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonTopCenter_b3
+{
+	background-image:url(/images/themes/nova/buttons/bt3_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:2px;
+}
+.CButtonTopCenter_b3Over
+{
+	background-image:url(/images/themes/nova/buttons/bt3_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:2px;
+}
+.CButtonTopRight_b3
+{
+	background-image:url(/images/themes/nova/buttons/tr3_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonTopRight_b3Over
+{
+	background-image:url(/images/themes/nova/buttons/tr3_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonBodyLeft_b3
+{
+	background-image:url(/images/themes/nova/buttons/ml3_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-y;
+	width:2px;
+}
+.CButtonBodyLeft_b3Over
+{
+	background-image:url(/images/themes/nova/buttons/ml3_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-y;
+	width:2px;
+}
+.CButtonBody_b3
+{
+	background-image:url('/images/themes/nova/buttons/bg3.gif');
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:16px;
+	color:#FFFFFF;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	font-weight:bold; 
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBody_b3Over
+{
+	background-image:url('/images/themes/nova/buttons/bg4.gif');
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:16px;
+	color:#FFFF99;
+	text-align:center;
+	font-family:Verdana, Arial, Helvetica, sans-serif; 
+	font-size:9px;
+	font-weight:bold; 
+	padding-left:2px; 
+	padding-right:2px; 
+	cursor:pointer; 
+	white-space: nowrap;
+}
+.CButtonBodyRight_b3
+{
+	background-image:url(/images/themes/nova/buttons/mr3_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-y;
+	height:2px;
+	width:2px;
+}
+.CButtonBodyRight_b3Over
+{
+	background-image:url(/images/themes/nova/buttons/mr3_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-y;
+	height:2px;
+	width:2px;
+}
+.CButtonBottomLeft_b3
+{
+	background-image:url(/images/themes/nova/buttons/bl3_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonBottomLeft_b3Over
+{
+	background-image:url(/images/themes/nova/buttons/bl3_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonBottomCenter_b3
+{
+	background-image:url(/images/themes/nova/buttons/bm3_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:2px;
+}
+.CButtonBottomCenter_b3Over
+{
+	background-image:url(/images/themes/nova/buttons/bm3_off.gif);
+	background-position:0px 0px;
+	background-repeat:repeat-x;
+	height:2px;
+}
+.CButtonBottomRight_b3
+{
+	background-image:url(/images/themes/nova/buttons/br3_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}
+.CButtonBottomRight_b3Over
+{
+	background-image:url(/images/themes/nova/buttons/br3_off.gif);
+	background-position:0px 0px;
+	background-repeat:no-repeat;
+	height:2px;
+	width:2px;
+}

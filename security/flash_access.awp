@@ -1,0 +1,15 @@
+<?php
+	$action = $HTTP_GET_VARS["action"];
+	
+	switch ($action)
+	{
+	case 'edit_sec':
+		$sVals = "edit_sec=";
+		$sVals .= ($_SESSION['EDIT_SEC']) ? "1" : "0";
+		break;
+	default:
+		break;
+	}
+	
+	echo $sVals;
+?>

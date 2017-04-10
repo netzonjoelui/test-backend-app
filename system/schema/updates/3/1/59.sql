@@ -1,0 +1,1 @@
+ALTER TABLE workflows ADD COLUMN f_processed_cond_met boolean;

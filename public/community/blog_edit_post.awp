@@ -1,0 +1,138 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");
+	require_once("../lib/content_table.awp");
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/CToolTabs.awp");
+	require_once("../lib/WindowFrame.awp");
+	require_once("../users/user_functions.php");
+	require_once("../lib/CToolTable.awp");
+	require_once("../lib/CDropdownMenu.awp");
+	require_once("../lib/Button.awp");
+	require_once("blog_functions.awp");
+	
+	$dbh = new CDatabase();
+									  
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$THNAME  = UserGetTheme(&$dbh, $USERID, 'name');
+	
+	$BID = $_GET['bid'];
+	$POSTID = $_GET['postid'];
+	
+	// Handle update and insert
+	if ($_POST['title'])
+	{
+		if ($POSTID)
+		{
+			$dbh->Query("update blog_articles set title='".$dbh->Escape($_POST['title'])."',
+						data='".$_POST['postbody']."', publish='".$_POST['publish']."'
+						where id='$POSTID'");
+			if ($_POST['publish'] == 't')
+				$status_message = "Post has been saved and published!";
+			else
+				$status_message = "Post has been saved as draft!";
+		}
+		else
+		{
+			$result = $dbh->Query("insert into blog_articles(title, data, time_entered, publish, blog_id)
+									values ('".$dbh->Escape($_POST['title'])."', '".$_POST['postbody']."', 'now', 
+									'".$_POST['publish']."', '$BID');
+									select currval('blog_articles_id_seq') as id;");
+			if ($_POST['publish'] == 't')
+				$status_message = "Post has been saved and published!";
+			else
+				$status_message = "Post has been saved as draft!";
+			
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$dbh->FreeResults($result);
+				$POSTID = $row['id'];
+			}
+		}
+	}
+	
+	if ($POSTID)
+	{
+		$result = $dbh->Query("select title, data, publish
+							   from blog_articles where id='$POSTID'");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$postbody = $row['data'];
+			$title = $row['title'];
+			$publish = $row['publish'];
+		}
+		$dbh->FreeResults($result);
+	}
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme(&$dbh, $USERID, 'css'); ?>" />
+<title>Create/Edit Post</title>
+<script language="JavaScript" type="text/javascript" src="/lib/rte/richtext.js"></script>
+<script language="javascript" type="text/javascript">
+	function submitForm(pub) 
+	{
+		//make sure hidden and iframe values are in sync before submitting form
+		//to sync only 1 rte, use updateRTE(rte)
+		//to sync all rtes, use updateRTEs
+		
+		document.editpost.publish.value = pub;
+
+		updateRTE('postbody');
+		document.editpost.submit();
+	}
+	
+	initRTE("/lib/rte/images/", "", "");
+</script>
+</head>
+
+<body class='appTopSpacer'>
+<?php
+	echo "<form name='editpost' method='post' action='blog_edit_post.awp?bid=$BID&postid=$POSTID'>
+		  <input type='hidden' name='publish' value=''>";
+					 
+	TableContentOpen('100%', ($POSTID) ? 'Edit Post' :  'Create New Post');
+	WindowFrameToolbarStart("100%");
+	$t_disp = ($publish == 't') ? "Save and Republish" : "Save and Publish";		
+	echo ButtonCreate($t_disp, "submitForm('t');", "b3");
+	$t_disp = ($publish == 't') ? "Save as Draft (Unpublish)" : "Save as Draft";		
+	echo ButtonCreate($t_disp, "submitForm('f');", "b2");
+	echo ButtonCreate("Cancel/Back", "document.location='blog_edit.awp?bid=$BID'");
+	echo "<div style='float:right;padding-right:3px;font-weight:bold;font-size:14px;' id='div_status'>
+			$status_message
+			<script language='script' type='text/javascript'>
+				window.setTimeout(function ClearStatus() { document.getElementById('div_status').innerHTML=''; }, 10000);
+			</script>
+		  </div>";
+	WindowFrameToolbarEnd();
+	
+	echo "<div tyle='padding-top:10px;'>
+			<div style='display:table;padding-top:3px;'>
+				<div style='float:left;padding-left:3px;padding-top:5px;font-size:14px;font-weight:bold;height:22px;'>
+					Post Title (required):
+				</div>
+				<div style='float:left;width:450px;padding-left:3px'>
+					<input style='width:100%' maxlength='64' type='text' name='title' value='$title'>
+				</div>
+				<div style='clear:both;'></div>
+			</div>
+			<div style='padding-left:3px;padding-right:4px;'>
+					<script language=\"JavaScript\" type=\"text/javascript\">
+					<!--
+					writeRichText('postbody', 'postbody', '".rawurlencode($postbody)."',  '100%', 400, true, false);
+					//-->
+					</script>
+			</div>
+		  </div>";
+	TableContentClose();
+	
+	echo "</form>";
+?>
+</body>
+</html>

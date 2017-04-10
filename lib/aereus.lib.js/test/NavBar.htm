@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>Test</title>
+	
+	<link rel="STYLESHEET" type="text/css" href="../style.css" />
+
+	<script language="javascript" type="text/javascript" src="../userAgent.js"></script>
+	<script language="javascript" type="text/javascript" src="../dom.js"></script>
+	<script language="javascript" type="text/javascript" src="../CTabs.js"></script>
+	<script language="javascript" type="text/javascript" src="../CNavBar.js"></script>
+	<script language="javascript" type="text/javascript" src="../alib.js"></script>
+	<script language='javascript' type='text/javascript'>
+	function appmain()
+	{
+		var main_con = document.getElementById("maincon");
+
+		var nb = new CNavBar();
+		var sec = nb.addSection("Test Navigation");
+		
+		sec.addItem("Home", null, SayHi, new Array("Hello there"), "home");
+		sec.addItem("Tabs", null, SayHi, new Array("Show Tabs"), "tabs");
+
+		nb.itemChangeState("home", "on");
+		nb.print(main_con);
+	}
+
+	function SayHi(message)
+	{
+		alert(message);
+	}
+	</script>
+</head>
+<body onload='appmain()'>
+	<div id='maincon' style='width:200px;'>
+	</div>
+</body>
+</html>
+
+

@@ -1,0 +1,246 @@
+<?php
+class CToolMenu
+{
+	var $buffer;
+	var $inSection;
+	
+	/***********************************************************************************
+	*	Function:	PrintMenu
+	*	Purpose:	Print buffer to screen
+	************************************************************************************/
+	function PrintMenu($width = "100%", $height = NULL)
+	{
+		print("<div>
+				<table width=\"$width\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">");
+		print($this->buffer);
+		if ($this->inSection)
+			print("</table></div>");
+		print("<tr><td class='CTMBorderBottom'></td></tr></table></div>");
+	}
+	
+	/***********************************************************************************
+	*	Function:	PrintButton
+	*	Purpose:	Print button with standard action
+	************************************************************************************/
+	function AddButton($label, $link, $target)
+	{
+		$displayLink = "/flash/templates/navButton.swf?sUrl=$link";
+		$displayLink .= "&sLabel=$label&sTarget=$target";
+		$this->buffer .= "<tr valign=\"top\"><td align=\"left\">
+						  <object classid=\"clsid:d27cdb6e-ae6d-11cf-96b8-444553540000\" 
+						  codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=7,0,0,0\" 
+						  width=\"200\" height=\"14\" id=\"navButton\" align=\"middle\">
+						  <param name=\"allowScriptAccess\" value=\"sameDomain\" />
+						  <param name=\"movie\" value=\"$displayLink\" />
+						  <param name=\"loop\" value=\"false\" />
+						  <param name=\"menu\" value=\"false\" />
+						  <param name=\"quality\" value=\"best\" />
+						  <param name=\"bgcolor\" value=\"#ffffff\" />
+						  <embed src=\"$displayLink\" loop=\"false\" menu=\"false\" quality=\"best\" bgcolor=\"#ffffff\" 
+						  width=\"200\" height=\"14\" name=\"navButton\" align=\"middle\" allowScriptAccess=\"sameDomain\" 
+						  type=\"application/x-shockwave-flash\" pluginspage=\"http://www.macromedia.com/go/getflashplayer\" />
+						  </object>
+						  </td></tr>";
+	}
+	
+	/***********************************************************************************
+	*	Function:	PrintSubButton
+	*	Purpose:	DEPRECIATED: Use AddButton instead
+	************************************************************************************/
+	function PrintSubButton($label, $link, $target)
+	{
+		$this->AddButton($label, $link, $target);
+	}
+	
+	/***********************************************************************************
+	*	Function:	AddAppButton
+	*	Purpose:	Print application button
+	************************************************************************************/
+	function AddAppButton($icon, $label, $link, $target, $btnstate)
+	{
+		global $USERID, $dbh;
+		if ($icon)
+			$icon = "<img src='$icon' border='0'>";
+		
+		if ($btnstate == "off")
+			$style = "background-image:url(/images/themes/".UserGetTheme($dbh, $USERID, 'name')."/buttons/program_button.gif);color:#990000;";
+		if ($btnstate == "on")
+			$style = "background-image:url(/images/themes/".UserGetTheme($dbh, $USERID, 'name')."/buttons/program_button_off.gif);color:#990000;";
+			
+		$style .= "height:30px;cursor:pointer;vertical-align:middle;width:100%;alert:left;";
+		$this->buffer .= "<tr valign=\"top\">
+							<td>
+								<table border='0' cellpadding='0' cellspacing='0' style=\"$style\"
+									onclick=\"top.webMenu.ChangeTitle('$label');$target.location='$link'\"
+									onMouseOver=\"this.style.color='#0000CC'\" onMouseOut=\"this.style.color='#990000'\">
+								<tr>
+									<td align='left' style='width:30px; padding-left: 10px;'>$icon</td>
+									<td style='font-family:verdana,arial;font-weight:bold; font-size:11px;'>$label</td>
+								</tr>
+								</table>
+							</td></tr>";
+	}
+	
+	/***********************************************************************************
+	*	Function:	PrintSubAppButton
+	*	Purpose:	DEPRECIATED: Use AddAppButton instead
+	************************************************************************************/
+	function PrintSubAppButton($icon, $label, $link, $target, $btnstate='off')
+	{
+		$this->AddAppButton($icon, $label, $link, $target, $btnstate);
+	}
+	
+	/***********************************************************************************
+	*	Function:	AddCollapseButton
+	*	Purpose:	Print collapsable button
+	************************************************************************************/
+	function AddCollapseButton($label, $url, $menu, $navigation)
+	{
+		$displayLink = "/flash/templates/navButton.swf?sUrl=$url?menu=";
+		$displayLink .= ($menu == $navigation) ? '' : $menu;
+		$displayLink .= "&sLabel=$label";
+		//$this->buffer .= "<tr valign=\"top\"><td align=\"left\"><div>
+		$this->buffer .= "<tr valign=\"top\"><td align=\"left\"><div>
+							<object classid=\"clsid:d27cdb6e-ae6d-11cf-96b8-444553540000\" 
+							codebase=\"http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=7,0,0,0\" 
+							width=\"200\" height=\"14\" id=\"navButton\" align=\"middle\">
+							<param name=\"allowScriptAccess\" value=\"sameDomain\" />
+							<param name=\"movie\" value=\"$displayLink\" />
+							<param name=\"loop\" value=\"false\" />
+							<param name=\"menu\" value=\"false\" />
+							<param name=\"quality\" value=\"best\" />
+							<param name=\"bgcolor\" value=\"#ffffff\" />
+							<embed src=\"$displayLink\" loop=\"false\" menu=\"false\" quality=\"best\" bgcolor=\"#ffffff\" 
+							width=\"200\" height=\"14\" name=\"navButton\" align=\"middle\" allowScriptAccess=\"sameDomain\" 
+							type=\"application/x-shockwave-flash\" pluginspage=\"http://www.macromedia.com/go/getflashplayer\" />
+							</object>
+						</div>
+						</td></tr></table>";
+	}
+	
+	/***********************************************************************************
+	*	Function:	StartSub
+	*	Purpose:	Begin collapsable menu (start by adding the coll button)
+	************************************************************************************/
+	function StartSub($label, $url, $menu, $navigation)
+	{
+		$this->AddCollapseButton($label, $url, $menu, $navigation);
+	}
+	
+	/***********************************************************************************
+	*	Function:	CloseSub
+	*	Purpose:	DEPRECIATED: No longer needed
+	************************************************************************************/
+	function CloseSub()
+	{
+	}
+	
+	/***********************************************************************************
+	*	Function:	AddNewSubItem
+	*	Purpose:	Add item link to left menu
+	************************************************************************************/
+	function AddNewSubItem($link, $target, $title, $icon=NULL, $style = NULL, $icon_other = NULL)
+	{
+		$target = ($target) ? ($target == 'parent') ? 'parent.' : "parent.".$target.'.' : '';
+		$act = (substr($link, 0, 11) == "JavaScript:") ? $link : $target."document.location='$link'";
+		$icon = ($icon) ? "<img src='$icon' border='0'>" : "&nbsp;";
+        if ($icon_other) $icon = $icon_other;
+		$this->buffer .= "<tr>
+							<td>
+								<table border='0' cellpadding='0' cellspacing='0' width='100%'
+									style='font-family:Verdana, Arial, Helvetica, sans-serif; font-size:10px;'><tr>
+									<td class='CTMLeftBorder'></td>
+									<td class='CTMList'
+										
+										onMouseOver=\"this.className='CTMListOver'\" 
+										onMouseOut=\"this.className='CTMList'\">
+									 <div style='display:table;width:100%;height:100%;'>
+										<div style='float:left;' class='CTMListIcon'>$icon</div>
+										<div style='cursor:pointer;".(($style) ? $style : '' )."' class='CTMListLink' onClick=\"$act\">
+											$title
+										</div>
+                                        <div style='clear:both;'></div>
+									 </div>
+									</td>
+									<td class='CTMRightBorder'></td>
+								</tr>
+								</table>
+							</td>
+						  </tr>";
+	}
+	
+	/***********************************************************************************
+	*	Function:	AddNewSubHeader
+	*	Purpose:	Add primary header
+	************************************************************************************/
+	function AddNewSubHeader($title, $link = NULL, $target = NULL, $maxheight = NULL)
+	{
+		if ($this->inSection)
+			$this->buffer .= "</table></div>";
+
+		$this->buffer .= "<table cellpadding='0' cellspacing='0' style='width:100%;";
+		if ($maxheight)
+		{
+			$this->buffer .= " height:$maxheight;overflow:auto; ";
+		}
+		$this->buffer .= "'>";
+
+		$this->inSection = true;
+
+		$this->buffer .= "<tr>
+							<td>
+								<table border='0' cellpadding='0' cellspacing='0' width='100%'>
+								<tr>
+									<td colspan='3' class='CTMHeaderTopHr'></td>
+								</tr>
+								<tr>
+									<td class='CTMLeftBorder'></td>
+						  			<td class='CTMHeaderBody'>";
+		if ($link)
+		{
+			$this->buffer .= "<a class='CTMHeaderLink' href='$link' target='$target'>$title</a>";
+		}
+		else
+		{
+			$this->buffer .= "<strong>$title</strong>";
+		}
+		$this->buffer .= "		</td><td class='CTMRightBorder'></td></tr>
+								<tr>
+									<td colspan='3' class='CTMHeaderBottomHr'></td>
+								</tr>
+								</table>
+							</td>
+							</tr>";
+
+	}
+	
+	/***********************************************************************************
+	*	Function:	AddNewSubHeader
+	*	Purpose:	Add primary header
+	************************************************************************************/
+	function StartSubCell()
+	{
+		$this->buffer .= "<tr>
+							<td>
+								<table border='0' cellpadding='0' cellspacing='0' width='100%'
+									style='font-family:Verdana, Arial, Helvetica, sans-serif; font-size:10px;'><tr>
+									<td class='CTMLeftBorder'></td>
+									<td class='CTMList'>";
+	}
+	function EndSubCell($spacer=NULL)
+	{
+		$this->buffer .= "		</td>
+									<td class='CTMRightBorder'></td>
+								</tr>
+								</table>
+							</td>
+						  </tr>";
+		if ($spacer)
+			$this->buffer .= "<tr><td height='$spacer'></td></tr>";
+	}
+	function AddToBuffer($cont)
+	{
+		$this->buffer .= $cont;
+	}
+}
+?>

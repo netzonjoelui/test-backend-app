@@ -1,0 +1,384 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+	<title><%PAGETITLE%></title>
+
+	<style type="text/css">
+	
+	html, body
+		{
+		height:100%;
+		margin:0;
+		padding:0;
+		background-color: #C4C4C4;
+		font: 12px georgia, times, serif;
+		color: #676980;
+		text-align: center;
+		border:none;
+		}
+		
+	a
+		{
+		color: #CC99CC;
+		text-decoration: none;
+		border-bottom: 1px solid #CC99CC;
+		}
+		
+	a:visited
+		{
+		color: #CC99CC;
+		border: none;
+		}
+		
+	a:hover
+		{
+		color: #996699;
+		border-bottom: 1px solid #996699;
+		}
+		
+	h1
+		{
+		display: none;
+		}
+		
+	h2
+		{
+		font-size: 2em;
+		font-weight: normal;
+		color: #922;
+		margin: 0 0 0.7em 0;
+		padding: 0;
+		}
+		
+	h3
+		{
+		width: 420px;
+		height: 20px;
+		margin: 1.2em 0 0.8em 0;
+		}
+		
+	h3 span
+		{
+		display: none;
+		visibility: hidden;
+		}
+	
+	blockquote {
+		align: center; 
+		line-height: 16px;
+		text-align: center;
+		padding: 10px;
+		color: #996699;
+		font-family: arial,verdana,sans-serif;
+		font-size: 10px;
+		font-style:italic;
+		letter-spacing: 1px;
+		background-color: #DDDDDD;
+	}
+	
+	input,textarea,select 
+	{ 
+		background-color: #FFF;
+		border: 1px solid #B8B8B8;
+		color: #333331;
+		padding:5px; 
+	}
+	
+	/* The following hack is to correct paragraph text size in IE/WIN */
+	
+	/* \*/ * html body p { font-size: 80%; } /* */
+	
+	
+	#globalContainer
+		{
+		position: relative;
+		text-align: left;
+		vertical-align: middle;
+		margin: 0 auto;
+		width: 728px;
+		background: #fff url(/images/blogs/mainColumn.gif) repeat-y;
+		border-bottom:1px solid transparent;
+		}
+		
+	#globalColumnBody
+		{
+		width: 728px;
+		background: #fff url(/images/blogs/mainColumn.gif) repeat-y;
+		border-bottom:1px solid transparent;
+		}
+		
+	#globalfooterText
+		{
+		width: 280px;
+		margin-left: 100px;
+		}
+		
+	#globalContent
+		{
+		margin-left: 75px;
+		width: 380px;
+		}
+		
+	#globalHeader
+		{
+		width: 728px;
+		height: 200px;
+		background: #FFF url(/images/blogs/mainHeader.png) no-repeat;
+		}
+		
+	#globalHeader div
+		{
+		font-size: 23px;
+		font-weight: normal;
+		font-family:"Times New Roman", Times, serif;
+		text-align: left;
+		padding-top:80px;
+		padding-left:80px;
+		text-transform:uppercase;
+		letter-spacing: 5px;
+		color: #FFF;
+		}
+		
+	#globalLinkList
+		{
+		position: absolute;
+		top: 200px;
+		left: 472px;
+		width: 194px;
+		}
+
+	/***********************************************************************
+	*	Classes that handle sidebar boxes
+	*
+	*	Layout:
+	*	
+	*	sidebox
+	*	{
+	*		sidebox2 -- used for rounded corners (optional)
+	*		{
+	*			sidebar_title
+	*			ul (no class - subclass ".sidebox ul" to style)
+	*			{
+	*				li ((no class - subclass ".sidebox li" to style))
+	*			}
+	*		}
+	*	}
+	*
+	*	Available subclasses: profile archive links (use ".sidebox profile")
+	*
+	************************************************************************/
+	
+	.sidebox 
+	{ 
+		color: #666;
+		font-size: 11px;
+		font-family: Arial, Helvetica, sans-serif;
+		letter-spacing: normal;
+		line-height: 20px; 
+		text-align: left;
+	}
+	
+	.sidebar_title 
+	{ 
+		font-family: Arial, Helvetica, sans-serif;
+		font-size:10px;
+		color: #FFF;
+		text-transform:uppercase;
+		letter-spacing:normal;
+		padding-left:4px;
+		padding-top:0px;
+		padding-bottom:0px;
+		margin:0;
+		background-color:#676980;		
+	}
+	
+	.sidebox li
+	{
+		font-family: Arial, Helvetica, sans-serif;
+		font-size:10px;
+		color: #333366;
+		line-height: 1.5em;
+		padding: 0.5em 8px;
+	}
+	
+	.sidebox li:hover
+	{
+		background: #D4D4D4;
+	}
+	
+	.sidebox li a
+	{
+		display: block;
+		border: none;
+		color: #333366;
+		text-decoration: none;
+	}
+	
+	.sidebox li a:visited
+	{
+		color: #333366;
+		text-decoration: none;
+	}
+	
+	.sidebox li a:hover
+	{
+		color: #676980;
+		text-decoration:none;
+	}
+	
+	.sidebox ul
+	{ 
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		background: #FFF;
+	}
+
+	/************************************************************
+	*	Classes that handle day, post, and comments for the body
+	*
+	*	Layout:
+	*	
+	*	post_day_container
+	*	{
+	*		post_date_header
+	*		post_container
+	*		{
+	*			post_header
+	*			post_body
+	*			post_footer
+	*			post_comment_container
+	*			{
+	*				post_comment
+	*				post_comment_add
+	*			}
+	*		}
+	*	}
+	*
+	*
+	*************************************************************/
+	
+	/* Each post is printed inside a div container for each day*/
+	.post_day_container
+	{
+		background-color: #FFF;
+		padding: 0px;
+		margin-bottom: 10px;
+	}
+	/* Date Header Div */
+	.post_date_header 
+	{ 
+		font-family: Arial, Helvetica, sans-serif;
+		font-size:12px;
+		font-weight:bold;
+		color: #676980;
+		font-style:italic;
+		float:left;
+	}
+	/* A container for each post (inside post_day_container) */
+	.post_container 
+	{
+		margin-top: 14px;
+	}
+	/* The title of each article */
+	.post_header
+	{
+		font-family: Arial, Helvetica, sans-serif;
+		font-size:14px;
+		font-weight:bold;
+		color: #676980;
+		letter-spacing:normal;
+		margin: 1.2em 0 0.8em 0;
+		padding-top:30px;
+	}
+	/* Where the body of the post article/post is printed */
+	.post_body
+	{	
+		font-family:Arial, Helvetica, sans-serif;
+		font-size: 88%;
+		color: #676980;
+		letter-spacing:normal;
+		line-height:20px;
+		text-align: justify;
+		margin: 0 0 0.6em 0;
+		}
+	
+	/* Comes after post_body inside post_container */
+	.post_footer
+	{
+		text-align: left;
+		padding-top:5px;
+		padding-bottom:10px;
+		font-size: 11px;
+		font-family: Arial, Helvetica, sans-serif;
+		text-align:center;
+	}
+	/* This div resides in the day container and is printed directly after the footer */
+	.post_comment_container
+	{
+		border-bottom:1px dotted #BBBBBB;
+		border-right:1px dotted #BBBBBB;
+		border-left:1px dotted #BBBBBB;
+	}
+	
+	/* Contains each and ever comment */
+	.post_comment
+	{
+		border-top:1px dotted #BBBBBB;
+		text-align:left;
+		padding:10px;
+		font-size: 11px;
+		font-family: Arial, Helvetica, sans-serif;
+	}
+	.post_comment strong
+	{
+		display:table;
+	}
+	
+	/* Contains the add new comment form */
+	.post_comment_add
+	{
+		border-top:1px dotted #BBBBBB;
+		padding-top:10px;
+		text-align:left;
+		padding:10px;
+		font-size: 11px;
+		font-family: Arial, Helvetica, sans-serif;
+	}
+	
+	</style>
+	<script type="text/javascript">
+	<!--
+	function ToggleComments(id)
+	{
+		var dv = document.getElementById('cmts_' + id);
+		if (dv && dv.style.display == 'block')
+			dv.style.display = 'none';
+		else
+			dv.style.display = 'block';
+	}
+	-->
+	</script>
+</head>
+
+<body>
+
+<div id="globalContainer">
+	<div id="globalColumnBody">
+		<div id="globalHeader">
+			<div>
+				<%TITLE_HEADER_DIV%>
+			</div>
+		</div>
+		<div id="globalContent">
+			<%BLOG_BODY%>		
+		</div>
+	</div>
+	<div id="globalLinkList">
+		<%SIDE_BAR%>
+	</div>
+</div>
+
+</body>
+</html>

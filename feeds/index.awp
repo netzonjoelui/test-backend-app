@@ -1,0 +1,178 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("community/feed_functions.awp");
+	require_once("lib/CAntObject.php");
+	
+	$dbh = $ANT->dbh;
+
+	// Update expired posts
+	FeedUpdateExpired($dbh);
+	$obj = new CAntObject($dbh, "content_feed_post");
+	$FID = $_GET['fid'];
+	$MAX_NUM = $_GET['max_num'];
+	$ORDER = rawurldecode($_GET['order']);
+	$CONDITION = rawurldecode($_GET['condition']);
+	$ARCHIVED = rawurldecode($_GET['archived']);
+
+	if (!$FID)
+		exit;
+
+	if (!$ORDER || !$MAX_NUM)
+	{
+		$result = $dbh->Query("select limit_num, sort_by from xml_feeds where id='$FID'");
+		$num = $dbh->GetNumberRows($result2);
+		for ($j = 0; $j < $num; $j++)
+		{
+			$row = $dbh->GetNextRow($result, $j);
+			if (!$ORDER && $row['sort_by'])
+				$ORDER = $row['sort_by'];
+			if (!$MAX_NUM && $row['limit_num'])
+				$MAX_NUM = $row['limit_num'];
+		}
+		$dbh->FreeResults($result);
+	}
+
+	if ($_GET['register_push'] && $FID && $_GET['push_url'])
+	{
+		$url = base64_decode($_GET['register_push']);
+		$furl = base64_decode($_GET['push_url']);
+
+		$result = $dbh->Query("select id from xml_feed_publish where feed_id='$FID' 
+							   and publish_to='".$dbh->Escape($url)."' and furl='".$dbh->Escape($furl)."'");
+		if (!$dbh->GetNumberRows($result))
+		{
+			$dbh->Query("insert into xml_feed_publish(feed_id, publish_to, furl) 
+						 values('$FID', '".$dbh->Escape($url)."', '".$dbh->Escape($furl)."');");
+		}
+
+		echo "1";
+		exit;
+	}
+
+	if ($ORDER)
+	{
+		$g_ordertype = "ASC";
+
+		// Strip " DESC" if exists
+		$pos = strpos($ORDER, " DESC");
+		if ($pos !== false)
+		{
+			$g_ordertype = "DESC";
+			$ORDER = substr($ORDER, 0, $pos);
+
+			if ($ORDER == "date" && !$dbh->GetNumberRows($dbh->Query("select id, col_name, col_title, col_type from xml_feed_fields where feed_id='$FID' and col_name='date'")))
+				$ORDER = "date_entered";
+		}
+
+		if ($obj->fields->getField($ORDER))
+			$main_order = " order by $ORDER $g_ordertype ";
+		else if ($obj->fields->getField($ORDER."_feed_id_".$FID))
+			$main_order = " order by $ORDER"."_feed_id_"."$FID $g_ordertype ";
+		/*
+		if ($dbh->ColumnExists("xml_feed_posts", $ORDER))
+			$main_order = " order by $ORDER $g_ordertype ";
+		else if ($dbh->ColumnExists("xml_feed_posts", $ORDER."_feed_id_".$FID))
+			$main_order = " order by $ORDER"."_feed_id_"."$FID $g_ordertype ";
+		 */
+	}
+
+	if ($CONDITION)
+	{
+		//$main_cond = " and $CONDITION ";
+		// Get col name and condition
+		$pos = strpos($CONDITION, "=");
+		if ($pos !== false)
+		{
+			$col = substr($CONDITION, 0, $pos);
+			$cond = substr($CONDITION, $pos + 1);
+			switch ($col)
+			{
+			case 'id':
+				$main_cond = " id=$cond ";
+				break;
+			case 'categories':
+			case 'category':
+				$main_cond = " id in (select post_id from xml_feed_post_cat_mem where category_id=$cond) ";
+				break;
+			default:
+				$main_cond = " $CONDITION ";
+				break;
+			}
+		}	
+	}
+
+	// Return XML
+	header("Content-type: text/xml");
+	echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'; 
+	echo "<ant_feed>\n";
+
+	$query = "select *,to_char(time_entered, 'MONTH DD YYYY') as date_entered, 
+				to_char(time_entered, 'HH12:MI:SS am') as time_posted ";
+	// Loop through additional fields and add values
+	$result2 = $dbh->Query("select id, col_name, col_title, col_type from xml_feed_fields where feed_id='$FID'");
+	$num2 = $dbh->GetNumberRows($result2);
+	for ($j = 0; $j < $num2; $j++)
+	{
+		$row2 = $dbh->GetNextRow($result2, $j);
+		if ($row2['col_type'] == "file") $row2['col_type'] = "text";
+
+		//$query .= ", t".$j.".val_".$row2['col_type']." as ".$row2['col_name'];
+		if ($obj->fields->getField($row2['col_name']."_feed_id_".$FID))
+			$query .= ", ".$row2['col_name']."_feed_id_$FID as ".$row2['col_name'];
+	}
+	$dbh->FreeResults($result2);
+
+	$query .= " from xml_feed_posts ";
+	// Loop through additional fields and left outer join
+	/*
+	$result2 = $dbh->Query("select id, col_name, col_title, col_type from xml_feed_fields where feed_id='$FID'");
+	$num2 = $dbh->GetNumberRows($result2);
+	for ($j = 0; $j < $num2; $j++)
+	{
+		$row2 = $dbh->GetNextRow($result2, $j);
+		if ($row2['col_type'] == "file") $row2['col_type'] = "text";
+
+		$query .= " left outer join xml_feed_post_values t".$j." on(xml_feed_posts.id=t".$j.".post_id 
+															and t".$j.".field_id='".$row2['id']."')";
+	}
+	$dbh->FreeResults($result2);
+	 */
+	$query .= " where feed_id='$FID' and 
+			  	f_publish='".(($ARCHIVED) ? 'f': 't')."' and f_deleted is not true";
+	if ($main_cond) $query .= " and $main_cond";
+	if ($main_order) $query .= $main_order;
+	if ($MAX_NUM) $query .= " LIMIT $MAX_NUM";
+	
+	$result = $dbh->Query($query);	
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$addrow = true;
+		// Set image location
+		$row['data'] = str_replace("src=\"/userfiles/file_download.awp", "src=\"http://$settings_localhost/userfiles/file_download.awp", $row['data']);
+		$row['data'] = str_replace("src=\"/files/", "src=\"http://$settings_localhost/files/", $row['data']);
+
+		echo "<post>";
+		foreach ($row as $varname=>$varval)
+		{
+			if ($varname == "data") $varname = "body";
+			echo "<$varname>".rawurlencode($varval)."</$varname>";
+		}
+		echo "<categories>";
+		$res2 = $dbh->Query("select id, name from xml_feed_post_categories where id in 
+								(select category_id from xml_feed_post_cat_mem where post_id='".$row['id']."')");
+		$num2 = $dbh->GetNumberRows($res2);
+		for ($j = 0; $j < $num2; $j++)
+		{
+			$row2 = $dbh->GetRow($res2, $j);
+			echo "<category id='".rawurlencode($row2['id'])."' name='".rawurlencode($row2['name'])."' />";
+		}
+		echo "</categories>";
+		echo "</post>";
+	}
+	$dbh->FreeResults($result);
+
+	echo "</ant_feed>";
+?>

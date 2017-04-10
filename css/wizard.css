@@ -1,0 +1,134 @@
+/* Typically used for actions */
+.wizardTitle
+{
+	border: 1px solid;
+	padding: 3px;
+	background-color: white;
+	color: #000;
+	margin: 5px 10px 5px 10px;
+}
+
+/* Typically used for actions */
+.wizardBody
+{
+	height: 485px;
+	overflow: auto;
+	margin: 0px 10px 0px 10px;
+}
+
+.wizardBody h1, h2, h3
+{
+	font-family: sans-serif;
+}
+
+.wizardBody h1
+{
+	font-size: 18px;
+	margin:5px 0 10px 0;
+}
+
+.wizardBody h2
+{
+	font-size: 16px;
+	margin:5px 0 5px 0;
+}
+
+.wizardBody h3
+{
+	font-size: 14px;
+	margin:3px 0 3px 0;
+}
+
+.wizardBody p
+{
+	font-family: Arial, Helvetica;
+	font-size: 13px;
+	margin: 5px 0px 10px 0px;
+}
+
+.wizardBody p.small
+{
+	font-size: 11px;
+	margin: 0px 0px 6px 0px;
+    height: 100%;
+}
+
+.wizardBody hr
+{
+	color: #ccc;
+	background-color: #ccc;
+	height: 1px;
+	border: 0;
+}
+
+.wizardBody fieldset
+{
+	margin: 0 0 10px 0;
+	border: 1px solid  #ccc;
+	padding: 10px;
+}
+
+.wizardBody fieldset > legend
+{
+	font-weight: bold;
+	color: #666;
+}
+
+.wizardLabel
+{
+	padding-top: 5px;
+	font-weight: bold;
+	font-size: 13px;
+}
+
+.wizardBody input[type=text]
+{
+	/* inherited from global input[type=text] now */
+}
+
+/* Typically used for buttons actions */
+.wizardFooter
+{
+	margin: 10px 10px 0px 10px;
+	text-align: right;
+}
+
+/**
+ * Wizard specific
+ */
+.wizardEditionPil
+{
+	height: 160px;
+	border: 1px solid #ccc;
+	text-align: center;
+	padding: 10px;
+	margin-bottom: 5px;
+
+	background: -moz-linear-gradient(top, rgba(0,0,0,0.04) 0%, rgba(200,200,200,0.1) 50%, rgba(200,200,200,0) 100%); 
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(0,0,0,0.04)), color-stop(50%,rgba(200,200,200,0.1)), color-stop(100%,rgba(200,200,200,0)));
+	background: -webkit-linear-gradient(top, rgba(0,0,0,0.04) 0%,rgba(200,200,200,0.1) 50%,rgba(200,200,200,0) 100%);
+	background: -o-linear-gradient(top, rgba(0,0,0,0.04) 0%,rgba(200,200,200,0.1) 50%,rgba(200,200,200,0) 100%);
+	background: -ms-linear-gradient(top, rgba(0,0,0,0.04) 0%,rgba(200,200,200,0.1) 50%,rgba(200,200,200,0) 100%);
+	background: linear-gradient(top, rgba(0,0,0,0.04) 0%,rgba(200,200,200,0.1) 50%,rgba(200,200,200,0) 100%);
+}
+
+.wizardEditionPil h1
+{
+	padding: 0px 0px 5px 0px;
+	margin: 0px;
+	border-bottom: 1px solid;
+}
+
+.wizardEditionPil h3
+{
+	font-size: 13px;
+	color: #666;
+	margin-bottom: 10px;
+}
+
+.wizardEditionPil .desc
+{
+	height: 80px;
+	overflow: hidden;
+	color: #333;
+}

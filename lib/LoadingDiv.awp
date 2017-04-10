@@ -1,0 +1,51 @@
+<?php
+function CreateLoadingDiv($title)
+{
+	global $CLOADINGDIVSCRIPT;
+	if (!$CLOADINGDIVSCRIPT)
+	{
+		echo "<script language=\"JavaScript\">
+				function clearPreloadPage() 
+				{ 
+					//DOM
+					if (document.getElementById)
+					{
+						document.getElementById('prepage').style.visibility='hidden';
+					}
+					else
+					{
+						if (document.layers)
+						{ 
+							//NS4
+							document.prepage.visibility = 'hidden';
+						}
+						else 
+						{ 
+							//IE4
+							document.all.prepage.style.visibility = 'hidden';
+						}
+					}
+				}
+			   </script>";
+			   
+		$CLOADINGDIVSCRIPT = true;
+	}
+	
+	echo "<div id=\"prepage\" style=\"position:absolute; font-family:arial; font-size:16; left:0px; 
+			top:0px; background-color:CCCCCC; layer-background-color:EEEEEE; height:100%; width:100%;\">
+				<table bgcolor='#CCCCCC' border='0' cellpadding='10' cellspacing='0' align=\"center\" height=\"100%\">
+					<tr valign=\"middle\">
+						<td>
+						<div class='loading'></div>
+						</td>		
+						<td valign='middle' style='font-size:16px; color:#000000; font-family:Arial, Helvetica, sans-serif;font-wieght:bold;'>
+							$title
+						</td>		
+					</tr>		
+			</table>
+			</div>";
+			
+	// Push output to browser
+	flush();
+}
+?>

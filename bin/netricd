@@ -1,0 +1,245 @@
+#!/usr/bin/env php
+<?php
+/**
+ * This is the new daemon manager for all background processes in netric
+ *
+ * The daemon is designed so that it can be run from any server or all servers since
+ * it maintains no state except through netric code allowing us to distribute
+ * it horizontally as more servers are needed.
+ */
+
+// Setup autoloader
+include(__DIR__ . "/../init_autoloader.php");
+
+$applicationEnvironment = (getenv('APPLICATION_ENV')) ? getenv('APPLICATION_ENV') : "production";
+
+// Get system config
+$config = Netric\Config\ConfigLoader::fromFolder(
+    __DIR__ . "/../config",
+    $applicationEnvironment
+);
+
+// Get system log
+$log = new \Netric\Log($config);
+
+global $pids;
+$pids = [];
+
+/*
+ * Setup ticks so we can handle events.
+ * A tick is an event that occurs for every N low-level tickable
+ * statements executed by the parser within the declare block.
+ * We are basically telling the pcntl_signal to check after every
+ * single operation to see if we should exit.
+ */
+declare(ticks = 1);
+
+// Path to the pid file to use
+$pidFile = $config->pidfile;
+$runningPid = @file_get_contents($pidFile);
+
+/*
+ * Handle user arguments
+ */
+switch ($_SERVER['argv'][1]) {
+
+    case "start":
+        if ($runningPid) {
+            die("netricd is already running");
+        }
+
+        /*
+         * Daemonize by killing this process and hand execution over to the forked process
+         */
+        $pid = pcntl_fork();
+        if ($pid) {
+
+            // Only the parent will know the PID. Kids aren't self-aware. Parent says goodbye!
+            $log->debug("netricd: Branched new daemon thread in: " . getmypid());
+
+            // Write to the pid file
+            file_put_contents($pidFile, $pid);
+
+            // Exit gracefully
+            exit(0);
+        }
+
+        // The forked process ($pid) will continue  below
+
+        break;
+
+    case "stop":
+
+        if (!$runningPid) {
+            die("No $pidFile file found. Is netricd running?");
+        }
+
+        // Send the kill signal
+        posix_kill($runningPid, SIGTERM);
+
+        // Wait for it to exit
+        for ($i = 0; $i < 5; $i++) {
+            echo "Waiting for netricd (pid $runningPid) to die...\n";
+
+            // If status returns non-0 then it has stopped
+            if (posix_kill($runningPid, SIGTERM)) {
+                break;
+            }
+
+            sleep(1);
+        }
+
+        if (!posix_kill($runningPid, SIGTERM)) {
+            die("Stopping netric failed; still running");
+        } else {
+            echo "netricd stopped\n";
+            unlink($pidFile);
+            exit(0);
+        }
+
+        break;
+
+    case "force-stop":
+        posix_kill($runningPid, SIGQUIT);
+        break;
+
+    case "status":
+        // Get status
+        if ($runningPid) {
+            if (posix_kill($runningPid, SIGUSR1)) {
+                // Status should have been printed from running daemon
+                echo "netricd is running\n";
+                exit(0);
+            } else {
+                echo "netricd is not running but the pid file exists!\n";
+                // Program is dead but the PID exists
+                exit(2);
+            }
+        }
+        // netricd is not running
+        echo "netricd is not running\n";
+        exit(3);
+
+    default:
+        die("Usage: netricd {start|stop|force-stop|status}\n");
+}
+
+$log->debug("New daemon process is: " . getmypid());
+
+/*
+ * Handle signals coming in from the outside
+ */
+function sig_handler($signo) {
+    global $pids, $pidFile, $log;
+
+    $log->debug("Received signal: $signo");
+
+    if ($signo == SIGTERM || $signo == SIGHUP || $signo == SIGINT){
+        // If we are being restarted or killed, quit all children
+
+        /*
+         * Look for zombie processes that have exited on their own.
+         * pcntl_waitpid will return the PID that exited, or 0 or ERROR.
+         * WNOHANG means do not sit and wait if the child is not ready for us
+         * to clean up immediately. The first param -1 means any child of the current process.
+         */
+        $deadAndGone = pcntl_waitpid(-1, $status, WNOHANG);
+        while($deadAndGone > 0){
+            // Remove the gone pid from the array
+            unset($pids[array_search($deadAndGone, $pids)]);
+            $log->debug("netricd: Cleaned up dead process: $deadAndGone");
+
+            // Look for another one
+            $deadAndGone = pcntl_waitpid(-1, $status, WNOHANG);
+        }
+
+        // Send the same signal to the children which we recieved
+        foreach($pids as $p) {
+            $log->debug("\tKilling child $p");
+            posix_kill($p,$signo);
+        }
+
+        // Women and Children first (wait for them to exit)
+        foreach($pids as $p) {
+            $log->debug("\tWaiting for child $p");
+            pcntl_waitpid($p,$status);
+            $log->debug("\tdone");
+        }
+
+        $log->debug(
+            "netricd: Parent ["
+            .  getmypid()
+            . "] - all child processes have exited, "
+            . " now clearing the pid file and exiting."
+        );
+
+        exit();
+    } else if($signo == SIGUSR1) {
+        print "netricd: " . count($pids) . " children are running\n";
+    }
+}
+
+// Register sig_handler as a listener to system signals
+pcntl_signal(SIGTERM, "sig_handler");
+pcntl_signal(SIGHUP,  "sig_handler");
+pcntl_signal(SIGINT, "sig_handler");
+pcntl_signal(SIGUSR1, "sig_handler");
+
+// All the daemon setup work is done now. Now do the actual tasks at hand
+// ======================================================================
+
+/*
+ * Start the scheduler process which basically looks for scheduled tasks
+ * and injects them into the WorkerMan to be handled by the workers below.
+ */
+$pid = pcntl_fork();
+if (!$pid) {
+    pcntl_exec("./netric", ["workers/schedule", "--daemon=true"]);
+    exit();
+} else {
+    // We add pids to a global array so we can manage as needed
+    $pids[] = $pid;
+}
+
+/*
+ * Now run workers that will process tasks as they come in.
+ */
+while(true) {
+
+    // Make sure at all times that there are at least 6 workers running
+    if(count($pids) < 6) {
+
+        // Fork a new child process
+        $pid = pcntl_fork();
+
+        if (!$pid) {
+            // New thread launches worker
+            pcntl_exec("./netric", ["workers/process", "--daemon=true"]);
+            $log->debug("netricd: exited workers/process");
+            exit();
+        } else {
+            // Parent thread stores the new process id so we can manage/cleanup
+            $pids[] = $pid;
+            $log->debug("netricd: started workers/process [{$pid}]");
+        }
+    }
+
+    /*
+     * Look for zombie processes that have exited on their own.
+     * pcntl_waitpid will return the PID that exited, or 0 or ERROR.
+     * WNOHANG means do not sit and wait if the child is not ready for us
+     * to clean up immediately. The first param -1 means any child of the current process.
+     */
+    $deadAndGone = pcntl_waitpid(-1, $status, WNOHANG);
+    while($deadAndGone > 0){
+        // Remove the gone pid from the array
+        unset($pids[array_search($deadAndGone, $pids)]);
+        $log->debug("netricd: Cleaned up dead process: $deadAndGone");
+
+        // Look for another one
+        $deadAndGone = pcntl_waitpid(-1, $status, WNOHANG);
+    }
+
+    // Sleep for 1 second
+    sleep(1);
+}

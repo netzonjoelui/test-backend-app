@@ -1,0 +1,112 @@
+/**************************************************************************************
+*	LIB:		CContentTable
+*	Purpose:	aereus.lib.js class used throughout ant for each content table
+***************************************************************************************/
+/* outer table */
+.ContentTable
+{
+	/*
+	border: 0;
+	*/
+	border-width:0;
+	border-style:solid; 
+	border-left-color:#0FC3E8; 
+	border-left-width:1px; 
+	border-top-width:1px; 
+	border-top-color:#0FC3E8; 
+	border-bottom-color:#0FC3E8; 
+	border-bottom-width:1px;  
+	border-right-color:#0FC3E8; 
+	border-right-width:1px;
+}
+/* Upper Left Corner */
+.ContentTableTitleLeftCorn
+{
+	width:0px;
+}
+/* Center of title bar */
+.ContentTableTitleCenter
+{
+	/*
+	background-color:#fff;
+	*/
+	background-color: #0FC3E8;
+	height: 20px;
+}
+/* Upper Right Corner */
+.ContentTableTitleRightCorn
+{
+	width:0px;
+}
+/* Label Container - For title */
+.ContentTableTitleLabel
+{
+	text-align:left;
+	font-size:13px; 
+	padding-left:3px;
+	padding-top:1px;
+	padding-bottom:2px;
+	color:#fff;
+	font-weight: bold;
+	/*
+	font-size: 16px;
+	font-weight: bold;
+	text-align: left;
+	padding: 5px 5px 5px 5px;
+	margin: 0px;
+	color: #F07E13;
+	*/
+}
+/* Context Container - For title */
+.ContentTableTitleContext
+{
+	margin-top: 1px;
+	margin-right: 1px;
+}
+/* Left border of table body */
+.ContentTableBodyLeft
+{
+	width:0px;
+}
+/* Table body */
+.ContentTableBody
+{
+	background-color:#FFFFFF; 
+	padding:4px; 
+	height:100%
+}
+/* Right border of table body */
+.ContentTableBodyRight
+{
+	width:0px;
+}
+/* Small 1px hr at the bottom of the table */
+.ContentTableFooterHrLeft
+{
+
+}
+.ContentTableFooterHr 
+{
+	background-color:#FFFFFF;
+	height:1px;
+}
+.ContentTableFooterHrRight
+{
+
+}
+
+/* The fotter row where the menu might optionally be placed */
+.ContentTableFooterLeftCorn
+{
+
+}
+
+.ContentTableFooterRow
+{
+
+}
+
+.ContentTableFooterRightCorn
+{
+
+}

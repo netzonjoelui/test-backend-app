@@ -1,0 +1,95 @@
+<?php
+	/********************************************************************************
+	*	File:		flashCmlQuery.awp
+	*	Purpose:	Take XML with query attribute and return results
+	*	Author:		joe, sky@aereus.com 2004
+	********************************************************************************/
+	
+	header("Content-type: text/xml");			// Returns XML document
+	
+	include("../../lib/AntConfig.php");		// General settings file
+	include("database_functions.php");			// Database man functions
+	$debug = 1;
+	include("../debug/dbgFunctions.awp");
+
+	
+	// Create new database connection
+	$dbh = new CDatabase();
+		// Make sure sRetVars is empty
+	$sRetVars = "";
+	
+	$sRetVars = "<?xml version=\"1.0\"?>\n";
+	$sRetVars .= "<result>\n";
+	
+	// XML should be posted through http_raw_post_data from the client (sendAndLoad)
+	$s = simplexml_load_string($GLOBALS['HTTP_RAW_POST_DATA']);
+	WriteLog("Query: " . $GLOBALS['HTTP_RAW_POST_DATA'] . "\n", "flashXmlQuery.log");
+	
+	// Received document must have a query tag 
+	// Example: <request><query>select something</query></request>
+	$query = $s->query;
+	WriteLog("Query: " . $query . "\n", "flashXmlQuery.log");
+	
+	switch($query)
+	{
+	case "function:GetComments":
+		$dtable = $s->tablename;
+		$vname = $s->varname;
+		
+		$comments = $dbh->GetColumnComment($dtable, $vname);
+		$sRetVars .= "<comments>".str_replace("<SMLdataseparator>", "[%SMLdataseparator%]", $comments)."</comments>";
+		break;
+	case "function:GetTableColumns":
+		$dtable = $s->tablename;
+		$dcol = $s->colname;
+		WriteLog("Perform GetTableColums with: $dtable, $dcol\n", "flashXmlQuery.log");
+		if ($dcol)
+			$result = $dbh->GetTableColumns($dtable, $dcol);
+		else
+			$result = $dbh->GetTableColumns($dtable);
+		
+		$num = $dbh->GetNumberRows($result);
+		WriteLog("GetColumns is returning: $num rows\n", "flashXmlQuery.log");
+		for ($i = 0; $i < $num; $i++)
+		{
+			$sRetVars .= "<datarow>\n";
+			$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+			foreach ($row as $varName => $varVal)
+			{
+				$sRetVars .= "<$varName>$varVal</$varName>\n";
+			}
+			$sRetVars .= "</datarow>\n";
+		}
+		pg_free_result($result);
+		break;
+	default:
+		WriteLog("Perform regular query\n", "flashXmlQuery.log");
+		// Return the results in xml format
+		// <result><datarow></datarow><datarow></datarow></result>
+		$result = $dbh->Query($query);
+		
+		$num = $dbh->GetNumberRows($result);
+		
+		for ($i = 0; $i < $num; $i++)
+		{
+			$sRetVars .= "<datarow>\n";
+			
+			$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+			foreach ($row as $varName => $varVal)
+			{
+				$sRetVars .= "<$varName>$varVal</$varName>\n";
+			}
+			$sRetVars .= "</datarow>\n";
+		}
+		$dbh->FreeResults($result);
+		break;
+	}
+	
+	$sRetVars .= "</result>\n";
+	
+	WriteLog("- Returning: $sRetVars\n\n", "flashXmlQuery.log");
+	
+	echo $sRetVars;
+	
+	// Destructor of database class will close handle to db
+?>

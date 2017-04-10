@@ -1,0 +1,119 @@
+/**************************************************************************************
+*	Page:		Dynamically Generated List Pages message_list.awp
+***************************************************************************************/
+.DynDivAct
+{
+	font-family:Arial, Helvetica, sans-serif;
+	cursor:pointer;
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	background-color:#CCCCCC;
+}
+
+.DynDivInact
+{
+	font-family:Arial, Helvetica, sans-serif;
+	cursor:pointer;
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	background-color:transparent;
+}
+
+.DynDivAlert
+{
+	font-family:Arial, Helvetica, sans-serif;
+	cursor:pointer;
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	background-color:#bcddff;
+}
+
+.DynDivBold
+{
+	color:#666666;
+	font-weight:bold;
+}
+
+.DynDivTopLeft
+{
+	color:#666666;
+	font-size:11px;
+}
+
+.DynDivTopRight
+{
+	color:#666666;
+	font-size:11px;
+}
+
+.DynDivMain
+{
+	border-top-color:#CCCCCC; 
+	border-top-style:solid; 
+	border-top-width:1px;
+	
+	border-left-color:#CCCCCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#CCCCCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+}
+
+.DynDivPaginate
+{
+	border-left-color:#CCCCCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#CCCCCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+}
+
+.DynDivPage
+{
+	border-top-color:#CCCCCC; 
+	border-top-style:solid; 
+	border-top-width:1px;
+	
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	
+	border-left-color:#CCCCCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#CCCCCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+	
+	width:auto;
+	
+	background-color:#E3E3E3;
+}
+
+.orderdiv
+{
+	border-bottom-color:#CCCCCC; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	
+	border-left-color:#CCCCCC; 
+	border-left-style:solid; 
+	border-left-width:1px;
+	
+	border-right-color:#CCCCCC; 
+	border-right-style:solid; 
+	border-right-width:1px;
+	
+	width:auto;
+	
+	background-color:#E3E3E3;
+}
+

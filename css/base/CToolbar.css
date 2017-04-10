@@ -1,0 +1,118 @@
+/**
+ * alib.ui.Toolbar - is replacing CTOolBart
+ * ==================================================================
+ */
+
+/* toolbar container */
+.alibToolbar
+{
+	background-color: #fff;
+	padding: 0px 0px 3px 0px;
+}
+
+/* toolbar button class */
+.alibToolbarButton
+{
+	border: 1px solid transparent;
+	cursor: default;
+	position: relative;
+	display: -moz-inline-box;
+	display: inline-block;
+	height: 20px;
+	vertical-align: middle;
+	margin-right: 3px;
+	-webkit-border-radius: 2px; 
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+}
+
+.alibToolbarButton button
+{
+	background-color: white;
+	border: none;
+}
+
+.alibToolbarButton:hover
+{
+	border: 1px solid black;
+}
+
+.alibToolbarButton.on
+{
+	border-color: #729BD1;
+	background-color: #dde1eb;
+}
+
+.alibToolbarButton.disabled, .alibToolbarButton.disabled:hover
+{
+	border: 1px solid transparent;
+	filter:progid:DXImageTransform.Microsoft.Alpha( Opacity=50 )
+	-moz-opacity: 0.5;
+	opacity: 0.5;
+}
+
+/* toolbar button class */
+.alibToolbarSeparator
+{
+	border-right: 1px solid #ccc;
+	cursor: default;
+	position: relative;
+	display: -moz-inline-box;
+	display: inline-block;
+	height: 20px;
+	vertical-align: middle;
+	margin-right: 3px;
+}
+
+
+/**************************************************************************
+*	CToolbar.js
+**************************************************************************/
+.CToolbar
+{ 
+	border: 0;
+	padding:2px 0px 10px 0px;
+	margin-top:0px;  
+	display:table;
+}
+
+.CToolbar button.CButton 
+{
+	margin:0px;
+}
+/* Gecko adds 3px margin */
+@-moz-document url-prefix() 
+{
+     .CToolbar button.CButton { margin:0 -3px; }
+}
+
+.CToolbarInputBlur
+{
+	color: #333;
+}
+
+/* Used for standard text labels in toolbars */
+
+.CToolbarLabel
+{
+	padding-right:6px;
+	padding-top: 3px;
+	font-family:Arial, Verdana,  Helvetica, sans-serif; 
+	font-size:12px;
+	font-weight:bold;
+	color:#000;	
+}
+
+.CToolbarSpacer
+{
+	width: 1px;
+	background-color: gray;
+	height: 18px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+}
+.CToolbarIcon
+{
+	width: 22px;
+	height: 22px;
+}

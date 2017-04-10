@@ -1,0 +1,1264 @@
+/********************************************************************
+ *	List of styles that control the look of aereuslib classes
+ ********************************************************************/
+
+/**************************************************************************
+ *	alib.js global styles
+ **************************************************************************/
+.statusAlert
+{
+	border: 1px solid #130B40;
+	padding: 8px;
+	background-color: #93B4C7;
+	color: white;
+}
+
+/**************************************************************************
+ *	CWindowFrame.js
+ **************************************************************************/
+.CWindowFrameOuter
+{
+	border: 1px solid #000;
+}
+.CWindowFrameLabel
+{
+	font-weight: bold;
+	border-bottom: 1px dashed #000;
+}
+.CWindowFrameContext
+{
+	font-weight: normal;
+	float: right;
+	margin-right: 3px;
+}
+.CWindowFrameContent
+{
+	font-weight: normal;
+}
+
+/**************************************************************************
+ *	CSplitContainer.js
+ **************************************************************************/
+.CSplitContainerHorizResizeBar
+{
+	height: 8px;	
+}
+.CSplitContainerHorizResizeBarOver
+{
+	height: 8px;
+	background-color: blue;
+	cursor: row-resize;
+}
+
+.CSplitContainerVertResizeBar
+{
+	width: 8px;	
+}
+.CSplitContainerVertResizeBarOver
+{
+	width: 8px;
+	background-color: blue;
+	cursor: col-resize;
+}
+/**************************************************************************
+ *	CTabs.js
+ **************************************************************************/
+.CTTabLeftOn
+{
+}
+.CTTabLeftOff
+{
+}
+
+.CTTabCenterOn
+{
+	background-color: #E3E3E3;
+	border-top: 1px solid #000;
+	border-right: 1px solid #000;
+	border-left: 1px solid #000;
+	font-weight: bold;
+	padding: 3px;
+}
+.CTTabCenterOff
+{
+	border-top: 1px solid #000;
+	border-right: 1px solid #000;
+	border-left: 1px solid #000;
+	padding: 3px;
+	cursor: pointer;
+}
+
+.CTTabRightOn
+{
+	width: 2px;
+}
+.CTTabRightOff
+{
+	width: 2px;
+}
+
+.CTTabHr
+{
+	height: 0px;
+	display: none;
+}
+
+.CTTabBody
+{
+	background-color: #E3E3E3;
+	border: 1px solid #000;
+}
+
+/**************************************************************************
+ *	CContentTable.js
+ **************************************************************************/
+/* Outer Container */
+.ContentTable
+{
+	border: 1px solid #000;
+}
+/* Upper Left Corner */
+.ContentTableTitleLeftCorn
+{
+}
+/* Center of title bar */
+.ContentTableTitleCenter
+{
+	border-bottom: 1px dotted #000;
+	height: 22px;
+}
+/* Upper Right Corner */
+.ContentTableTitleRightCorn
+{
+}
+/* Label Container - For title */
+.ContentTableTitleLabel
+{
+	font-weight: bold;
+}
+/* Context Container - For title */
+.ContentTableTitleContext
+{
+}
+/* Left border of table body */
+.ContentTableBodyLeft
+{
+}
+/* Table body */
+.ContentTableBody
+{
+}
+/* Right border of table body */
+.ContentTableBodyRight
+{
+}
+/* Footer Row */
+.ContentTableFooterRow
+{
+}
+/* Lower left corder */
+.ContentTableFooterLeftCorn
+{
+}
+/* Footer body */
+.ContentTableFooterCenter
+{
+}
+/* Footer Right Corner */
+.ContentTableFooterRightCorn
+{
+}
+
+/**
+ * alib.ui.Toolbar
+ * ==================================================================
+ */
+
+/* toolbar container */
+.alibToolbar
+{
+	background-color: #e3e3e3;
+	padding: 3px;
+}
+
+/* toolbar button class */
+.alibToolbarButton
+{
+	border: 1px solid transparent;
+	cursor: default;
+	position: relative;
+	display: -moz-inline-box;
+	display: inline-block;
+	height: 20px;
+	vertical-align: middle;
+	margin-right: 3px;
+	-webkit-border-radius: 2px; 
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+}
+
+.alibToolbarButton:hover
+{
+	border: 1px solid black;
+}
+
+.alibToolbarButton.on
+{
+	border-color: #729BD1;
+	background-color: #dde1eb;
+}
+
+.alibToolbarButton.disabled, .alibToolbarButton.disabled:hover
+{
+	border: 1px solid transparent;
+	filter:progid:DXImageTransform.Microsoft.Alpha( Opacity=50 )
+	-moz-opacity: 0.5;
+	opacity: 0.5;
+}
+
+/* toolbar button class */
+.alibToolbarSeparator
+{
+	border-right: 1px solid #ccc;
+	cursor: default;
+	position: relative;
+	display: -moz-inline-box;
+	display: inline-block;
+	height: 20px;
+	vertical-align: middle;
+	margin-right: 3px;
+}
+
+
+/**************************************************************************
+ *	CToolbar.js
+ **************************************************************************/
+.CToolbar
+{
+	border-bottom: 1px solid #666;
+	background-color: #EEEEEE;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+.CToolbarSpacer
+{
+	width: 1px;
+	background-color: gray;
+	height: 22px;
+}
+.CToolbarIcon
+{
+	width: 22px;
+	height: 22px;
+}
+
+/**************************************************************************
+ *	CMenubar.js
+ **************************************************************************/
+.CMenubar
+{
+	background-color: #CCC;
+}
+
+.CMenuBarLink
+{
+	cursor: default;
+}
+
+.CMenuBarLinkOver
+{
+	background-color: white;
+	cursor: default;
+}
+
+.CMenuBarLinkOn
+{
+	background-color: blue;
+	color: white;
+	cursor: default;
+}
+
+/**************************************************************************
+ *	CDropdownMenu.js
+ **************************************************************************/
+.CDropdownMenuContainer
+{
+	border: 1px solid #666;
+}
+/* A small span tag is before the label for button dropdowns
+ * this is perfect for an image of a down arror or something similar */
+.CDropdownMenuButtonPrefix
+{
+	width: 10px;
+	height: 5px;
+	background-color: blue;
+	margin-left: 3px;
+}
+
+.CDropdownMenuIcon
+{
+	background-color:black;
+	color: #FFF;
+}
+.CDropdownMenuIconOver
+{
+	background-color:white;
+	color: #000;
+}
+.CDropdownMenuLink
+{
+	background-color:black;
+	color: #FFF;
+}
+.CDropdownMenuLinkOver
+{
+	background-color:white;
+	color: #000;
+}
+.CDropdownMenuRight
+{
+	background-color:black;
+	color: #FFF;
+}
+.CDropdownMenuRightOver
+{
+	background-color:white;
+	color: #000;
+}
+/* Use to defile icon that suggests a sub-menu */
+.CDropdownMenuRightIcon
+{
+	width: 12px;
+}
+
+/**************************************************************************
+ *	CToolTable.js
+ **************************************************************************/
+.CTTMainTable
+{
+	border: 1px solid #666;
+}
+.CTTHeaderCell
+{
+	background-color: blue;
+	font-weight: bold;
+	color: white;
+	border-right: 1px solid #FFF;
+}
+.CTTRowOne
+{
+	background-color: #E3E3E3;
+	border-right: 1px solid #FFF;
+}
+.CTTRowOneBold
+{
+	background-color: #E3E3E3;
+	border-right: 1px solid #FFF;
+}
+.CTTRowTwo
+{
+	background-color: #CCCCCC;
+	border-right: 1px solid #FFF;
+}
+.CTTRowTwoBold
+{
+	background-color: #CCCCCC;
+	border-right: 1px solid #FFF;
+}
+.CTTRowSpacer
+{
+	background-color: #FFF;
+	height: 1px;
+}
+
+
+
+/**************************************************************************
+ *	CNavBar.js
+ **************************************************************************/
+.CNavBar
+{
+	border: 1px solid #666;
+}
+
+.CNavBarItem
+{
+	color: black;
+	background-color: white;
+}
+.CNavBarItemOver
+{
+	background-color: #E3E3E3;
+}
+.CNavBarItemOn
+{
+	background-color: black;
+	color: white;
+}
+
+/**************************************************************************
+ *	CDataset.js
+ **************************************************************************/
+.CDatasheetMainTable
+{
+	border-left: 1px solid #E3E3E3;
+	border-bottom: 1px solid #E3E3E3;
+}
+.CDatasheetHeaderCell
+{
+	background-color: #ccc;
+	padding: 10px;
+}
+.CDatasheetRowTitle
+{
+	background-color: #ccc;
+	padding: 3px 5px 3px 5px;
+	/* Set default width */
+	width: 10px;
+}
+.CDatasheetCell
+{
+	border-right: 1px solid #E3E3E3;
+	border-top: 1px solid #E3E3E3;
+	padding: 3px 5px 3px 5px;
+	background-color: none;
+	font-family: times, serif;
+}
+.CDatasheetCellRO 
+{
+	/* Read only */
+	border-right: 1px solid #E3E3E3;
+	border-top: 1px solid #E3E3E3;
+	padding: 3px 5px 3px 5px;
+	background-color: #eee;
+	font-family: times, serif;
+}
+.CDatasheetCellEdit
+{
+	border-right: 1px solid #E3E3E3;
+	border-top: 1px solid #E3E3E3;
+	padding: 0px;
+	font-family: times, serif;
+}
+
+.CDatasheetCellEdit input
+{
+	border: 0px;
+	font-family: times, serif;
+	padding: 3px 5px 3px 5px;
+}
+
+.CDatasheetCellSelected
+{
+	border-right: 1px solid #000000;
+	border-top: 1px solid #000000;
+	padding: 3px 5px 3px 5px;
+	background-color: blue;
+	color: white;
+	font-family: times, serif;
+}
+.CDatasheetRow
+{
+	background-color: white;
+}
+.CDatasheetRowSelected
+{
+	background-color: blue;
+}
+
+/**************************************************************************
+ *	CTreeView.js
+ **************************************************************************/
+
+/* Outer Container */
+.CTreeViewCon
+{
+}
+
+/* Div holding each row */
+.CTreeViewRow
+{
+	border: 1px solid;
+	width: 100%;
+}
+
+/* Container with subs - closed */
+.CTreeViewTildeWithSubClosed
+{
+	width: 12px;
+	height: 16px;
+	background-color: blue;
+	/*
+	background-image: url(images/CTreeView/closed.gif);
+	background-repeat: no-repeat; 
+	background-position: 0px 6px; 
+	*/
+}
+
+/* Container with subs - open */
+.CTreeViewTildeWithSubOpen
+{
+	width: 12px;
+	height: 16px;
+	background-color: black;
+	/*
+	background-image: url(images/CTreeView/open.gif);
+	background-repeat: no-repeat; 
+	background-position: 0px 6px; 
+	*/
+}
+
+/* Container with no subs */
+.CTreeViewTildeNoSub
+{
+	width: 12px;
+	height: 16px;
+	border: 1px dashed red;
+}
+
+/* Container space to the left of tide and icon */
+.CTreeViewSpaceLine
+{
+	width: 10px;
+	height: 18px;
+	border-bottom: 1px dashed gray;
+}
+
+.CTreeViewIcon
+{
+	width: 15px;
+	padding-right: 5px;
+	padding-left: 3px;
+	padding-top: 1px;
+	height: 16px;
+	background-color: #fff;
+}
+
+.CTreeViewBodyOut
+{
+	cursor: default;
+}
+
+.CTreeViewBodyOver
+{
+	cursor: default;
+	background-color: blue;
+	color: white;
+}
+
+.CTreeViewBodyOn
+{
+	cursor: default;
+	background-color: black;
+	color: white;
+}
+
+
+
+/**************************************************************************
+ *	CDialog.js
+ **************************************************************************/
+/* Div that covers the entire page when dialog is open */
+#CDialogOverlay
+{
+	background-color: black;
+	filter:progid:DXImageTransform.Microsoft.Alpha( Opacity=40 )
+	-moz-opacity: 0.4;
+	opacity: 0.4
+}
+
+/* Outer dialog container */
+.CDialogCon
+{
+	background-color:#eee; 
+	border:2px outset #666;
+}
+
+
+/* Body container */
+.CDialogBody
+{
+	padding: 5px 5px 5px 5px; 
+}
+
+/* Title container */
+.CDialogTitle
+{
+	background-color:blue; 
+	color: white;
+	padding: 3px;
+}
+
+/* Title container close */
+.CDialogTitleClose
+{
+	border: 1px solid white;
+	width: 20px;
+	height: 20px;
+}
+
+
+/**************************************************************************
+ *	CRte.js
+ **************************************************************************/
+.CRteIframe
+{
+	border: 1px solid #cccccc;
+}
+
+
+/**************************************************************************
+ *	Alib_Ui_Autocomplete
+ **************************************************************************/
+.autocomplete-w1 { background:url(img/shadow.png) no-repeat bottom right; position:absolute; top:0px; left:0px; margin:8px 0 0 6px; /* IE6 fix: */ _background:none; _margin:0; }
+.autocomplete { border:1px solid #999; background:#FFF; cursor:default; text-align:left; max-height:350px; overflow:auto; margin:-6px 6px 6px -6px; /* IE6 specific: */ _height:350px;  _margin:0; _overflow-x:hidden; }
+.autocomplete .selected { background:#F0F0F0; }
+.autocomplete div { padding:2px 5px; white-space:nowrap; }
+.autocomplete strong { font-weight:normal; color:#3399FF; }
+
+
+/**************************************************************************
+ *	CAutoCompleteCal.js
+ **************************************************************************/
+.acCalContainer
+{
+	border: 1px solid #000;
+	font-family:arial; 
+	font-size:12px;
+	background-color: white;
+}
+
+.acCalYearNavigation, .acCalMonthNavigation
+{
+	background-color:#33CCFF; 
+	text-align:center; 
+	vertical-align:center; 
+	text-decoration:none; 
+	color:#000000; 
+	font-weight:bold;
+}
+
+.acCalText
+{
+}
+
+td.acCalDayColumnHeader
+{
+	text-align:right; 
+	border:solid thin #C0C0C0;
+	border-width:0px 0px 1px 0px;
+}
+
+.acCalCurrentMonthDate, .acCalOtherMonthDate, .acCalCurrentDate
+{
+	text-align:right; 
+	text-decoration:none;
+}
+
+.acCalCurrentMonthDateDisabled, .acCalOtherMonthDateDisabled, .acCalCurrentDateDisabled
+{
+	color:#D0D0D0;
+	text-align:right;
+	text-decoration:line-through;
+}
+
+.acCalCurrentMonthDate, .acCalCurrentDate
+{
+	color:#000000;
+}
+
+.acCalOtherMonthDate
+{
+	color:#808080;
+}
+
+td.acCalCurrentDate
+{
+	color:white; 
+	background-color: #C0C0C0; 
+	border-width:1px; 
+	border:solid thin #800000;
+}
+
+td.acCalCurrentDateDisabled
+{
+	border-width:1px; 
+	border:solid thin #FFAAAA;
+}
+
+td.acCalTodayText, td.acCalTodayTextDisabled
+{
+	border:solid thin #C0C0C0; 
+	border-width:1px 0px 0px 0px;
+}
+
+a.acCalTodayText, span.acCalTodayTextDisabled
+{
+	height:20px;
+}
+
+a.acCalTodayText
+{
+	color: black;
+}
+
+.acCalTodayTextDisabled
+{
+	color:#D0D0D0;
+}
+
+/* Add time classes */
+div.acTimePicker 
+{
+	border: 1px solid #000;
+	font-family:arial; 
+	font-size:13px;
+	background-color: #888888;
+	color: #fff;
+	position: absolute;
+	height: 200px;
+	width:4em; /* needed for IE */
+	overflow: auto;
+	z-index: 99;
+}
+div.acTimePicker-12hours 
+{
+  width:6em; /* needed for IE */
+}
+ 
+div.acTimePicker ul 
+{
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+div.acTimePicker li 
+{
+  padding: 1px;
+  cursor: pointer;
+}
+div.acTimePicker li.selected 
+{
+  background: #000000;
+  color: #fff;
+}
+
+
+/* 
+		This stylesheet belongs to TextboxList - Copyright Guillermo Rauch <http://devthought.com> 2009 
+		TextboxList is not priceless for commercial use. See <http://devthought.com/projects/jquery/textboxlist/> 
+		Purchase to remove copyright
+*/
+
+.textboxlist { font: 11px "Lucida Grande", Verdana; cursor: text; }
+.textboxlist-bits { zoom: 1; overflow: hidden; margin: 0; padding: 3px 4px 0; border: 1px solid #999; *padding-bottom: 3px; }
+.textboxlist-bit { list-style-type: none; float: left; display: block; padding: 0; margin: 0 5px 3px 0; cursor: default; }
+.textboxlist-bit-editable { border: 1px solid #fff; }
+.textboxlist-bit-editable-input { border: 0; padding: 2px 0; *padding-bottom: 0; height: 14px; font: 11px "Lucida Grande", Verdana; }
+.textboxlist-bit-editable-input:focus { outline: 0; }
+.textboxlist-bit-box { position: relative; line-height: 18px; padding: 0 5px; -moz-border-radius: 9px; -webkit-border-radius: 9px; border-radius: 9px; border: 1px solid #CAD8F3; background: #DEE7F8; cursor: default; }
+.textboxlist-bit-box-deletable { padding-right: 15px; }
+.textboxlist-bit-box-deletebutton { position: absolute; right: 4px; top: 6px; display: block; width: 7px; height: 7px; font-size: 1px; background: url('close.gif'); }
+.textboxlist-bit-box-deletebutton:hover { border: none; background-position: 7px; text-decoration: none; }
+.textboxlist-bit-box-hover { background: #BBCEF1; border: 1px solid #6D95E0; }
+.textboxlist-bit-box-focus { border-color: #598BEC; background: #598BEC; color: #fff; }
+.textboxlist-bit-box-focus .textboxlist-bit-box-deletebutton { background-position: bottom; }
+
+/*  TextboxList Style guidelines 
+			This style doesn't necessarily have to be in a separate file. 
+			It's advisable not to set widths and margins from here, but instead apply it to a particular object or class (#id .textboxlist { width: xxx } or .class .textboxlist { width: xxx })
+			The padding-top + padding-left + height of ".textboxlist-bit-editable-input {}" has to match the line-height of ".textboxlist-bit-box {}" for UI consistency. 
+			The font configuration has to be present in .textboxlist and .textboxlist-bit-editable-input (for IE reasons)
+			The *padding-bottom (notice the *) property of .textboxlist-bits {} has to be equal to the margin-bottom of .textboxlist-bit {} for IE reasons.
+			The padding-top of .textboxlist ul {} has to match the margin-bottom of .textboxlist-bit, and the padding-bottom has to be null.
+			Make sure the border-width of the .textboxlist-bit-editable {} is equal to the border-width of the box (a border that matches the background is advisable for the input)
+			Feel free to edit the borders, fonts, backgrounds and radius.		
+*/
+
+
+/**************************************************************************
+ *	Ui/Button.js
+ **************************************************************************/
+button {
+	display: inline-block;
+	outline: none;
+	cursor: pointer;
+	text-align: center;
+	text-decoration: none;
+	font: 14px/100% Arial, Helvetica, sans-serif;
+	padding: 5px;
+	text-shadow: 0 1px 1px rgba(0,0,0,.3);
+	-webkit-border-radius: 3px; 
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);
+	-moz-box-shadow: 0 1px 2px rgba(0,0,0,.2);
+	box-shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+button:hover {
+	text-decoration: none;
+}
+button:active {
+	position: relative;
+	top: 1px;
+}
+
+button.grLeft
+{
+	-webkit-border-top-right-radius: 0px; 
+	-moz-border-top-right-radius: 0px;
+	border-top-right-radius: 0px;
+
+	-webkit-border-bottom-right-radius: 0px; 
+	-moz-border-bottom-right-radius: 0px;
+	border-bottom-right-radius: 0px;
+}
+
+button.grRight
+{
+	-webkit-border-top-left-radius: 0px; 
+	-moz-border-top-left-radius: 0px;
+	border-top-left-radius: 0px;
+
+	-webkit-border-bottom-left-radius: 0px; 
+	-moz-border-bottom-left-radius: 0px;
+	border-bottom-left-radius: 0px;
+}
+
+button.grCenter
+{
+	-webkit-border-radius: 0; 
+	-moz-border-radius: 0;
+	border-radius: 0;
+}
+
+button[disabled]
+{
+	color: #666;
+}
+
+.bigrounded {
+	-webkit-border-radius: 2em;
+	-moz-border-radius: 2em;
+	border-radius: 2em;
+}
+.medium {
+	font-size: 12px;
+	padding: .4em 1.5em .42em;
+}
+.small {
+	font-size: 11px;
+	padding: .2em 1em .275em;
+}
+
+
+/* white */
+.b1 {
+	color: #606060;
+	border: solid 1px #b7b7b7;
+	background: #fff;
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ededed));
+	background: -moz-linear-gradient(top,  #fff,  #ededed);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#ededed');
+}
+.b1:hover {
+    cursor: pointer !important; 
+	background: #ededed;
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#dcdcdc));
+	background: -moz-linear-gradient(top,  #fff,  #dcdcdc);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#dcdcdc');
+}
+.b1:active {
+	color: #999;
+	background: -webkit-gradient(linear, left top, left bottom, from(#ededed), to(#fff));
+	background: -moz-linear-gradient(top,  #ededed,  #fff);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#ffffff');
+}
+button.on {
+	color: #999;
+	background: -webkit-gradient(linear, left top, left bottom, from(#ededed), to(#fff));
+	background: -moz-linear-gradient(top,  #ededed,  #fff);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#ffffff');
+}
+
+/* blue */
+.b2 {
+	color: #d9eef7;
+	border: solid 1px #0076a3;
+	background: #0095cd;
+	background: -webkit-gradient(linear, left top, left bottom, from(#00adee), to(#0078a5));
+	background: -moz-linear-gradient(top,  #00adee,  #0078a5);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#00adee', endColorstr='#0078a5');
+}
+.b2:hover {
+	background: #007ead;
+	background: -webkit-gradient(linear, left top, left bottom, from(#0095cc), to(#00678e));
+	background: -moz-linear-gradient(top,  #0095cc,  #00678e);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#0095cc', endColorstr='#00678e');
+}
+.b2:active {
+	color: #80bed6;
+	background: -webkit-gradient(linear, left top, left bottom, from(#0078a5), to(#00adee));
+	background: -moz-linear-gradient(top,  #0078a5,  #00adee);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#0078a5', endColorstr='#00adee');
+}
+
+
+/* red */
+.b3 {
+    cursor: pointer;
+	color: #faddde;
+	border: solid 1px #980c10;
+	background: #d81b21;
+	background: -webkit-gradient(linear, left top, left bottom, from(#ed1c24), to(#aa1317));
+	background: -moz-linear-gradient(top,  #ed1c24,  #aa1317);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ed1c24', endColorstr='#aa1317');
+}
+.b3:hover {
+	background: #b61318;
+	background: -webkit-gradient(linear, left top, left bottom, from(#c9151b), to(#a11115));
+	background: -moz-linear-gradient(top,  #c9151b,  #a11115);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#c9151b', endColorstr='#a11115');
+}
+.b3:active {
+	color: #de898c;
+	background: -webkit-gradient(linear, left top, left bottom, from(#aa1317), to(#ed1c24));
+	background: -moz-linear-gradient(top,  #aa1317,  #ed1c24);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#aa1317', endColorstr='#ed1c24');
+}
+
+/* gray */
+.gray {
+	color: #e9e9e9;
+	border: solid 1px #555;
+	background: #6e6e6e;
+	background: -webkit-gradient(linear, left top, left bottom, from(#888), to(#575757));
+	background: -moz-linear-gradient(top,  #888,  #575757);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#888888', endColorstr='#575757');
+}
+.gray:hover {
+	background: #616161;
+	background: -webkit-gradient(linear, left top, left bottom, from(#757575), to(#4b4b4b));
+	background: -moz-linear-gradient(top,  #757575,  #4b4b4b);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#757575', endColorstr='#4b4b4b');
+}
+.gray:active {
+	color: #afafaf;
+	background: -webkit-gradient(linear, left top, left bottom, from(#575757), to(#888));
+	background: -moz-linear-gradient(top,  #575757,  #888);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#575757', endColorstr='#888888');
+}
+
+/* white */
+.white {
+	color: #606060;
+	border: solid 1px #b7b7b7;
+	background: #fff;
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ededed));
+	background: -moz-linear-gradient(top,  #fff,  #ededed);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#ededed');
+}
+.white:hover {
+	background: #ededed;
+	background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#dcdcdc));
+	background: -moz-linear-gradient(top,  #fff,  #dcdcdc);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#dcdcdc');
+}
+.white:active {
+	color: #999;
+	background: -webkit-gradient(linear, left top, left bottom, from(#ededed), to(#fff));
+	background: -moz-linear-gradient(top,  #ededed,  #fff);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#ffffff');
+}
+
+/* orange */
+.orange {
+	color: #fef4e9;
+	border: solid 1px #da7c0c;
+	background: #f78d1d;
+	background: -webkit-gradient(linear, left top, left bottom, from(#faa51a), to(#f47a20));
+	background: -moz-linear-gradient(top,  #faa51a,  #f47a20);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#faa51a', endColorstr='#f47a20');
+}
+.orange:hover {
+	background: #f47c20;
+	background: -webkit-gradient(linear, left top, left bottom, from(#f88e11), to(#f06015));
+	background: -moz-linear-gradient(top,  #f88e11,  #f06015);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#f88e11', endColorstr='#f06015');
+}
+.orange:active {
+	color: #fcd3a5;
+	background: -webkit-gradient(linear, left top, left bottom, from(#f47a20), to(#faa51a));
+	background: -moz-linear-gradient(top,  #f47a20,  #faa51a);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#f47a20', endColorstr='#faa51a');
+}
+
+/* red */
+.red 
+{
+	color: #faddde;
+	border: solid 1px #980c10;
+	background: #d81b21;
+	background: -webkit-gradient(linear, left top, left bottom, from(#ed1c24), to(#aa1317));
+	background: -moz-linear-gradient(top,  #ed1c24,  #aa1317);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#ed1c24', endColorstr='#aa1317');
+}
+.red:hover {
+	background: #b61318;
+	background: -webkit-gradient(linear, left top, left bottom, from(#c9151b), to(#a11115));
+	background: -moz-linear-gradient(top,  #c9151b,  #a11115);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#c9151b', endColorstr='#a11115');
+}
+.red:active {
+	color: #de898c;
+	background: -webkit-gradient(linear, left top, left bottom, from(#aa1317), to(#ed1c24));
+	background: -moz-linear-gradient(top,  #aa1317,  #ed1c24);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#aa1317', endColorstr='#ed1c24');
+}
+
+/* blue */
+.blue {
+	color: #d9eef7;
+	border: solid 1px #0076a3;
+	background: #0095cd;
+	background: -webkit-gradient(linear, left top, left bottom, from(#00adee), to(#0078a5));
+	background: -moz-linear-gradient(top,  #00adee,  #0078a5);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#00adee', endColorstr='#0078a5');
+}
+.blue:hover {
+	background: #007ead;
+	background: -webkit-gradient(linear, left top, left bottom, from(#0095cc), to(#00678e));
+	background: -moz-linear-gradient(top,  #0095cc,  #00678e);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#0095cc', endColorstr='#00678e');
+}
+.blue:active {
+	color: #80bed6;
+	background: -webkit-gradient(linear, left top, left bottom, from(#0078a5), to(#00adee));
+	background: -moz-linear-gradient(top,  #0078a5,  #00adee);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#0078a5', endColorstr='#00adee');
+}
+
+/* rosy */
+.rosy {
+	color: #fae7e9;
+	border: solid 1px #b73948;
+	background: #da5867;
+	background: -webkit-gradient(linear, left top, left bottom, from(#f16c7c), to(#bf404f));
+	background: -moz-linear-gradient(top,  #f16c7c,  #bf404f);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#f16c7c', endColorstr='#bf404f');
+}
+.rosy:hover {
+	background: #ba4b58;
+	background: -webkit-gradient(linear, left top, left bottom, from(#cf5d6a), to(#a53845));
+	background: -moz-linear-gradient(top,  #cf5d6a,  #a53845);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#cf5d6a', endColorstr='#a53845');
+}
+.rosy:active {
+	color: #dca4ab;
+	background: -webkit-gradient(linear, left top, left bottom, from(#bf404f), to(#f16c7c));
+	background: -moz-linear-gradient(top,  #bf404f,  #f16c7c);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#bf404f', endColorstr='#f16c7c');
+}
+
+/* green */
+.green {
+	color: #e8f0de;
+	border: solid 1px #538312;
+	background: #64991e;
+	background: -webkit-gradient(linear, left top, left bottom, from(#7db72f), to(#4e7d0e));
+	background: -moz-linear-gradient(top,  #7db72f,  #4e7d0e);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#7db72f', endColorstr='#4e7d0e');
+}
+.green:hover {
+	background: #538018;
+	background: -webkit-gradient(linear, left top, left bottom, from(#6b9d28), to(#436b0c));
+	background: -moz-linear-gradient(top,  #6b9d28,  #436b0c);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#6b9d28', endColorstr='#436b0c');
+}
+.green:active {
+	color: #a9c08c;
+	background: -webkit-gradient(linear, left top, left bottom, from(#4e7d0e), to(#7db72f));
+	background: -moz-linear-gradient(top,  #4e7d0e,  #7db72f);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#4e7d0e', endColorstr='#7db72f');
+}
+
+/* pink */
+.pink {
+	color: #feeef5;
+	border: solid 1px #d2729e;
+	background: #f895c2;
+	background: -webkit-gradient(linear, left top, left bottom, from(#feb1d3), to(#f171ab));
+	background: -moz-linear-gradient(top,  #feb1d3,  #f171ab);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#feb1d3', endColorstr='#f171ab');
+}
+.pink:hover {
+	background: #d57ea5;
+	background: -webkit-gradient(linear, left top, left bottom, from(#f4aacb), to(#e86ca4));
+	background: -moz-linear-gradient(top,  #f4aacb,  #e86ca4);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#f4aacb', endColorstr='#e86ca4');
+}
+.pink:active {
+	color: #f3c3d9;
+	background: -webkit-gradient(linear, left top, left bottom, from(#f171ab), to(#feb1d3));
+	background: -moz-linear-gradient(top,  #f171ab,  #feb1d3);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#f171ab', endColorstr='#feb1d3');
+}
+
+
+
+/* Classes for slimscroll */
+.lb-v-dummy { width: 100%; display: block; height: 1px; }
+.lb-h-dummy { height: 100%; display: block; width: 1px; }
+.lb-clear { clear: both; }
+.lb-wrap { z-index: 0; overflow: auto; position: relative; }
+.lb-v-scrollbar { z-index: 1; position: absolute; right: 2px; top: 2px; width: 7px; height: 100%; background: #cfcfcf; opacity: 0.3; -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=40)"; border-radius: 7px; -webkit-border-radius: 7px; -moz-border-radius: 7px; }
+.lb-h-scrollbar { z-index: 1; position: absolute; bottom: 2px; left: 2px; width: 100%; height: 7px; background: #cfcfcf; opacity: 0.3; -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=40)"; border-radius: 7px; -webkit-border-radius: 7px; -moz-border-radius: 7px; }
+.lb-v-scrollbar-slider { position: absolute; width: 7px; height: 100px; left: 0; top: 0; background: #000; -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)"; border-radius: 7px; -webkit-border-radius: 7px; -moz-border-radius: 7px; }
+.lb-h-scrollbar-slider { position: absolute; height: 7px; width: 100px; left: 0; top: 0; background: #000; -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=100)"; border-radius: 7px; -webkit-border-radius: 7px; -moz-border-radius: 7px; }
+
+/*
+<!--[if IE 8]>
+<style>
+.lb-v-scrollbar { background: red; }
+</style>
+<![endif]-->
+*/
+
+/**
+ * alib.ui.Menu
+ * ==================================================================
+ */
+.alibMenu
+{
+	background: #fff;
+	border-color: #ccc #666 #666 #ccc;
+	border-style: solid;
+	border-width: 1px;
+	cursor: default;
+	font: normal 13px Arial, sans-serif;
+	margin: 0;
+	outline: none;
+	padding: 4px 0;
+	z-index: 20000;
+}
+
+.alibMenuItem
+{
+	color: #000;
+	font: normal 13px Arial, sans-serif;
+	list-style: none;
+	margin: 0;
+	padding: 4px 7em 4px 28px;
+	white-space: nowrap;
+}
+
+.alibMenuItemLabel
+{
+	
+}
+
+.alibMenuItemIcon
+{
+	color: #000;
+	padding-left: 6px;
+	text-align: left;
+}
+
+
+/* State: disabled. */
+.alibMenuItemDisabled .alibMenuItemLabel 
+{
+  color: #ccc !important;
+}
+
+.alibMenuItemDisabled .alibMenuItemIcon 
+{
+  opacity: 0.3;
+  -moz-opacity: 0.3;
+  filter: alpha(opacity=30);
+}
+
+/* State: hover. */
+.alibMenuItemHover  
+{
+  background-color: #d6e9f8;
+  /* Use an explicit top and bottom border so that the selection is visible
+   * in high contrast mode. */
+  border-color: #d6e9f8;
+  border-style: dotted;
+  border-width: 1px 0;
+  padding-bottom: 3px;
+  padding-top: 3px;
+}
+
+/* State: selected/checked. */
+.alibMenuItemCheckbox,
+.alibMenuItemIcon 
+{
+  background-repeat: no-repeat;
+  height: 16px;
+  /*
+  left: 6px;
+  position: absolute;
+  right: auto;
+  */
+  float: left;
+  margin-left: -22px;
+  vertical-align: middle;
+  width: 16px;
+}
+
+/**
+ * Right arrow for submenu
+ */
+.alibSubMenuArrow 
+{
+  color: #000;
+  left: auto;
+  padding-right: 6px;
+  position: absolute;
+  right: 0;
+  text-align: right;
+}
+
+/* State: disabled. */
+.alibMenuItemDisabled .alibSubMenuArrow 
+{
+  color: #ccc;
+}
+
+/* Menu button dropdown icon */
+.alibMenuButtonIcon
+{
+}
+
+/**
+ * alib.ui.Tooltip
+ * ==================================================================
+ */
+.alib-tooltip { font-size: 10px; position: absolute; padding: 5px; z-index: 100000; }
+.alib-tooltip-inner { background-color: #000; color: #FFF; max-width: 200px; padding: 5px 8px 4px 8px; text-align: center; }
+
+/* Rounded corners */
+.alib-tooltip-inner { border-radius: 3px; -moz-border-radius: 3px; -webkit-border-radius: 3px; }
+
+/* Uncomment for shadow */
+/*.alib-tooltip-inner { box-shadow: 0 0 5px #000000; -webkit-box-shadow: 0 0 5px #000000; -moz-box-shadow: 0 0 5px #000000; }*/
+
+.alib-tooltip-arrow { position: absolute; width: 0; height: 0; line-height: 0; border: 5px dashed #000; }
+
+/* Rules to colour arrows */
+.alib-tooltip-arrow-n { border-bottom-color: #000; }
+.alib-tooltip-arrow-s { border-top-color: #000; }
+.alib-tooltip-arrow-e { border-left-color: #000; }
+.alib-tooltip-arrow-w { border-right-color: #000; }
+
+.alib-tooltip-n .alib-tooltip-arrow { top: 0px; left: 50%; margin-left: -5px; border-bottom-style: solid; border-top: none; border-left-color: transparent; border-right-color: transparent; }
+.alib-tooltip-nw .alib-tooltip-arrow { top: 0; left: 10px; border-bottom-style: solid; border-top: none; border-left-color: transparent; border-right-color: transparent;}
+.alib-tooltip-ne .alib-tooltip-arrow { top: 0; right: 10px; border-bottom-style: solid; border-top: none;  border-left-color: transparent; border-right-color: transparent;}
+.alib-tooltip-s .alib-tooltip-arrow { bottom: 0; left: 50%; margin-left: -5px; border-top-style: solid; border-bottom: none;  border-left-color: transparent; border-right-color: transparent; }
+.alib-tooltip-sw .alib-tooltip-arrow { bottom: 0; left: 10px; border-top-style: solid; border-bottom: none;  border-left-color: transparent; border-right-color: transparent; }
+.alib-tooltip-se .alib-tooltip-arrow { bottom: 0; right: 10px; border-top-style: solid; border-bottom: none; border-left-color: transparent; border-right-color: transparent; }
+.alib-tooltip-e .alib-tooltip-arrow { right: 0; top: 50%; margin-top: -5px; border-left-style: solid; border-right: none; border-top-color: transparent; border-bottom-color: transparent; }
+.alib-tooltip-w .alib-tooltip-arrow { left: 0; top: 50%; margin-top: -5px; border-right-style: solid; border-left: none; border-top-color: transparent; border-bottom-color: transparent; }
+

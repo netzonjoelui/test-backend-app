@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Test Rich Text Editor</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<link rel="STYLESHEET" type="text/css" href="../../style.css" />
+	<link rel="STYLESHEET" type="text/css" href="../../ui/Editor/codemirror/lib/codemirror.css" />
+
+	<script language="javascript" type="text/javascript" src="../../jquery.min.js"></script>
+	<script language="javascript" type="text/javascript" src="../../alib.js"></script>
+	<script language="javascript" type="text/javascript" src="../../dom.js"></script>
+	<script language="javascript" type="text/javascript" src="../../events.js"></script>
+	<script language="javascript" type="text/javascript" src="../../events/EventWrapper.js"></script>
+	<script language="javascript" type="text/javascript" src="../../CEffect.js"></script>
+	<script language="javascript" type="text/javascript" src="../../CDialog.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/Toolbar.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/ToolbarButton.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/ToolbarToggleButton.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/ToolbarSeparator.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/Button.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/ButtonToggler.js"></script>
+	<script language="javascript" type="text/javascript" src="../../userAgent.js"></script>
+	<script language="javascript" type="text/javascript" src="../../CDropdownMenu.js"></script>
+	<script language="javascript" type="text/javascript" src="../../CButton.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ckeditor/ckeditor.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/Editor/codemirror_full.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/Editor.js"></script>
+	<script language='javascript' type='text/javascript'>
+	function appmain()
+	{
+		var rteCon = alib.dom.createElement("div", document.getElementById("neweditor"));
+
+		var rte = alib.ui.Editor();
+		/*
+		rte.cssFiles = [
+					"http://fbc.aereusdev.com/css/bootstrap.min.css", 
+					"http://fbc.aereusdev.com/css/bootstrap-theme.min.css"
+				];
+				*/
+		rte.print(rteCon, '90%', "200px", "<p>My name is Sky Sky <span id='myid'>orig</span> – my </p><p><b>Bold</b></p><p><u>Underline</u></p><p><i>Italics</i></p>");
+
+		var a = alib.dom.createElement("button", document.getElementById("neweditor"));
+		a.rte = rte;
+		a.onclick = function() { this.rte.setElementHtml('myid', 'replaced'); };
+		a.innerHTML = "Test Replace";
+
+		var a = alib.dom.createElement("button", document.getElementById("neweditor"));
+		a.rte = rte;
+		a.onclick = function() { this.rte.setHeight("400px"); };
+		a.innerHTML = "Resize";
+
+		// Label
+		alib.dom.createElement("h3", document.getElementById("neweditor"), "Value");
+
+		var valChange  = alib.dom.createElement("textarea", document.getElementById("neweditor"));
+		alib.dom.styleSet(valChange, "width", "100%");
+		alib.dom.styleSet(valChange, "height", "200px");
+		rte.onChange = function()
+		{
+			valChange.value = this.getValue();
+		}
+		valChange.value = "Onchange Value Test";
+
+	}
+	</script>
+</head>
+<body onload='appmain()'>
+	<div id='neweditor'>
+	</div>
+</body>
+</html>
+

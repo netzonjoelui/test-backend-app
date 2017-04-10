@@ -1,0 +1,389 @@
+<?php 
+	/**************************************************************************************
+	*	THEME:		armygreen
+	*				Copyright (c) 2006 Aereus Corporation. All rights reserved.	
+	***************************************************************************************/
+
+	header("Content-type: text/css"); 
+    if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') === false || strpos($_SERVER['HTTP_USER_AGENT'], 'Opera'))
+		$pnghack = false;
+    else
+		$pnghack = true;
+?>
+
+/**************************************************************************************
+*	 Containers:	Global body classes
+***************************************************************************************/
+body 
+{ 
+	background-color:#FAFFE8; 
+	font-family:Arial, Helvetica, sans-serif; 
+	font-size:10px;
+	color:#000000;
+}
+/* used for all popups */
+body.popup
+{
+	background-color:#FFFFFF;
+	font-family:Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	font-size:11px;
+	color:#000000;
+	margin: 0px 10px 0 10px;
+	padding: 0px;
+}
+body.whitepage
+{ 
+	background-color : #FFFFFF; 
+	font-family:Arial, Helvetica, sans-serif; 
+	font-size:10px;
+	color:#000000;
+}
+body.iframe
+{ 
+	background-color : transparent; 
+	font-family:Arial, Helvetica, sans-serif; 
+	font-size:10px;
+	color:#000000;
+}
+body.leftnav
+{ 	
+	margin-top: 5px;  
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+/* Add appropriate margin to applications. Sometimes 0px is used for dashboards */
+.appTopSpacer
+{
+	margin-top: 5px;
+}
+
+/* application name/title container */
+#appname
+{
+	background-color:#e4e1dc; 
+	border-bottom: 1px solid #cecbc7;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 2px;
+	color:#5a6a7a;
+	font-size:16px; 
+	font:Verdana, Arial, Helvetica, sans-serif;
+	font-weight:bold; 
+}
+/* application title container */
+.apptitle
+{
+	background-color:#e4e1dc; 
+	border-bottom: 1px solid #cecbc7;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-left: 2px;
+	color:#5a6a7a;
+	font:Verdana, Arial, Helvetica, sans-serif;
+}
+.apptitle h1
+{
+	font-size:16px; 
+	margin: 0 0 3px 0;
+	padding: 0;
+	font-weight:bold; 
+}
+/* application body frame/container */
+#appbody
+{
+	margin-left: 5px;
+}
+
+
+/**************************************************************************************
+*	 Global body classes
+***************************************************************************************/
+/* Global Table classes */
+table 
+{ 
+	font-family: arial, verdana, helvitica, sans-serif; 
+	font-size: 11px; 
+}
+
+.horizontalline
+{
+	height:1px;
+	background-color:#83867A;
+}
+.table_stop /* used to show warnings in tables */
+{
+	color: red;
+	font-weight: bold;
+}
+.table_go /* used to show good news in tables */
+{
+	color: green;
+}
+/* loading div or span */
+.loading
+{
+	background-image: url(/images/loading.gif);	
+	background-repeat: no-repeat;
+	width: 16px;
+	height: 16px;
+	margin: 10px;
+}
+/* used in conjunction with another class to add warning - class='headerOne alert' */
+.alert
+{
+	color: red;
+}
+/* notice & notification containers */
+.error, .notice, .success {padding:.8em;margin-top:10px;margin-bottom:10px;border:2px solid #ddd;}
+.error {background:#FBE3E4;color:#8a1f11;border-color:#FBC2C4;}
+.notice {background:#FFF6BF;color:#514721;border-color:#FFD324;}
+.success {background:#E6EFC2;color:#264409;border-color:#C6D880;}
+.error a {color:#8a1f11; background:none; padding:0; margin:0; }
+.notice a {color:#514721; background:none; padding:0; margin:0; }
+.success a {color:#264409; background:none; padding:0; margin:0; }
+/**************************************************************************************
+*	 Popup Containers
+***************************************************************************************/
+/* Container for toolbar */
+.popup_toobar
+{
+}
+/* Container for body */
+.popup_body
+{
+	margin: 3px;
+}
+
+/**************************************************************************************
+*	Links and buttons
+***************************************************************************************/
+/* Global Link classes */
+a:link { text-decoration: underline; color: #000066; font-size:11px; }
+a:active { text-decoration: underline; color: #000066; font-size:11px; }
+a:visited { text-decoration: underline; color: #000066; font-size:11px; }
+a:hover { text-decoration: underline; color: #FF0000; font-size:11px; }
+.link { text-decoration: underline; color: #000066; font-size:11px; } /* Used for span and text acting like a link */
+
+/**************************************************************************************
+*	 Headers:	Global header and label classes
+***************************************************************************************/
+.headerTable
+{
+	font-weight: bold;
+}
+.headerOne, h1
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-weight:bold; 
+	padding-top:10px;
+}
+.headerTwo, h2
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-weight:bold; 
+	padding-top:10px;
+}
+.headerThree, h3
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-weight:bold; 
+}
+.formTitle
+{
+	font-family:  Arial, Verdana, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+	line-height: 18px;
+	text-align:left;
+	color: #000000;	
+	padding:5px;
+	margin:0px;
+	height:22px;
+	background-color:#F6F5F4;
+	border-bottom:1px solid #808080;
+}
+.formLabel
+{
+	font-weight: bold;
+}
+.formValue
+{
+	font-weight: bold;
+}
+.headerBar
+{
+	border-bottom: 1px solid #CCCCCC;
+}
+
+/**************************************************************************************
+*	Input:		For Input Box and Form Specific Classes
+***************************************************************************************/
+form
+{
+	margin: 0px;
+}
+input, textarea, select
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	font-size: 12px; 
+   	padding:2px;
+}
+input[type=text]
+{
+	border: 1px solid #333333; 
+}
+
+input[type=text]:hover
+{
+	border: 1px solid #333333; 
+}
+
+input[type=text]:focus
+{
+	border: 1px solid #3E7AA2; 
+	color: #333333;
+}
+
+input[type=text]:focus:hover
+{
+	border: 1px solid #3E7AA2; 
+	color: #333333;
+}
+textarea
+{
+	border: 1px solid #333333; 
+}
+
+textarea:hover
+{
+	border: 1px solid #333333; 
+}
+
+textarea:focus
+{
+	border: 1px solid #3E7AA2; 
+	color: #333333;
+}
+
+textarea:focus:hover
+{
+	border: 1px solid #3E7AA2; 
+	color: #333333;
+}
+
+input[disabled]
+{
+	border: 1px solid #999;
+	background-color: #ddd;
+}
+
+textarea[disabled]
+{
+	border: 1px solid #999;
+	background-color: #ddd;
+}
+
+/**************************************************************************************
+*	Reader:		For Reader Classes
+***************************************************************************************/
+.readerBody
+{
+	font-family:  Arial, Verdana, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+	line-height: 18px;
+	text-align:left;
+	color: #000000;	
+	padding:5px;
+	margin:10px 0 0 0;
+}
+
+.readerBody h1
+{
+	font-size: 18px;
+}
+.readerBody h2
+{
+	font-size: 16px;
+}
+.readerBody h3
+{
+	font-size: 14px;
+}
+.readerBody h4
+{
+	font-size: 12px;
+	font-weight: bold;
+}
+.readerBody h5
+{
+	font-size: 10px;
+	font-weight: bold;
+}
+
+.readerRibbon
+{
+
+}
+
+/**************************************************************************************
+*	alib.js:		global styles
+***************************************************************************************/
+
+/* Popup alerts used through page for status updates. This si the container */
+.statusAlert
+{
+	border: 1px solid #130B40;
+	padding: 8px;
+	background-color: #93B4C7;
+	color: white;
+	font-weight: bold;
+}
+
+/**************************************************************************************
+*	Global includes
+***************************************************************************************/
+<?php
+	include("progressbar.css");
+	include("wizard.css");
+	include("CTextBoxList.css");
+?>
+
+/**************************************************************************************
+*	Theme Includes
+***************************************************************************************/
+<?php
+	$folder = "armygreen";
+	include("$folder/header.css");
+	include("$folder/contacts.css");
+	include("$folder/notes.css");
+	include("$folder/calendar.css");
+	include("$folder/topnav.css");
+	include("$folder/files.css");
+	include("$folder/homewidgets.css");
+	//include("$folder/DynDiv.css");
+	include("$folder/AntObjectBrowser.css");
+	include("$folder/email.css");
+	include("$folder/chat.css");
+	include("$folder/help.css");
+	include("$folder/statusPages.css");
+	
+	/*
+	*	List of styles that control the look of aereuslib classes
+	*/
+	include("$folder/CToolbar.css");
+	include("$folder/CWindowFrame.css");
+	include("$folder/CSplitContainer.css");
+	include("$folder/CTabs.css");
+	include("$folder/CContentTable.css");
+	include("$folder/CMenuBar.css");
+	include("$folder/CDropdownMenu.css");
+	include("$folder/CToolTable.css");
+	include("$folder/CButton.css");
+	include("$folder/CNavBar.css");
+	include("$folder/CDatasheet.css");
+	include("$folder/CTreeView.css");
+	include("$folder/CDialog.css");
+	include("$folder/CRte.css");
+	include("$folder/CAutoComplete.css");
+?>

@@ -1,0 +1,7 @@
+RewriteEngine on 
+
+RewriteRule campaign/([0-9]+)$ campaign.php?eid=$1&%{QUERY_STRING}
+RewriteRule campaign/([0-9]+)/([0-9a-zA-Z]+)$ campaign.php?eid=$1&cid=$2&%{QUERY_STRING}
+
+RewriteRule campimg/([0-9]+)$ campaign_tracker.php?eid=$1&%{QUERY_STRING}
+RewriteRule campimg/([0-9]+)/([0-9a-zA-Z]+)$ campaign_tracker.php?eid=$1&cid=$2&%{QUERY_STRING}

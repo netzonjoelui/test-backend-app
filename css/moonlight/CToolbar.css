@@ -1,0 +1,84 @@
+/**************************************************************************
+*	CToolbar.js
+**************************************************************************/
+.CToolbar
+{ 
+	background-color : white;
+	border:1px solid #481800;
+	padding:2px;
+	margin-top:0px;  
+	display:table;
+}
+
+.CToolbar input
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	font-size: 11px; 
+	border: #808080; 
+	border-style:solid; 
+	border-top-width: 1px; 
+	border-right-width: 1px; 
+	border-bottom-width: 1px; 
+	border-left-width: 1px; 
+	height:15px; 
+	width:200px;
+	padding: 1px 0px 0px 1px;
+	margin: 2px;
+}
+
+.CToolbar select
+{
+	font-family: Tahoma, Arial, Verdana, Helvetica, sans-serif; 
+	font-size: 11px; 
+	border: #808080; 
+	border-style:solid; 
+	border-top-width: 1px; 
+	border-right-width: 1px; 
+	border-bottom-width: 1px; 
+	border-left-width: 1px; 
+	height:15px; 
+	padding: 0px;
+}
+
+.CToolbar button.CButton 
+{
+	margin:0px;
+}
+/* Gecko adds 3px margin */
+@-moz-document url-prefix() 
+{
+     .CToolbar button.CButton { margin:0 -3px; }
+}
+
+.CToolbarInputBlur
+{
+	color: #333;
+}
+
+/* Used for standard text labels in toolbars */
+
+.CToolbarLabel
+{
+	padding-right:6px;
+	padding-top: 3px;
+	font-family:Arial, Verdana,  Helvetica, sans-serif; 
+	font-size:12px;
+	font-weight:bold;
+	color:#000;	
+}
+
+.CToolbarSpacer
+{
+	width: 1px;
+	background-color: gray;
+	height: 15px;
+	margin-top: 2px;
+	margin-left: 4px;
+	margin-right: 2px;
+}
+
+.CToolbarIcon
+{
+	width: 22px;
+	height: 22px;
+}

@@ -1,0 +1,236 @@
+<?php
+	require_once("../lib/AntConfig.php");
+    require_once("ant.php");
+    require_once("ant_user.php");
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/aereus.lib.php/CChart.php");
+	require_once("../users/user_functions.php");
+	require_once("../calendar/calendar_functions.awp");
+	require_once("../contacts/contact_functions.awp");
+	require_once("../customer/customer_functions.awp");
+	require_once("../lib/aereus.lib.php/CPageCache.php");
+
+	$dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+	$ACCOUNT = $USER->accountId;
+
+	$FUNCTION = $_GET['function'];
+	switch ($FUNCTION)
+	{
+	case "dashboard_del_rpt_graph":
+
+		$eid = $_GET['eid'];
+		if ($eid)
+		{
+			$result = $dbh->Query("delete from dc_dashboard where id='$eid' and user_id='$USERID'");
+			$retval = $eid;
+		}
+		break;
+	case "dashboard_save_layout":
+		$num = rawurldecode($_GET['num_cols']);
+		if ($num)
+		{
+			for ($i = 0; $i < $num; $i++)
+			{
+				$items = rawurldecode($_GET['col_'.$i]);
+				if ($items)
+				{
+					$widgets = explode(":", $items);
+
+					if (is_array($widgets))
+					{
+						for ($j = 0; $j < count($widgets); $j++)
+						{
+							$dbh->Query("update user_dashboard_layout set position='$j', col='$i' where user_id='$USERID' 
+										 and id='".$widgets[$j]."';");
+						}
+					}
+				}
+			}
+		}
+		$retval = "done";
+		break;
+	case "dashboard_save_layout_resize":
+		$num = rawurldecode($_GET['num_cols']);
+		if ($num)
+		{
+			for ($i = 0; $i < $num; $i++)
+				UserSetPref($dbh, $USERID, "home/col".$i."_width", rawurldecode($_GET["col_".$i]));
+		}
+		$retval = "done";
+		break;
+
+	case "dashboard_del_widget":
+		$eid = $_GET['eid'];
+		if ($eid)
+		{
+			// Purge cached data if exists
+			$cache = new CPageCache(null, "widgets-home-".$eid);
+			$cache->purge();
+
+			$result = $dbh->Query("delete from user_dashboard_layout where id='$eid' and user_id='$USERID'");
+			$retval = $eid;
+		}
+		break;
+
+	case "dashboard_set_total_width":
+		$width = $_GET['width'];
+		if (is_numeric($width))
+		{
+			UserSetPref($dbh, $USERID, "home/dashboard_width", $width);
+		
+			for ($i = 0; $i < 3; $i++)
+				UserSetPref($dbh, $USERID, "home/col".$i."_width", (($width/3) - 5)."px");
+
+			$retval = $width;
+		}
+		else
+		{
+			UserSetPref($dbh, $USERID, "home/dashboard_width", "100%");
+		}
+		break;
+
+	// Weather: Set zipcode
+	//-----------------------------------------------------
+	case "set_zipcode":
+		// Purge cache file if exitst// 1800 = 30 minutes
+		$oldzip = UserGetPref($dbh, $USERID, "userdata/zipcode");
+		if ($oldzip)
+		{
+			$cache = new CPageCache(null, "widgets-xml-weather-$USERID-$oldzip");
+			$cache->purge();
+		}
+
+		// Set new zip
+		UserSetPref($dbh, $USERID, "userdata/zipcode", $_GET['zipcode']);
+		$retval = $_GET['zipcode'];
+		break;
+
+	// Settings
+	//-----------------------------------------------------
+	case "add_widget":
+		if (is_numeric($_GET['wid']))
+		{
+			// Get next position id
+			$result = $dbh->Query("select position from user_dashboard_layout where user_id='$USERID' 
+									and dashboard='home' order by position DESC limit 1");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$dbh->FreeResults($result);
+				$use = $row['position'] + 1;
+			}
+			else
+				$use = 1;
+
+
+			$result = $dbh->Query("insert into user_dashboard_layout (user_id, col, position, widget_id, dashboard) 
+									values('$USERID', '0', '$use', '".$_GET['wid']."', 'home');
+									select currval('user_dashboard_layout_id_seq') as id;");
+			if ($dbh->GetNumberRows($result))
+			{
+				$row = $dbh->GetNextRow($result, 0);
+				$retval = $row['id'];
+			}
+			else
+				$retbal = -1;
+			$dbh->FreeResults($result);
+		}
+		else
+			$retval = -1;
+
+		break;
+
+	// Welcome Center Options
+	//-----------------------------------------------------
+	case "set_wel_color":
+		UserSetPref($dbh, $USERID, "hompage_messagecntr_txtclr", $_GET['val']);
+		break;
+	case "get_wel_color":
+		$retval = UserGetPref($dbh, $USERID, "hompage_messagecntr_txtclr");
+		break;
+	case "set_wel_img":
+		UserSetPref($dbh, $USERID, "hompage_messagecntr_image", $_GET['val']);
+		break;
+	case "set_wel_img_def":
+		UserDeletePref($dbh, $USERID, 'hompage_messagecntr_image');
+		UserDeletePref($dbh, $USERID, 'hompage_messagecntr_txtclr');
+		break;
+	case "get_wel_image":
+		// Look for custom image
+		$custimg = UserGetPref($dbh, $USERID, "hompage_messagecntr_image");
+		$width = $_GET['width'];
+		if ($custimg)
+		{
+			$retval = ($custimg == "none") ? "none" : "/userfiles/getthumb_by_id.awp?fid=$custimg&stretch=1&iw=$width";
+		}
+		else
+		{
+			$custom_default = $ANT->settingsGet("general/welcome_image");
+
+			if (is_numeric($custom_default))
+			{
+				$retval = "/files/images/$custom_default/$width";
+			}
+			else
+			{
+				$retval = "/userfiles/getthumb.awp?path=".base64_encode("/images/themes/".UserGetTheme($dbh, $USERID, 'name')."/greeting.png");
+				$retval .= "&iw=$width&stretch=1&type=PNG\";";
+			}
+		}
+		break;
+
+	// Calendar Options
+	//-----------------------------------------------------
+	case "set_cal_timespan":
+		UserSetPref($dbh, $USERID, 'calendar/home/span', $_GET['val']);
+		if ($_GET['val'] > 1)
+			$retval = date("m/d/Y", strtotime("+ ".($_GET['val']-1)." days"));
+		else
+			$retval = date("m/d/Y");
+
+		// Purge cached data if exists
+		$cache = new CPageCache(null, "calendar-events-viewer-$USERID");
+		$cache->purge();
+		break;
+	case "get_cal_timespan":
+		$val = UserGetPref($dbh, $USERID, 'calendar/home/span');
+		if ($val > 1)
+			$retval = date("m/d/Y", strtotime("+ ".($val-1)." days"));
+		else
+			$retval = date("m/d/Y");
+
+		// Purge cached data if exists
+		$cache = new CPageCache(null, "calendar-events-viewer-$USERID");
+		$cache->purge();
+		break;
+	// RSS Options
+	//-----------------------------------------------------
+	case "rss_set_data":
+		// Purge cached data if exists
+		$cache = new CPageCache(null, "widgets-home-".$_GET['id']);
+		$cache->purge();
+
+		$result = $dbh->Query("update user_dashboard_layout set 
+								data='".$dbh->Escape(rawurldecode($_GET['data']))."' where id='".$_GET['id']."'");
+		$retval = $_GET['data'];
+		break;
+	// General
+	//-----------------------------------------------------
+	case "widget_set_data":
+		$result = $dbh->Query("update user_dashboard_layout set 
+								data='".$dbh->Escape(rawurldecode($_GET['data']))."' where id='".$_GET['id']."'");
+		$retval = $_GET['data'];
+		break;
+	}
+
+	$res = "<retval>" . rawurlencode($retval) . "</retval>";
+	$res .= "<cb_function>".$_GET['cb_function']."</cb_function>";
+
+	header("Content-type: text/xml");			// Returns XML document
+	echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+
+	echo "<response>$res</response>";
+?>
+

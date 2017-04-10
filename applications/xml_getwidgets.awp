@@ -1,0 +1,123 @@
+<?php
+    require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("ant_user.php");
+    require_once("lib/CDatabase.awp");
+    require_once("lib/aereus.lib.php/CChart.php");
+    require_once("users/user_functions.php");
+
+    $dbh = $ANT->dbh;
+	$USERNAME = $USER->name;
+	$USERID =  $USER->id;
+    $SHOWCOLS = 3; // Later this will be dynamic
+
+    $appNavname = $_GET['appNavname'];
+
+    function getColArray($dbh, $appNavname="home")
+    {
+        global $USERID, $_GET;
+
+        $columns = array();
+
+        if (!$dbh->GetNumberRows($dbh->Query("select id from user_dashboard_layout 
+        where user_id='$USERID' and dashboard='$appNavname'")))
+        {            
+            initDefWidLayout($dbh, $USERID, $appNavname);
+        }
+
+        $result = $dbh->Query("select user_dashboard_layout.id, user_dashboard_layout.col, user_dashboard_layout.widget_id, 
+								app_widgets.type, user_dashboard_layout.data, app_widgets.title, app_widgets.class_name 
+								from user_dashboard_layout, app_widgets
+								where user_dashboard_layout.widget_id=app_widgets.id 
+								and user_dashboard_layout.user_id='$USERID' and user_dashboard_layout.dashboard='$appNavname'
+								".(($_GET['eid']) ? " and user_dashboard_layout.id='".$_GET['eid']."'" : '')."
+								order by col, position");
+        $num = $dbh->GetNumberRows($result);
+        for ($i = 0; $i < $num; $i++)
+        {
+            $row = $dbh->GetNextRow($result, $i);
+
+            $removable = ($row['type'] == "system" && $row['title'] == "Settings") ? 'f' : 't';
+
+            $columns[$row['col']] .= "<widget>";
+            $columns[$row['col']] .= "<id>".rawurlencode($row['id'])."</id>";
+            $columns[$row['col']] .= "<class>".rawurlencode($row['class_name'])."</class>";
+            $columns[$row['col']] .= "<title>".rawurlencode($row['title'])."</title>";
+            $columns[$row['col']] .= "<removable>".$removable."</removable>";
+            $columns[$row['col']] .= "<data>".rawurlencode($row['data'])."</data>";
+            $columns[$row['col']] .= "</widget>";
+        }
+        $dbh->FreeResults($result);
+
+        return $columns;
+    }
+
+    function initDefWidLayout($dbh, $USERID, $appNavname="home")
+    {	
+        $filename = "../applications/dashboards/layouts/$appNavname.php";        
+        if (file_exists($filename)) 
+        {
+            require_once($filename);
+            
+			for ($i = 0; $i < count($layout); $i++)
+            {
+         		$position = 0;
+				foreach ($db_layout[$i]['widgets'] as $widget)
+				{
+					$widgetClass = $widget['widgetClass'];
+					$result = $dbh->Query("select id from app_widgets where class_name='$widgetClass'");
+					if($dbh->GetNumberRows($result))
+					{
+						$row = $dbh->GetRow($result, 0);
+						if ($row['id']>0)
+						{
+							$dbh->Query("insert into user_dashboard_layout(col, position, widget_id, user_id, dashboard) values
+									('".($i)."', '$position', '".$row['id']."', '$USERID', '$appNavname')");
+						}
+					}           
+					$dbh->FreeResults($result);
+
+                    $position++;
+				}
+            }
+        }
+    }
+
+    header("Content-type: text/xml");			// Returns XML document
+    echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'; 
+
+    $columns = getColArray($dbh, $appNavname);
+
+    $total_width = 0;
+    $buf = "";
+    $wild_used = false;
+    for ($i = 0; $i < $SHOWCOLS; $i++)
+    {
+        $width = UserGetPref($dbh, $USERID, "$appNavname/col".$i."_width");
+        if (!$width) 
+        {
+            if (!$wild_used)
+            {
+                $width = "*";
+                $wild_used = true;
+            }
+            else
+                $width = "300px";
+        }
+
+        if (is_numeric($width))
+            $total_width += $width;
+
+        $buf .= "<column width='".rawurlencode($width)."'>".$columns[$i]."</column>";
+    }
+
+    $width = UserGetPref($dbh, $USERID, "$appNavname/dashboard_width");
+    if (!$width)
+        $width = "100%";
+    if (strpos($width, "%") === false)
+        $width .= "px";
+
+    echo "<dashboard width='$width'>";
+    echo $buf;
+    echo "</dashboard>";
+?>

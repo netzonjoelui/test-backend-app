@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<rss version="2.0">
+<channel>
+<title>AEREUS.com</title>
+<link>http://www.aereus.com/</link>
+<description>ANT Beta Project News and Updates</description>
+<language>en-us</language>
+<copyright>© 2005 Aereus, Inc.</copyright>
+<pubDate>Wed, 28 Sep 2005 11:40:0 PST</pubDate>
+<item>
+<title>Updated Chat Emoticons</title>
+<description>&lt;img align=&quot;left&quot; src=&quot;/rss/images/ant2.png&quot;&gt;Just a quick note. Emoticons for Team America and Capitan Chaos have been removed indefinetly.</description>
+<pubDate>Wed, 28 Sep 2005 11:40:0 PST</pubDate>
+</item>
+<item>
+<title>ANT Help - How do I compose a new message?</title>
+<link>http://ant.aereus.com/help/helpdoc.awp?docid=8</link>
+<description>&lt;img align=&quot;left&quot; src=&quot;/rss/images/ant1.png&quot;&gt;Click here to find out how to compose a new message using ANT's web-based email tools.</description>
+<pubDate>Wed, 28 Sep 2005 11:40:0 PST</pubDate>
+</item>
+</channel>
+</rss>

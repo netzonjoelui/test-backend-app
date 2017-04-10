@@ -1,0 +1,52 @@
+/**************************************************************************************
+*	Page:		/lib/CToolTable.awp
+*	Purpose:	Standard table used for most tools
+***************************************************************************************/
+.CTTMainTable
+{
+	background-color:#FFFFFF;
+}
+
+.CTTHeaderCell
+{
+	background-color:#758397; 
+	color:#FFFFFF;
+	border-right:1px solid #CACADD;
+}
+
+.CTTRowOne
+{
+	background-color:#F0F0F0; 
+	color:#444444;
+	border-right:1px solid #CACADD;
+	vertical-align:middle;
+}
+.CTTRowOneBold
+{
+	color:#444444;
+	background-color:#BABACC; 
+	border-right:1px solid #CACADD;
+	vertical-align:middle;
+}
+.CTTRowTwo
+{
+	color:#444444;
+	background-color:#DEDEDE; 
+	border-right:1px solid #CACADD;
+	vertical-align:middle;
+}
+.CTTRowTwoBold
+{
+	color:#444444;
+	background-color:#CACADD; 
+	border-right:1px solid #CACADD;
+	vertical-align:middle;
+}
+.CTTRowSpacer
+{
+	background-image:url(/images/cellspacing_dotted_line.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+	border-right:1px solid #CACADD;
+	height:1px;
+}

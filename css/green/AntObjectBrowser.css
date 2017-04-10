@@ -1,0 +1,89 @@
+/**
+ * Styles used in the AntObjectList class
+ */
+.aobListRow, .aobListRowAct, .aobListRowAlert, .aobListRowOver
+{
+	cursor:pointer;
+	color:#000000;
+	background-color:#FFFFFF;
+	font-size: 13px;
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+
+.aobListRow > td, .aobListRowAct > td, .aobListRowAlert > td, .aobListRowOver > td
+{
+	border-bottom-color:#808080; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+/* Inactive / Normal state */
+.aobListRow
+{
+}
+
+
+/* Active - selected */
+.aobListRowAct
+{
+	background-color:#1E324A;
+	color:#FFFFFB;
+}
+
+.aobListRowAct td
+{
+	color:#ffffff;
+}
+
+
+/* Alert - usually means unread */
+.aobListRowAlert
+{
+	background-color:#E2D397;
+	color: #481800;
+}
+
+.aobListRowAlert td
+{
+	color:#481800;
+}
+
+/* Over - on mouse over */
+.aobListRowOver
+{
+	background-color: #e3e3e3;
+}
+
+/* General table styles */
+
+.aobListTable
+{
+	width: 100%;
+}
+
+.aobListTable th
+{
+	text-align: left;
+	color:#666666;
+	border-right:1px solid #FFFFFF;
+	padding: 2px 0px 2px 5px;
+	background-color: #fff;
+}
+
+.aobjListBold
+{
+	font-weight:bold;
+}
+
+.aobListItal
+{
+	color:#336699;
+}

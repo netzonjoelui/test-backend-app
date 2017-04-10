@@ -1,0 +1,51 @@
+/**************************************************************************
+ *	CToolTable.js
+ **************************************************************************/
+.CTTMainTable
+{
+}
+.CTTHeaderCell
+{
+	background-color:#00b0d8; 
+	color:#FFFFFF;
+	border-right:1px solid #FFFFFF;
+}
+.CTTRowOne
+{
+	background-color:#fff; 
+	/*background-color:#F0F0F0; */
+	border-right:1px solid #FFFFFF;
+	vertical-align:middle;
+}
+.CTTRowOneBold
+{
+	color:#666666;
+	background-color:#BABACC; 
+	border-right:1px solid #FFFFFF;
+	vertical-align:middle;
+}
+.CTTRowTwo
+{
+	background-color:#fff; 
+	/*
+	color:#666666;
+	background-color:#DEDEDE; 
+	*/
+	border-right:1px solid #FFFFFF;
+	vertical-align:middle;
+}
+.CTTRowTwoBold
+{
+	color:#666666;
+	background-color:#CACADD; 
+	border-right:1px solid #FFFFFF;
+	vertical-align:middle;
+}
+.CTTRowSpacer
+{
+	background-image:url(/images/cellspacing_dotted_line.gif);
+	background-position:0 0;
+	background-repeat:repeat-x;
+	border-right:1px solid #FFFFFF;
+	height:1px;
+}

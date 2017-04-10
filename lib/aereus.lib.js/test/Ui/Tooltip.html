@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Test Menus in ANT</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<link rel="STYLESHEET" type="text/css" href="../../style.css" />
+
+	<script language="javascript" type="text/javascript" src="../../jquery.min.js"></script>
+	<script language="javascript" type="text/javascript" src="../../jquery/jquery.tipsy.js"></script>
+	<script language="javascript" type="text/javascript" src="../../alib.js"></script>
+	<script language="javascript" type="text/javascript" src="../../dom.js"></script>
+	<script language="javascript" type="text/javascript" src="../../events.js"></script>
+	<script language="javascript" type="text/javascript" src="../../events/EventWrapper.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/Tooltip.js"></script>
+	<script language="javascript" type="text/javascript" src="../../userAgent.js"></script>
+</head>
+<body>
+	<h1>Simple alib.ui.Tooltip demo</h1>
+
+	<h2>With Title As Source</h2>
+	<a id='b1' title='Here is my tooltip'>Hover over me</a>
+
+	<script type='text/javascript'>
+		var btn = document.getElementById("b1");
+		var tt = new alib.ui.Tooltip(btn);
+	</script>
+
+	<h2>With Long HTML Manual Source</h2>
+	<a id='b2'>Hover over me</a>
+
+	<script type='text/javascript'>
+		var btn = document.getElementById("b2");
+		var tt = new alib.ui.Tooltip(btn, "<strong>Longer explanation</strong> This is what a good solid explanation looks like. This is what a good solid explanation looks like. This is what a good solid explanation looks like. This is what a good solid explanation looks like. This is what a good solid explanation looks like.");
+	</script>
+</body>
+</html>

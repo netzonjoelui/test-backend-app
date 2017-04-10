@@ -1,0 +1,135 @@
+/**
+ * Styles used in the AntObjectList class
+ */
+.aobListRow, .aobListRowAct, .aobListRowAlert
+{
+	cursor:pointer;
+	color:#000000;
+	background-color:#FFFFFF;
+	font-size: 13px;
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+
+.aobListRow > td, .aobListRowAct > td, .aobListRowAlert > td
+{
+	border-bottom-color:#cccccc; 
+	border-bottom-style:solid; 
+	border-bottom-width:1px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+/* Inactive / Normal state */
+.aobListRow
+{
+}
+
+/* Over - on mouse over */
+.aobListRow:hover
+{
+	background-color: #e3e3e3;
+}
+
+/* Active - selected */
+.aobListRowAct
+{
+	background-color:#CCCCCC;
+	color:#000000;
+}
+
+.aobListRowAct td
+{
+	color:#000000;
+}
+
+
+/* Alert - usually means unread */
+.aobListRowAlert
+{
+	/*background-color:#bcddff;*/
+}
+
+.aobListRowAlert td
+{
+	color:blue;
+	font-weight: bold;
+}
+
+/* No select option - no hover */
+.aobListRowNoSelect
+{
+	background-color: none;
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: auto;
+	-khtml-user-select: auto;
+	-moz-user-select: auto;
+	-o-user-select: auto;
+	user-select: auto;
+}
+
+/* General table styles */
+
+.aobListTable
+{
+	width: 100%;
+}
+
+.aobListTable th
+{
+	text-align: left;
+	background-color:#979797; 
+	color:#FFFFFF;
+	border-right:1px solid #FFFFFF;
+	padding: 2px 0px 2px 5px;
+}
+
+.aobjListBold
+{
+	font-weight:bold;
+	color: #666;
+}
+
+.aobListItal
+{
+	color:#336699;
+}
+
+
+/* Comment row */
+.aobListRowComment
+{
+	cursor:default;
+	margin: 5px 5px 0px 0px;
+	padding: 5px 0 5px 0;
+	background-color: #ECEFF5;
+	color: black;
+
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: auto;
+	-khtml-user-select: auto;
+	-moz-user-select: auto;
+	-o-user-select: auto;
+	user-select: auto;
+}
+
+/* No select option - no hover */
+.aobListRowNoSelect, .aobListRowNoSelect:hover
+{
+	background-color: none;
+	cursor:auto;
+
+	/* We use drag and drop so disable selecting text */
+	-webkit-user-select: auto;
+	-khtml-user-select: auto;
+	-moz-user-select: auto;
+	-o-user-select: auto;
+	user-select: auto;
+}

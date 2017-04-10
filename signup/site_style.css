@@ -1,0 +1,695 @@
+/*---------------------------------------------------------------------------
+
+	Author: joe, 2009 sky.stebnicki@aereus.com	
+	Copyright: 2009, Aereus Corportaion. All rights reserverd.
+
+---------------------------------------------------------------------------*/
+
+html, body
+{
+	height:100%;
+}
+
+body
+{
+	margin: 0px;
+	padding: 0px;
+	/* IE will not recognize auto marign without this */
+	text-align: center;
+	background-color:#ffffff;
+	color:#000;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+}
+
+
+/**************************************************************************************
+*    Import Stylesheets
+***************************************************************************************/
+
+/* @import url("otherstylesheet.css"); */
+
+
+/**************************************************************************************
+*    Layout Styles
+***************************************************************************************/
+
+#pageOuterContainer
+{
+	margin-left: auto;
+	margin-right: auto;
+	width:960px;
+	text-align: left;
+	min-height: 100%;
+	position: relative;
+}
+
+/*IE treats height as min-height anyway*/
+* html #pageOuterContainer
+{
+	height:100%;
+} 
+
+#pageHeader
+{
+	font-weight: bold;
+	height:50px;
+	/*background-color: #123137;*/
+	background-color: #000000;
+	color: white;
+}
+
+#pageNav
+{
+	float: left;
+	width: 220px;
+	margin-bottom: 20px;
+}
+
+#pageTopNav
+{
+	/*background-color: #123137;*/
+	background-color: #000000;
+	color: white;
+	text-align: right;
+	padding: 0px 5px 0px 0px;
+	margin-bottom: 10px;
+}
+
+#pageContent
+{
+	margin-left: 225px;
+	padding: 0px 0px 20px 0px;
+	/*border-left: 1px solid #666666;*/
+}
+
+.pageContentRightBar
+{
+	width: 210px;
+	float: right;
+}
+
+.pageContentLeftBody
+{
+	margin-right: 215px;
+}
+
+/* 3 col div */
+.bodyCol3
+{
+	/*display:inline-table;*/
+	width: 33.332%;
+	float: left;
+}
+
+/* 2 col div */
+.bodyCol2
+{
+	/*display:inline-table;*/
+	width: 50%;
+	float: left;
+}
+
+#pageFooter
+{
+	border-top: 1px solid;
+	/*background-color: #123137;*/
+	background-color: #000000;
+	color: white;
+	text-align: center;
+}
+
+#pageFooter a
+{
+	color: white;
+}
+
+#homeBanner
+{
+	height:450px; 
+}
+
+#homeContent
+{
+	padding-top: 10px;
+	/*color: #D9E888; */
+}
+
+#homeContentHr
+{
+	height: 5px;
+	background-color: #000;
+	border-bottom: 4px solid #ccc;
+}
+
+#homeContent h1
+{
+	/*color: #CBB568;*/
+}
+
+/**************************************************************************************
+*    Global link Styles
+***************************************************************************************/
+a 
+{ 
+	text-decoration:none;
+	font-family: helvetica, arial, sans-serif;
+	font-size:12px;
+}
+a:link	
+{
+	color:	#336699;
+}
+a:visited	
+{
+	color:	#336699;
+}
+a:active	
+{
+	color:	#336699;
+}
+a:hover	
+{
+	color:	#003366;
+	text-decoration: underline;
+}
+
+/**************************************************************************************
+*    Top Nav classes
+***************************************************************************************/
+/* Main nav button classes */
+.topNavButton
+{
+	display:inline-table;
+	width: 120px;
+	text-align: center;
+	font-size: 16px;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.topNavButtonOn
+{
+	background-color: white;
+	color: #0099ff;
+}			 
+
+.topNavButtonOff	
+{
+	color: #fff;
+}
+
+.topNavButtonOver
+{
+	color: #0099ff;
+}
+
+/**************************************************************************************
+*    Left Nav classes
+***************************************************************************************/
+/* Main nav button classes */
+.pageNavButtonOn, .pageNavButtonOn:hover, .pageNavButtonOn:hover, .pageNavButtonOn:visited, .pageNavButtonOn:active, 
+.pageNavButtonOff, .pageNavButtonOff:hover, .pageNavButtonOff:hover, .pageNavButtonOff:visited, .pageNavButtonOff:active,
+.pageNavButtonOver, .pageNavButtonOver:hover, .pageNavButtonOver:hover, .pageNavButtonOver:visited, .pageNavButtonOver:active
+{
+	display: block;
+	font-size: 14px;
+	margin: 0px;
+	text-align: left;
+	padding:2px 0 2px 4px;
+	text-decoration: none; 
+	font-weight:bold;	
+	font-size: 18px;
+	border-top: 1px solid #666666;
+}
+
+.pageNavButtonOn, .pageNavButtonOn:hover, .pageNavButtonOn:visited, .pageNavButtonOn:active
+{
+	color: #771a1d; 
+}
+
+.pageNavButtonOff, .pageNavButtonOff:hover, .pageNavButtonOff:visited, .pageNavButtonOff:active	
+{
+	color: #333333; 
+}
+
+.pageNavButtonOver, .pageNavButtonOver:hover, .pageNavButtonOver:visited, .pageNavButtonOver:active
+{
+	background-color: #771a1d;
+	color: white;
+}
+
+/* Sub-nav classes */
+.pageNavButtonSubOn, .pageNavButtonSubOn:hover, .pageNavButtonSubOn:visited, .pageNavButtonSubOn:active,
+.pageNavButtonSubOff, .pageNavButtonSubOff:hover, .pageNavButtonSubOff:visited, .pageNavButtonSubOff:active,
+.pageNavButtonSubOver, .pageNavButtonSubOver:hover, .pageNavButtonSubOver:visited, .pageNavButtonSubOver:active
+{
+	display: block;
+	font-size: 14px;
+	margin: 0px 0px 0px 10px;
+	text-align: left;
+	padding:2px 0 2px 4px;
+	text-decoration: none; 
+	font-weight:bold;	
+	font-size: 14px;
+}
+
+.pageNavButtonSubOn, .pageNavButtonSubOn:hover, .pageNavButtonSubOn:visited, .pageNavButtonSubOn:active
+{
+	color: #771a1d;
+}
+.pageNavButtonSubOff, .pageNavButtonSubOff:hover, .pageNavButtonSubOff:visited, .pageNavButtonSubOff:active
+{
+	color: #333333; 
+}
+.pageNavButtonSubOver, .pageNavButtonSubOver:hover, .pageNavButtonSubOver:visited, .pageNavButtonSubOver:active
+{
+	color: #cccccc; 
+}
+
+/**************************************************************************************
+*    Styles for handling floating
+***************************************************************************************/
+
+.clear
+{
+	clear:both;
+}
+
+.right
+{
+	float: right;
+}
+
+.left
+{
+	float: left;
+}
+
+
+
+/**************************************************************************************
+*    Remove margin, padding and border from everything
+***************************************************************************************/
+
+*
+{
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+
+/**************************************************************************************
+*    Typography
+***************************************************************************************/
+
+h1
+{
+	font-size: 22px;
+	color: #771a1d;
+	margin-bottom: 10px;
+}
+	
+h2
+{
+	font-size: 20px;
+	color: #771a1d;
+	margin-bottom: 8px;
+}
+
+h2.centered
+{
+	font-size: 20px;
+	color: black;
+	margin-bottom: 8px;
+	text-align: center;
+}
+	
+h3
+{
+	font-size: 18px;
+	color: #771a1d;
+	margin-bottom: 5px;
+}
+	
+h4
+{
+	font-size: 16px;
+	color: black;
+	margin-bottom: 3px;
+}
+
+h4.centered
+{
+	text-align: center;
+}
+	
+h5
+{
+	font-size: 14px;
+	color: black;
+}
+	
+p
+{
+	font-size: 14px;
+	color: #232323;
+	font-family: georgia, times, "times new roman";
+	line-height: 1.2em;
+	margin-bottom: 10px;
+}
+
+q, cite
+{
+	font-size: 14px;
+}
+
+ul, ol, dl
+{
+	font-size: 12px;
+}
+
+li, dd, dt
+{
+	font-size: 12px;
+}
+
+blockquote
+{
+	font-size: 12px;
+}
+
+.formLabel
+{
+	font-weight: bold;
+}
+
+.colArticle
+{
+	text-align: justify;
+	margin-bottom: 10px;
+	margin-right: 10px;
+	font-size: 16px;
+}
+.todo
+{
+	background-color: yellow;
+	color: red;
+}
+
+/**************************************************************************************
+*    Forms
+***************************************************************************************/
+
+form
+{
+	margin: 0px;
+	padding: 0px;
+}
+
+input[type="text"]
+{
+	padding: 3px;
+	border: 1px solid #999999;	
+}
+input[type="password"]
+{
+	padding: 3px;
+	border: 1px solid #999999;	
+}
+input[type="button"], input[type="submit"]
+{
+	padding: 3px;
+	border: 1px solid #999999;	
+}
+select
+{
+	padding: 3px;
+	border: 1px solid #999999;	
+}
+textarea
+{
+	padding: 3px;
+	border: 1px solid #999999;	
+}
+button
+{
+	border: 1px solid #999999;	
+}
+
+/**************************************************************************************
+*    Tables
+***************************************************************************************/
+
+/* Global standard table
+===========================================================*/
+table
+{ 
+}
+
+td 
+{
+  	text-align: left;
+	font-weight: normal;
+}
+
+th 
+{
+  	text-align: left;
+	font-weight: bold;
+}
+
+tr
+{
+	vertical-align: top;
+}
+
+/* Data table (used to display data)
+===========================================================*/
+table.data
+{ 
+	font:14px Arial, Helvetica, sans-serif; 
+}
+
+table.data tbody td 
+{ 
+	color:#5A666E; 
+	padding:2px; 
+	border-top:1px solid #FFF; 
+	border-left:1px solid #FFF; 
+	border-bottom:1px solid #AFB5B8; 
+	border-right:1px solid #AFB5B8;  
+}
+table.data tbody th 
+{ 
+	background-color:#666666;
+	color:#D7DBDD; 
+	padding:2px; 
+	text-align:center; 
+	border-top:1px solid #93A1AA; 
+	border-left:1px solid #93A1AA; 
+	border-bottom:1px solid #2F3B42; 
+	border-right:1px solid #2F3B42; 
+}
+
+/* Handle links in this table differently */
+table.data tbody td a 
+{  
+	color:#724809; 
+	text-decoration:none; 
+	font-weight:bold; 
+}
+
+table.data tbody td a:hover 
+{
+	background-color:#F5B348; 
+	color:#FFF; 
+}
+
+/**************************************************************************************
+*	Global Widget classes
+***************************************************************************************/
+/*Widget*/
+.widget
+{
+	float:left;
+	/*background:url(/images/widget-background-1.png) repeat-x top left;*/
+	width:241px;
+	height:255px;
+	margin:0px;
+	padding:0px;
+	border-top:1px solid #404c58;
+	border-bottom:1px solid #404c58;	
+	overflow: hidden;
+}
+
+
+/**************************************************************************************
+*    Custom styles
+***************************************************************************************/
+{
+}
+
+/**************************************************************************************
+*    Custom styles
+***************************************************************************************/
+
+
+/**************************************************************************************
+*	Website portfolio viewer
+***************************************************************************************/
+div.pViewContainer
+{
+	margin:10px 0 0 0;
+	padding:0px;	
+	width:533px;
+}
+div.pViewImage
+{
+	margin:0px;
+	padding:0px;	
+	width:533px;
+	height:340px;
+}
+div.pViewDetails
+{
+	float:left;
+	text-align:left;
+	width: 210px;
+	margin:0px;
+	padding:0px;
+}
+div.pViewDetailsDescription
+{
+	margin:4px 4px 0 212px;
+	padding:4px;
+	text-align:left;
+}
+div.pViewIndex
+{ 
+	text-align:left;	
+	padding-top:15px;
+	margin:0px;
+	width:533px;
+}
+div.pViewProjectLink
+{
+	background:url(/images/pagenav-bg-1.png) repeat top left;
+	cursor: pointer;
+	text-decoration:none;
+	padding-left:3px;
+	margin:0px;
+	width:98%;
+}
+div.pViewProjectLinkOver
+{
+	background:#465a6d;
+	cursor: pointer;
+	text-decoration:none;
+	padding-left:3px;
+	margin:0px;
+	width:98%;
+}
+div.pViewProjectLinkOut
+{
+	background:url(/images/pagenav-bg-1.png) repeat top left;
+	cursor: pointer;
+	text-decoration:none;
+	padding-left:3px;
+	margin:0px;
+	width:98%;
+}
+.pViewProjectLinkContainer
+{
+	width:100%;
+	padding:0px;
+	margin:0px;
+}
+.pViewDetailClientInfobox
+{
+	padding:4px;
+}
+.pViewDetailHeader
+{
+	margin:0px;
+	padding:0px;
+}
+.pViewDetailClientName
+{
+	font-weight:normal;	
+	text-decoration: none;
+	margin:0px;
+	padding:0px;
+}
+
+/**************************************************************************************
+*	Editions
+***************************************************************************************/
+
+.editionCol
+{
+	border:1px solid #ccc;
+	text-align:center;
+	margin-top: 10px;
+}
+
+.editionColRaised
+{
+	border:2px solid blue;
+	text-align:center;
+	margin-right:3px;
+	margin-left:3px;
+}
+
+.editionColTitle
+{
+	border-bottom:1px dashed #ccc;
+}
+
+.editionColBody
+{
+	height:250px;
+	text-align:center;
+	margin: 3px;
+}
+
+.editionColAction
+{
+	text-align:center;
+	padding: 3px;
+}
+
+.editionColAction a 
+{
+	color: red;
+	font-size: 18px;
+}
+
+
+.editionCol h1, .editionColRaised h1
+{
+	color: black;
+	font-size: 24px;
+}
+
+.editionCol h4, .editionColRaised h4
+{
+	color: #666;
+	font-weight: normal;
+	font-size: 12px;
+}
+
+.editionCol ul, .editionColRaised ul
+{
+	margin-top: 10px;
+	list-style: none;
+}
+
+.editionCol li, .editionColRaised li
+{
+	border-bottom: 1px dashed #ccc;
+	font-size: 14px;
+	margin-top: 3px;
+}
+

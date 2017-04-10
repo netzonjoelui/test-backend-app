@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title><%PAGETITLE%></title>
+<style type="text/css">
+body
+{
+	background:#FFF;
+}
+
+#header
+{
+	width:740px;
+	background:#456 url("/images/blogs/corners_bl_top.gif") no-repeat left top;
+	margin:0 0 0;
+	padding:8px 0 0;
+	color:#fff;
+}
+
+
+#header div 
+{
+	background:url("/images/blogs/corners_bl_bot.gif") no-repeat left bottom;
+	padding:0 15px 8px;
+}
+
+#blog_title 
+{
+	margin:0;
+	padding:10px 30px 5px;
+	font-size:200%;
+	line-height:1.2em;
+}
+
+#blog
+{
+	margin:15px 0 0;
+	width:485px;
+	float:left;
+	background:#fff url("/images/blogs/corners_blog_bot.gif") no-repeat left bottom;
+	padding:0 0 10px;
+	color:#000;
+	font-size:14px;
+	line-height:1.5em;
+}
+
+#blog2 
+{
+	float:left;
+	width:100%;
+	background:url("/images/blogs/corners_blog_top.gif") no-repeat left top;
+	padding:10px 0 0;
+}
+#blog3 
+{
+	background:url("/images/blogs/rails_blog.gif") repeat-y;
+	padding:0;
+}
+
+/* Sidebar Classes */
+#sidebar 
+{
+	width:240px;
+	float:right;
+	margin:15px 0 0;
+	font-size:97%;
+	line-height:1.5em;
+}
+
+.sidebox
+{
+	background:#cdc url("/images/blogs/corners_side_top.gif") no-repeat left top;
+	margin:0 0 15px;
+	padding:10px 0 0;
+	color:#666;
+}
+
+.sidebox2
+{
+	background:url("/images/blogs/corners_side_bot.gif") no-repeat left bottom;
+	padding:0 13px 8px;
+}
+
+.sidebar_title 
+{
+	margin:0;
+	padding:0 0 .2em;
+	border-bottom:1px dotted #9b9;
+	font-size:115%;
+	line-height:1.5em;
+	color:#333;
+}
+  
+/* Now set post styles */
+.post_date_header 
+{
+	margin:0 28px 0 18px;
+	font-size:14px;
+	line-height:2em;
+	text-transform:uppercase;
+	letter-spacing:.2em;
+	color:#357;
+}
+.post_container
+{
+	margin:.3em 0 25px;
+	padding:0 13px;
+}
+.post_header
+{
+	margin:0;
+	font-size:22px;
+	line-height:1.5em;
+	display:block;
+	padding:2px 14px 2px 3px;
+	color:#333333;
+}
+.post_body
+{
+	padding:10px 14px 1px 3px;
+}
+.post_footer
+{
+	background:#EEEEEE;
+	margin:0;
+	padding:2px 14px 2px 3px;
+	line-height:1.5em;
+	color:#666666;
+	text-align:right;
+	border:1px dotted #BBBBBB;
+}
+
+.post_comment_container
+{
+	border-bottom:1px dotted #BBBBBB;
+	border-right:1px dotted #BBBBBB;
+	border-left:1px dotted #BBBBBB;
+}
+
+.post_comment
+{
+	border-top:1px solid #999999;
+}
+
+.post_comment_add
+{
+	border-top:1px solid #999999;
+	padding-top:10px;
+}
+
+
+
+</style>
+<script language="javascript" type="text/javascript">
+<!--
+function ToggleComments(id)
+{
+	var dv = document.getElementById('cmts_' + id);
+	if (dv && dv.style.display == 'block')
+		dv.style.display = 'none';
+	else
+		dv.style.display = 'block';
+}
+-->
+</script>
+</head>
+
+<body>
+
+<div id='container' style="width:740px;">
+	<div id='header'>
+		<div>
+		<h1 id='blog_title'><%TITLE_HEADER_DIV%></h1>
+		</div>
+	</div>
+	
+	<div id='blog'><div id='blog2'><div id='blog3'>
+		<%BLOG_BODY%>
+	</div></div></div>
+	
+	<div id='sidebar'>
+		<%SIDE_BAR%>
+	</div>
+</div>
+</body>
+</html>

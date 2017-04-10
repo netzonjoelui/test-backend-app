@@ -1,0 +1,67 @@
+/**************************************************************************
+ *	CTabs.js
+ **************************************************************************/
+.CTTabLeftOn
+{
+	background-image:url(/images/themes/nova/tab_on_left.gif);
+	background-position: bottom right;
+	background-repeat:no-repeat;
+	width: 2px;
+}
+.CTTabLeftOff
+{
+	background-image:url(/images/themes/nova/tab_off_left.gif);
+	background-position: bottom right;
+	background-repeat:no-repeat;
+	width: 2px;
+}
+.CTTabCenterOn
+{
+	background: url('/images/themes/nova/tab_on_mid.gif');
+	background-repeat: repeat-x;
+	background-position: bottom left;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:10px;
+	color: #FFFF66;
+	padding: 4px;
+	cursor: pointer;
+}
+.CTTabCenterOff
+{
+	background: url('/images/themes/nova/tab_off_mid.gif');
+	background-repeat: repeat-x;
+	background-position: bottom left;
+	font-family:Verdana, Arial, Helvetica, sans-serif;
+	font-size:10px;
+	color: #000000;
+	padding: 4px;
+	cursor: pointer;
+}
+
+.CTTabRightOn
+{
+	background-image:url(/images/themes/nova/tab_on_right.gif);
+	background-position: bottom left;
+	background-repeat:no-repeat;
+	width: 3px;
+}
+
+.CTTabRightOff
+{
+	background-image:url(/images/themes/nova/tab_off_right.gif);
+	background-position: bottom left;
+	background-repeat:no-repeat;
+	width: 3px;
+}
+
+.CTTabHr
+{
+	height: 1px;
+	background-color: #ccc;
+}
+
+.CTTabBody
+{
+}
+
+

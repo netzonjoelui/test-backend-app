@@ -1,0 +1,57 @@
+/**************************************************************************************
+*	Page:		Dynamically Generated Contact Pages edit_contact.awp
+***************************************************************************************/
+a.saveContact
+{
+	color:#666666;
+	text-decoration:none;
+	font-size:10px;
+	font-family:Arial, Helvetica, sans-serif;
+}
+a.saveContact:hover
+{
+	color:#FF6600;
+	text-decoration:none;
+	font-size:10px;
+	font-family:Arial, Helvetica, sans-serif;
+}
+a.saveContact:visited
+{
+	color:#999999;
+	text-decoration:none;
+	font-size:10px;
+	font-family:Arial, Helvetica, sans-serif;
+}
+
+.ConDivTop
+{
+	border-top-width:1px;
+	border-top-style:solid;
+	border-top-color:#CCC;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#CCC;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#CCC;
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#CCC;
+	
+	background-color:#E7E7E7;
+}
+
+.ConDivBottom
+{
+	border-bottom-width:1px;
+	border-bottom-style:solid;
+	border-bottom-color:#CCC;
+	border-left-width:1px;
+	border-left-style:solid;
+	border-left-color:#CCC;
+	border-right-width:1px;
+	border-right-style:solid;
+	border-right-color:#CCC;
+	
+	background-color:#797979;
+}

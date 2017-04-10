@@ -1,0 +1,267 @@
+
+/* Outer Container */
+.ContentTable
+{
+	border-width:0px;
+	background-color:transparent; 
+}
+
+/* Upper Left Corner */
+.ContentTableTitleLeftCorn
+{
+	width:10px;
+	height:18px;
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/upperleftcorner.png);
+				background-position:0px 0px; 
+				background-repeat:no-repeat;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/upperleftcorner.png, sizingMethod='scale');";
+	}
+	?>
+}
+/* Center of title bar */
+.ContentTableTitleCenter 
+{
+	height:18px;
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/windowHeaderShade.png);
+				background-position:0px 0px;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/windowHeaderShade.png, sizingMethod='scale');";
+	}
+	?>
+	background-repeat:repeat;
+}
+/* Upper Right Corner */
+.ContentTableTitleRightCorn
+{
+	width:10px;
+	height:18px;
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/upperrightcorner.png);
+				background-position:0px 0px; 
+				background-repeat:no-repeat;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/upperrightcorner.png, sizingMethod='scale');";
+	}
+	?>
+}
+
+/* Label Container - For title */
+.ContentTableTitleLabel
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-size:12px; 
+	font-weight:bold; 
+	color:#FFFFFF;
+	padding-left:2px;
+	padding-top:2px;
+}
+
+/* Context Container - For title */
+.ContentTableTitleContext
+{
+}
+
+
+/* Left border of table body */
+.ContentTableBodyLeft
+{
+	width:10px;
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/body.png);
+				background-position:0px 0px;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/body.png, sizingMethod='scale');";
+	}
+	?>
+	background-repeat:repeat;
+}
+/* Table body */
+.ContentTableBody 
+{
+	padding:2px; 
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/body.png);
+				background-position:0px 0px;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/body.png, sizingMethod='scale');";
+	}
+	?>
+	background-repeat:repeat;
+	height:100%;
+	color: #FFF;
+}
+/* Right border of table body */
+.ContentTableBodyRight
+{
+	width:10px;
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/body.png);
+				background-position:0px 0px;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/body.png, sizingMethod='scale');";
+	}
+	?>
+	background-repeat:repeat;
+}
+
+/* Small 1px hr at the bottom of the table */
+.ContentTableFooterHrLeft
+{
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/body.png);
+				background-position:0px 0px;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/body.png, sizingMethod='scale');";
+	}
+	?>
+	background-repeat:repeat;
+	height:0px;
+}
+.ContentTableFooterHr 
+{
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/body.png);
+				background-position:0px 0px;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/body.png, sizingMethod='scale');";
+	}
+	?>
+	background-repeat:repeat;
+	height:0px;
+}
+.ContentTableFooterHrRight
+{
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/body.png);
+				background-position:0px 0px;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/body.png, sizingMethod='scale');";
+	}
+	?>
+	background-repeat:repeat;
+	height:0px;
+}
+
+/* Lower left corder */
+.ContentTableFooterLeftCorn
+{
+	width:10px;
+	height:10px;
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/lowerleftcorner.png);
+				background-position:0px 0px; 
+				background-repeat:no-repeat;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/lowerleftcorner.png, sizingMethod='scale');";
+	}
+	?>
+}
+/* Footer Row */
+.ContentTableFooterRow 
+{
+	height:10px;
+}
+/* Footer body */
+.ContentTableFooterCenter
+{
+	height:10px;
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/windowHeaderShade.png);
+				background-position:0px 0px;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/windowHeaderShade.png, sizingMethod='scale');";
+	}
+	?>
+	background-repeat:repeat;
+}
+/* Footer Right Corner */
+.ContentTableFooterRightCorn
+{
+	width:10px;
+	height:10px;
+	<?php
+	if (!$pnghack)
+	{
+		echo "background-image:url(/images/themes/nova/lowerrightcorner.png);
+				background-position:0px 0px; 
+				background-repeat:no-repeat;";
+	}
+	else
+	{
+		
+		echo "background-image: none;
+			filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src=/images/themes/nova/lowerrightcorner.png, sizingMethod='scale');";
+	}
+	?>
+}
+
+

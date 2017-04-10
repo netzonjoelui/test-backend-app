@@ -1,0 +1,160 @@
+<?php
+	if ($_POST['add_email'] && $_POST['add_member'])
+	{
+		// Get user id
+		$delim = (strpos($_POST['add_email'], ",")!==false) ? "," : ";";
+		$usrs = explode($delim, $_POST['add_email']);
+		foreach ($usrs as $usr)
+		{
+			if ($usr)
+			{
+				$result = $dbh->Query("select user_id from email_accounts where address='".$usr."'");
+				if ($dbh->GetNumberRows($result))
+				{
+					$row = $dbh->GetNextRow($result, 0);
+					$dbh->FreeResults($result);
+					
+					if ($row['user_id'] == $USERID)
+					{
+						$status_message = "You do not need to add yourself!";
+					}
+					else if ($row['user_id'])
+					{
+						$dbh->Query("insert into project_template_members(user_id, template_id)
+									 values('".$row['user_id']."', '$TMPID');");
+					}
+				}
+				else
+					$status_message = "$usr - User not found!";
+			}
+		}
+
+	}
+	
+	if ($_POST['add_pos_btn'] && $_POST['add_position'])
+	{
+		// Get user id
+		$result = $dbh->Query("insert into project_positions(name, template_id) 
+							   values('".$dbh->Escape($_POST['add_position'])."', '$TMPID');");
+		$status_message = "Position was added!";
+	}
+	
+
+	if ($_GET['dmid'])
+		$dbh->Query("delete from project_template_members where id='".$_GET['dmid']."'");
+	
+	if ($_GET['dpid'])
+		$dbh->Query("delete from project_positions where id='".$_GET['dpid']."'");
+
+		
+	WindowFrameToolbarStart('100%');
+	if ($RETPAGE) echo ButtonCreate("Go Back", "document.location='".base64_decode($RETPAGE)."'", "b2");
+	echo "<div style='float:right;padding-right:3px;font-weight:bold;font-size:14px;'>$status_message</div>";
+	WindowFrameToolbarEnd();
+	
+	echo "<div style='padding-top:10px;'>";
+	WindowFrameStart("Add Project Member", "100%");
+	echo "<form name='edit_template' action='template.awp?$FWDVARS' method='post'>
+			<table border='0'>
+				<tr>
+					<td>User Email:</td>
+					<td colspan='2'>";
+	$acField = new CAutoComplete('xml_users_ac.awp', 'add_email', 
+								 NULL, '', "style='width:350px;'", ',');
+	$acField->PrintTextBox();				
+	echo "			</td>
+					<td>
+						".ButtonCreate("Add Attendee", "SUBMIT:edit_template:add_member")."
+					</td>
+				</tr>
+			</table>
+		  </form>";
+	WindowFrameEnd();
+	echo "</div>";
+	
+	echo "<div style='padding-top:10px;'>";
+	WindowFrameStart("Add Member Position (to be applied to memebers)", "100%");
+	echo "<form name='edit_template_pos' action='template.awp?$FWDVARS' method='post'>
+			<table border='0'>
+				<tr>
+					<td>Position Name:</td>
+					<td colspan='2'>
+						<input type='text' name='add_position' value='' style='width:350px;'>
+					</td>
+					<td>
+						".ButtonCreate("Add Position", "SUBMIT:edit_template_pos:add_pos_btn")."
+					</td>
+				</tr>
+			</table>
+		  </form>";
+	WindowFrameEnd();
+	echo "</div>";
+
+	$intervals = "<option value='3' selected>day(s)</option>
+				  <option value='4'>week(s)</option>
+				  <option value='5'>month(s)</option>";
+	
+	echo "<div style='padding-top:10px;'>";
+	WindowFrameStart("Existing Members/Positions", "100%");
+	// Create new tool table
+	$tbl = new CToolTable;
+	// Create table headers
+	$tbl->StartHeaders();
+	$tbl->AddHeader("Name");
+	$tbl->AddHeader("Full Name");
+	$tbl->AddHeader("Email");
+	//$tbl->AddHeader("Accepted");
+	$tbl->AddHeader("Delete", 'center', '50px');
+	$tbl->EndHeaders();
+	// Get Project Positions
+	$query = "select project_positions.id, project_positions.name 
+				from project_positions where 
+				project_positions.template_id='$TMPID'
+				order by name";
+	$result = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($result);
+	for ($i=0; $i<$num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$name = $row['name'];
+		
+		$tbl->StartRow();
+		$tbl->AddCell($row['name']);
+		$tbl->AddCell("Project Position");
+		$tbl->AddCell("Not Yet Assigned");
+		//$tbl->AddCell(('t' == $row['accepted']) ? 'yes' : 'no');
+		$tbl->AddCell("<a href=\"javascript:DeleteTemplatePosition('".$row['id']."');\">
+						<img src='/images/themes/$THEMENAME/deleteTask.gif' border='0' title='Delete'></a>", 
+						true, 'center');
+		$tbl->EndRow();
+	}
+	$dbh->FreeResults($result);
+	
+	// Get attendees (users)
+	$query = "select project_template_members.id, users.id as user_id, users.name, users.full_name, 
+				project_template_members.accepted from project_template_members, users where 
+				project_template_members.template_id='$TMPID'
+				and  project_template_members.user_id = users.id
+				order by name";
+	$result = $dbh->Query($query);
+	$num = $dbh->GetNumberRows($result);
+	for ($i=0; $i<$num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i);
+		$name = $row['name'];
+		
+		$tbl->StartRow();
+		$tbl->AddCell($row['name']);
+		$tbl->AddCell($row['full_name']);
+		$tbl->AddCell(UserGetEmail(&$dbh, $row['user_id']));
+		//$tbl->AddCell(('t' == $row['accepted']) ? 'yes' : 'no');
+		$tbl->AddCell("<a href=\"javascript:DeleteTemplateMember('".$row['id']."');\">
+						<img src='/images/themes/$THEMENAME/deleteTask.gif' border='0' title='Delete'></a>", 
+						true, 'center');
+		$tbl->EndRow();
+	}
+	$dbh->FreeResults($result);
+	$tbl->PrintTable();
+	WindowFrameEnd();
+	echo "</div>";
+?>

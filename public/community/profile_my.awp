@@ -1,0 +1,216 @@
+<?php
+	require_once("../validate_user.php");
+	require_once("../lib/AntConfig.php");
+	require_once("../settings/settings_functions.php");
+	require_once("../lib/content_table.awp");
+	require_once("../lib/CDatabase.awp");
+	require_once("../lib/CToolTabs.awp");
+	require_once("../lib/WindowFrame.awp");
+	require_once("../users/user_functions.php");
+	require_once("../lib/CToolTable.awp");
+	require_once("../lib/CDropdownMenu.awp");
+	require_once("../lib/Button.awp");
+	require_once("blog_functions.awp");
+	
+	$dbh = new CDatabase();
+									  
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$THNAME  = UserGetTheme(&$dbh, $USERID, 'name');
+	
+	// Handle profile update
+	if ($_POST['save_changes'] && $_POST['profile_id'])
+	{
+		$dbh->Query("update community_profiles set display_name='".$_POST['display_name']."',
+						user_image=".db_CheckNumber($_POST['user_image']).",
+						city = '".$_POST['city']."',
+						state = '".$_POST['state']."',
+						country = '".$_POST['country']."',
+						about = '".$_POST['about']."',
+						interests = '".$_POST['interests']."'
+						where id='".$_POST['profile_id']."'");
+						
+		$status_message = "Profile changes saved!";
+	}
+	
+	// Get blog id
+	$result = $dbh->Query("select id, display_name, user_image, about, interests,
+							city, state, country 
+							from community_profiles where user_id='$USERID'");
+	if ($dbh->GetNumberRows($result))
+	{
+		$row = $dbh->GetNextRow($result, 0);
+		$dbh->FreeResults($result);
+		$id = $row['id'];
+		$display_name = $row['display_name'];
+		$user_image = $row['user_image'];
+		$about = $row['about'];
+		$interests = $row['interests'];
+		$city = $row['city'];
+		$state = $row['state'];
+		$country = $row['country'];
+		if ($user_image)
+		{
+			$image_url = "/userfiles/getthumb_by_id.awp?iw=200&ih=200&fid=$user_image";
+		}
+	}
+	else
+	{
+		$display_name = UserGetFullName(&$dbh, $USERID);
+		$result = $dbh->Query("insert into community_profiles(display_name, user_id) 
+								values('$display_name', '$USERID');
+								select currval('community_profiles_id_seq') as id;");
+		if ($dbh->GetNumberRows($result))
+		{
+			$row = $dbh->GetNextRow($result, 0);
+			$dbh->FreeResults($result);
+			$id = $row['id'];
+		}
+	}
+	
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link rel="STYLESHEET" type="text/css" href="/css/<?php echo UserGetTheme(&$dbh, $USERID, 'css'); ?>" />
+<title>Community Home</title>
+<script language="javascript" type="text/javascript">
+function ProUpdateMainImage(fid, fname)
+{
+	if (fid) 
+	{
+		var imagePath = "/userfiles/getthumb_by_id.awp?iw=200&ih=200&fid=" + fid;
+		var mainImageDiv = document.getElementById('mainImage_div');
+		mainImageDiv.innerHTML = "<img align='left' src='"+imagePath+"' border='0' id='mainImage'>";
+		document.frm_profile.user_image.value=fid;
+	}
+}
+
+function ProRemoveMainImage()
+{
+	if (confirm("Are you sure you want to remove your profile image?")) 
+	{
+		var mainImageDiv = document.getElementById('mainImage_div');
+		mainImageDiv.innerHTML = 'No Image Selected';
+		document.frm_profile.user_image.value='';
+	}
+}
+</script>
+</head>
+
+<body <?php if ($_GET['refresh']) echo "onload=\"window.parent.leftnav.document.location.reload();\""; ?> class='appTopSpacer'>
+<?php
+	TableContentOpen('700px', "My Public Profile");
+	echo "<form name='frm_profile' method='post' action='profile_my.awp'>
+			<input type='hidden' name='profile_id' value='$id'>
+			<input type='hidden' name='user_image' value='$user_image'>";
+	
+	WindowFrameToolbarStart("100%");
+	echo ButtonCreate("Save Changes", "SUBMIT:frm_profile:save_changes", "b2");
+	echo ButtonCreate("View Public Profile", "window.open('/blogs/profile.awp?pid=$id");
+	echo "<div style='float:right;padding-right:3px;font-weight:bold;font-size:14px;' id='div_status'>
+			$status_message
+			<script language='script' type='text/javascript'>
+				window.setTimeout(function ClearStatus() { document.getElementById('div_status').innerHTML=''; }, 10000);
+			</script>
+		  </div>";
+	WindowFrameToolbarEnd();
+	
+	$padding='padding-left:5px; padding-right:5px; padding-top:3px; padding-bottom:3px;';
+	
+	echo "<div style='padding-top:10px;'>";
+	echo "<div style='float:left;width:454px;'>";
+	WindowFrameStart("General Info", "100%");
+	// Create new tool table
+	$tbl = new CToolTable;
+	
+	$lnk = "/userfiles/popup_browse_files.awp?browse=1&filter=jpg:jpeg:png:gif&callback=ProUpdateMainImage";
+	
+	$tbl->StartRow();
+	$tbl->AddCell("Display Name", false, 'left', $padding, '100px');
+	$tbl->AddCell("<input type='text' name='display_name' value=\"$display_name\" size='32' maxlength='64'>");
+	$tbl->EndRow();
+	$tbl->StartRow();
+	$tbl->AddCell("Change Image", false, 'left', $padding, '100px');
+	$tbl->AddCell(ButtonCreate("Select Image", "window.open('$lnk');").
+					ButtonCreate("Remove Image", "ProRemoveMainImage();", "b3"));
+	$tbl->EndRow();
+	$tbl->PrintTable();
+	
+	WindowFrameEnd();
+	echo "</div>";
+	
+	echo "<div style='float:left;width:210px;margin-left:10px;'>";
+	WindowFrameStart("My Image", "100%");
+	echo "<div id='mainImage_div'>";
+	if ($image_url)
+		echo "<img align='left' src='$image_url' border='0' id='mainImage'>";
+	else
+		echo "No Image Selected";
+	echo "</div>";
+	WindowFrameEnd();
+	echo "</div><div style='clear:both;'></div>";
+	
+	echo "</div>";
+	
+	echo "<div style='padding-top:10px;'>";
+	WindowFrameStart("Location", "100%");
+	
+	// Create new tool table
+	$tbl = new CToolTable;
+	
+	// Create table headers
+	$tbl->StartHeaders();
+	
+	$tbl->StartRow();
+	$tbl->AddCell("City", false, 'left', $padding, '100px');
+	$tbl->AddCell("<input type='text' name='city' value=\"$city\" size='64' maxlength='64'>");
+	$tbl->EndRow();
+	
+	$tbl->StartRow();
+	$tbl->AddCell("State/Region", false, 'left', $padding, '100px');
+	$tbl->AddCell("<input type='text' name='state' value=\"$state\" size='64' maxlength='64'>");
+	$tbl->EndRow();
+	
+	$tbl->StartRow();
+	$tbl->AddCell("Country", false, 'left', $padding, '100px');
+	$tbl->AddCell("<input type='text' name='country' value=\"$country\" size='64' maxlength='64'>");
+	$tbl->EndRow();
+	
+	$tbl->PrintTable();
+	
+	WindowFrameEnd();
+	echo "</div>";
+	
+	
+	echo "<div style='padding-top:10px;'>";
+	WindowFrameStart("Details", "100%");
+	
+	// Create new tool table
+	$tbl = new CToolTable;
+	
+	// Create table headers
+	$tbl->StartHeaders();
+	
+	$tbl->StartRow();
+	$tbl->AddCell("About Me", false, 'left', $padding, '100px');
+	$tbl->AddCell("<textarea name='about' rows='3' style='width:100%;'>$about</textarea>");
+	$tbl->EndRow();
+	
+	$tbl->StartRow();
+	$tbl->AddCell("Interests", false, 'left', $padding, '100px');
+	$tbl->AddCell("<textarea name='interests' rows='3' style='width:100%;'>$interests</textarea>");
+	$tbl->EndRow();
+	
+	$tbl->PrintTable();
+	
+	WindowFrameEnd();
+	echo "</div>";
+	
+	echo "</form>";
+	TableContentClose();
+?>
+</body>
+</html>

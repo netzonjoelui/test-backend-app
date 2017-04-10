@@ -1,0 +1,27 @@
+% $Header: /var/cvs/ant.aereus.com/lib/html_to_pdf/geometry.ps,v 1.2 2006/01/30 00:39:22 administrator Exp $
+
+/inside-rectangle {                % => X Y L T W H
+  5 index 4 index sub              % => X Y L T W H X-L
+  dup 0 gt                         % => X Y L T W H X-L X-L>0
+  exch 3 index lt and              % => X Y L T W H (X-L<W & X-L>0)
+  5 index 4 index sub neg          % => X Y L T W H (X-L<W & X-L>0) -(Y-T)
+  dup 0 gt                         % => X Y L T W H (X-L<W & X-L>0) -(Y-T) -(Y-T)>0
+  exch 3 index lt and              % => X Y L T W H (X-L<W & X-L>0) (-(Y-T)>0 & -(Y-T)<H)
+  and                              % => X Y L T W H (X-L<W & X-L>0) & (-(Y-T)>0 & -(Y-T)<H)
+  7 1 roll
+  pop pop 
+  pop pop pop pop
+} def
+
+/inside-rectangle-border {         % => X Y L T W H
+  5 index 4 index sub              % => X Y L T W H X-L
+  dup 0 ge                         % => X Y L T W H X-L X-L>0
+  exch 3 index le and              % => X Y L T W H (X-L<W & X-L>0)
+  5 index 4 index sub neg          % => X Y L T W H (X-L<W & X-L>0) -(Y-T)
+  dup 0 ge                         % => X Y L T W H (X-L<W & X-L>0) -(Y-T) -(Y-T)>0
+  exch 3 index le and              % => X Y L T W H (X-L<W & X-L>0) (-(Y-T)>0 & -(Y-T)<H)
+  and                              % => X Y L T W H (X-L<W & X-L>0) & (-(Y-T)>0 & -(Y-T)<H)
+  7 1 roll
+  pop pop 
+  pop pop pop pop
+} def

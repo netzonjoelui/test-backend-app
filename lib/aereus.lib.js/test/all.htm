@@ -1,0 +1,1293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>Test All</title>
+	
+	<link rel="STYLESHEET" type="text/css" href="../style.css" />
+	<style type='text/css'>
+	html, body 
+	{
+		height: 100%;
+		margin: 0px;
+	}
+	body 
+	{
+		overflow: auto;
+	}
+	</style>
+
+	<script language="javascript" type="text/javascript" src="../jquery.min.js"></script>
+	<script language="javascript" type="text/javascript" src="../jquery/jquery.datetimepicker.js"></script>
+	<script language="javascript" type="text/javascript" src="../jquery/GrowingInput.js"></script>
+	<script language="javascript" type="text/javascript" src="../jquery/TextboxList.js"></script>
+	<script language="javascript" type="text/javascript" src="../jquery/TextboxList.Autocomplete.js"></script>
+	<script language="javascript" type="text/javascript" src="../jquery/TextboxList.Autocomplete.Binary.js"></script>
+	<script language="javascript" type="text/javascript" src="../alib.js"></script>
+	<script language="javascript" type="text/javascript" src="../userAgent.js"></script>
+	<script language="javascript" type="text/javascript" src="../dom.js"></script>
+	<script language="javascript" type="text/javascript" src="../CTabs.js"></script>
+	<script language="javascript" type="text/javascript" src="../CNavBar.js"></script>
+	<script language="javascript" type="text/javascript" src="../CWindowFrame.js"></script>
+	<script language="javascript" type="text/javascript" src="../CSplitContainer.js"></script>
+	<script language="javascript" type="text/javascript" src="../CContentTable.js"></script>
+	<script language="javascript" type="text/javascript" src="../CToolbar.js"></script>
+	<script language="javascript" type="text/javascript" src="../CMenuBar.js"></script>
+	<script language="javascript" type="text/javascript" src="../CButton.js"></script>
+	<script language="javascript" type="text/javascript" src="../CToolTable.js"></script>
+	<script language="javascript" type="text/javascript" src="../CDatasheet.js"></script>
+	<script language="javascript" type="text/javascript" src="../CDropdownMenu.js"></script>
+	<script language="javascript" type="text/javascript" src="../CDragAndDrop.js"></script>
+	<script language="javascript" type="text/javascript" src="../CTreeView.js"></script>
+	<script language="javascript" type="text/javascript" src="../CDialog.js"></script>
+	<script language="javascript" type="text/javascript" src="../CRte.js"></script>
+	<script language="javascript" type="text/javascript" src="../CEffect.js"></script>
+	<script language="javascript" type="text/javascript" src="../CAutoCompleteCal.js"></script>
+	<script language="javascript" type="text/javascript" src="../CAutoComplete.js"></script>
+	<script language="javascript" type="text/javascript" src="../CAutoCompleteTime.js"></script>
+	<script language="javascript" type="text/javascript" src="../CNavHistory.js"></script>
+	<script language="javascript" type="text/javascript" src="../CTextBoxList.js"></script>
+	<script language="javascript" type="text/javascript" src="../CAjax.js"></script>
+	<script language="javascript" type="text/javascript" src="../CAjaxRpc.js"></script>
+	<script language="javascript" type="text/javascript" src="../CXml.js"></script>
+	<script language="javascript" type="text/javascript" src="../Ui/Editor.js"></script>
+	<script language="javascript" type="text/javascript" src="../Ui/AutoComplete.js"></script>
+    <script language="javascript" type="text/javascript" src="../Ui/Button.js"></script>
+    <script language="javascript" type="text/javascript" src="../Ui/ButtonToggler.js"></script>
+	<script language="javascript" type="text/javascript" src="../Ui/Tooltip.js"></script>
+	<script language="javascript" type="text/javascript" src="../Ui/SlimScroll.js"></script>
+	<script language="javascript" type="text/javascript" src="../Ui.js"></script>
+	<script language="javascript" type="text/javascript" src="../ckeditor/ckeditor.js"></script>
+	<script language="javascript" type="text/javascript" src="../ckeditor/adapters/jquery.js"></script>
+	<script language='javascript' type='text/javascript'>
+
+	var testnbsec;
+
+	function appmain()
+	{
+		// Turn on debugging
+		ALib.m_debug = true;
+
+		// Goback code
+		/*
+		var gbdiv = alib.dom.createElement("div", document.body);
+		gbdiv.onclick = function() {ALib.History.goBack()};
+		gbdiv.innerHTML = "Go Back";
+		*/
+
+		var main_con = document.getElementById("maincon");
+
+		var con = new CSplitContainer("verticle", "100%", alib.dom.getContentHeight(main_con) + "px");
+		con.resizable = true;
+
+		// Create Navigation Panel
+		var pane1 = con.addPanel("150px");
+		// Main Application Panel
+		var pane2 = con.addPanel("*");
+
+		BuildNav(pane1, pane2);
+		BuildHome(pane2);
+
+		con.print(main_con);
+
+		testnbsec.setHeight("200");
+	}
+
+	function BuildNav(con, appcon)
+	{
+		var nb = new CNavBar();
+		nb.print(con);
+		
+		var sec = nb.addSection("Lib Demo");
+		testnbsec = sec;
+		
+		sec.addItem("Home", null, BuildHome, [appcon], "home");
+        sec.addItem("Tooltip", null, BuildTooltip, [appcon], "home");
+		sec.addItem("Very Long Version Of The Home Link", null, BuildHome, [appcon], "home2");
+		sec.addItem("Tabs", null, BuildTabs, [appcon], "tabs");
+		sec.addItem("Window Frame", null, BuildWFrame, [appcon], "wframe");
+		sec.addItem("Content Table", null, BuildCTable, [appcon], "ctable");
+		sec.addItem("Toolbar & Menubar", null, BuildToolbar, [appcon], "toolbar");
+		sec.addItem("Button", null, BuildButton, [appcon], "button");
+		sec.addItem("Tables", null, BuildCToolTable, [appcon], "tables");
+		sec.addItem("Datasheet", null, BuildCDatasheet, [appcon], "datasheet");
+		sec.addItem("Drop Down", null, BuildDropdown, [appcon], "dropdown");
+		sec.addItem("Drag & Drop", null, BuildDragAndDrop, [appcon], "dragndrop");
+		sec.addItem("TreeView", null, BuildTreeView, [appcon], "treeview");
+		sec.addItem("Ajax", null, BuildAjax, [appcon], "ajax");
+		sec.addItem("Split Contaner", null, BuildSplit, [appcon], "splitcon");
+		sec.addItem("Status Alert", null, BuildStatusAler, [appcon], "statusalert");
+		sec.addItem("Dialog", null, BuildDialog, [appcon], "dialog");
+		sec.addItem("Rte", null, BuildRte, [appcon], "rte");
+		sec.addItem("NewRte", null, BuildNewRte, [appcon], "newrte");
+		sec.addItem("Effect", null, BuildEffect, [appcon], "effect");
+		sec.addItem("AutoComplete", null, BuildAutoComplete, [appcon], "autocomplete");
+		sec.addItem("TextBox", null, BuildTextBox, [appcon], "textbox");
+		sec.addItem("Detect Activity", null, BuildDetectActive, [appcon], "detectactive");
+
+		// Add subnavigation
+		var sec2 = nb.addSection("TreeView", "tree");
+		var item = sec2.addItem("Test Item 1", null, null, null, "item1");
+		var rcon = item.getOptionCon();
+		rcon.innerHTML = "[opt]";
+		var i2 = item.addItem("Sub Item 1", null, null, null, "item1sub1");
+		var i3 = i2.addItem("Sub Item 2a", null, null, null, "item1sub1sub1a");
+		var i3 = i2.addItem("Sub Item 2b", null, null, null, "item1sub1sub1b");
+		var item = sec2.addItem("Test Item 2", null, null, null, "item2");
+		var item = sec2.addItem("Test Dropable", null, BuildTestItemDrop, [appcon], "item_dropable");
+		item.registerDropzone("dzNavbarDrop");
+		item.onDragEnter = function(e)
+		{
+		}
+		item.onDragExit = function(e)
+		{
+		}
+		item.onDragDrop = function(e)
+		{
+			e.innerHTML = "Deleted!";
+		}
+
+		item.expand();
+
+		nb.itemChangeState("home", "on");
+	}
+
+	function ClearCon(con)
+	{
+		con.innerHTML = "";
+	}
+
+	function BuildHome(con)
+	{
+		ClearCon(con);
+
+		var ta = alib.dom.createElement("textarea", con);
+		ta.style.height = "200px";
+		ta.style.width = "98%";
+
+		var buf = "";
+		for (var i = 0; i < 100; i++)
+			buf += "Line " + i + "\n";
+
+		ta.value = buf;
+
+		alib.dom.textAreaAutoResizeHeight(ta, 200);
+	}
+
+	function BuildTabs(con)
+	{
+		ClearCon(con);
+		var tabs = new CTabs();
+
+		// Test tab 1
+		var tabcon1 = tabs.addTab("Test 1");
+		tabcon1.innerHTML = "Content of test 1";
+		// Test tab 1
+		var tabcon2 = tabs.addTab("Test 2");
+		tabcon2.innerHTML = "Content of test 2";
+		// Test tab 1
+		var tabcon3 = tabs.addTab("Test 3");
+		tabcon3.innerHTML = "Content of test 3";
+		// Right div
+		var right = tabs.getRightCon();
+		right.innerHTML = "action link here";
+		
+		tabs.print(con);
+	}
+
+	function BuildWFrame(con)
+	{
+		ClearCon(con);
+		var frm = new CWindowFrame("Frame 1", "400px", "3px");
+		var content = frm.getCon();
+		content.innerHTML = "Window frames are used to visually group components on a page.";
+		frm.print(con);
+		
+		var spacer = ALib.m_document.createElement("div");
+		alib.dom.styleSet(spacer, "height", "10px");
+		con.appendChild(spacer);
+
+		var frm = new CWindowFrame("Frame 2", "400px", "3px");
+		var content = frm.getCon();
+		content.innerHTML = "Window frames are used to visually group components on a page.";
+		frm.print(con);
+	}
+
+	function BuildCTable(con)
+	{
+		ClearCon(con);
+
+		// Create Content Table
+		var ctbl = new CContentTable("Content Table", "100%", "100%");		
+		var ctbl_con = ctbl.getCon();
+		ctbl.print(con);
+
+		// Add context menu (text only)
+		var cdiv = ctbl.get_ctitle();
+		cdiv.innerHTML = "[X]";
+
+		ctbl_con.innerHTML = "Content tables are used for outer containers. They are like windows but are embedded";
+	}
+
+	function BuildToolbar(con)
+	{
+		ClearCon(con);
+
+		// Create Content Table
+		var ctbl = new CContentTable("Content Table", "400px");		
+		var ctbl_con = ctbl.getCon();
+
+		// Add menubar
+		var mb = new CMenubar();
+		var dv = ALib.m_document.createElement("div");
+		dv.innerHTML = "File";
+		var dm = mb.AddItem("File");
+		for (i = 1; i < 10; i++)
+			dm.addEntry("Sub " + i, "alert('Clicked');");
+		var dm = mb.AddItem("Edit");
+		for (i = 1; i < 10; i++)
+			dm.addEntry("Sub " + i, "alert('Clicked');");
+		var dm = mb.AddItem("Tools");
+		for (i = 1; i < 10; i++)
+			dm.addEntry("Sub " + i, "alert('Clicked');");
+		var dm = mb.AddItem("View");
+		for (i = 1; i < 10; i++)
+			dm.addEntry("Sub " + i, "alert('Clicked');");
+		mb.print(ctbl_con);
+
+		// Add toolbar
+		var tb = new CToolbar();
+		var dv = ALib.m_document.createElement("div");
+		var btn = new CButton("GO", "void(0)", null, "b1");
+		tb.AddItem(btn.getButton(), "left");
+		var btn = new CButton("STOP", "void(0)", null, "b1");
+		tb.AddItem(btn.getButton(), "left");
+		tb.print(ctbl_con);
+
+		var dv = ALib.m_document.createElement("div");
+		dv.innerHTML = "See both the CMenubar and CToolbar in action above";
+		ctbl_con.appendChild(dv);
+
+		ctbl.print(con);
+	}
+
+	function BuildButton(con)
+	{
+		ClearCon(con);
+
+		// Crate a container to test margins
+		var subcon = alib.dom.createElement("div", con);
+		alib.dom.styleSet(subcon, "border", "1px dashed red");
+		alib.dom.styleSet(subcon, "padding", "3px");
+
+		var btn = new CButton("Create Database", function() {alert(navigator.userAgent.toLowerCase());}, null, "b1");
+		btn.print(subcon);
+		
+		var spacer = alib.dom.createElement("span", subcon);
+		spacer.innerHTML = "&nbsp;";
+
+		var btn = new CButton("Cancel", "void(0)", null, "b2");
+		btn.print(subcon);
+
+		var spacer = alib.dom.createElement("span", subcon);
+		spacer.innerHTML = "&nbsp;";
+
+		var btn = new CButton("Disabled", "void(0)", null, "b1");
+		btn.print(subcon);
+		btn.disable();
+
+		// Pillar buttons (like google)
+		var subcon = alib.dom.createElement("div", con);
+		alib.dom.styleSet(subcon, "border", "1px dashed blue");
+		alib.dom.styleSet(subcon, "margin-top", "3px");
+		alib.dom.styleSet(subcon, "padding", "3px");
+
+		var btn = new CButton("Left", "void(0)", null, "b1 grLeft");
+		btn.print(subcon);
+		var btn = new CButton("Center Opt 1", "void(0)", null, "b1 grCenter");
+		btn.print(subcon);
+		var btn = new CButton("Date", function() { var dte = new Date("7/1/2009 11:15 PM"); alert(dte.toString()); }, null, "b1 grCenter");
+		btn.print(subcon);
+		var btn = new CButton("Right", "void(0)", null, "b1 grRight");
+		btn.print(subcon);
+
+		// Pillar toggler
+		var subcon = alib.dom.createElement("div", con);
+		alib.dom.styleSet(subcon, "border", "1px dashed green");
+		alib.dom.styleSet(subcon, "margin-top", "3px");
+		alib.dom.styleSet(subcon, "padding", "3px");
+
+		// Create toggler class
+		var toggler = alib.ui.ButtonToggler();
+
+		var btn = alib.ui.Button("Day", {
+			"class":"b1 grLeft", tooltip:"Click to toggle",
+			onclick:function() { }
+		});
+		toggler.add(btn, "day");
+		btn.print(subcon);
+		var btn = alib.ui.Button("Week", {
+			"class":"b1", tooltip:"Click to toggle",
+			onclick:function() { }
+		});
+		toggler.add(btn, "week");
+		btn.print(subcon);
+		var btn = alib.ui.Button("Month", {
+			"class":"b1 grRight", tooltip:"Click to toggle",
+			onclick:function() { }
+		});
+		toggler.add(btn, "month");
+		btn.print(subcon);
+
+		toggler.select("week");
+	}
+
+	function BuildCToolTable(con)
+	{
+		ClearCon(con);
+
+		// Add table
+		var tbl = new CToolTable("100%");
+		tbl.addHeader("#", "center", "20px");
+		tbl.addHeader("Test1");
+		tbl.addHeader("Test 2", "center", "50px");
+
+		rw = tbl.addRow();
+		rw.addCell("1", true, "center");
+		rw.addCell("Row 1");
+		rw.addCell("[edit]");
+
+		rw = tbl.addRow();
+		rw.addCell("2", true, "center");
+		rw.addCell("Row 2");
+		rw.addCell("[edit]");
+
+		tbl.print(con);
+	}
+	
+	var datasheet;
+	var g_numrows = 1;
+	function BuildCDatasheet(con)
+	{
+		ClearCon(con);
+
+		// Add table
+		datasheet = new CDatasheet("100%");
+		datasheet.clicksToEdit = "single";
+		datasheet.onCellChange = function(rowname, colname)
+		{
+			//alert("Changed " + colname + " - " + rowname);
+		}
+
+		datasheet.addHeader("#", "center", "20px");
+		datasheet.addHeader("Test1");
+		datasheet.addHeader("Test2");
+		datasheet.addHeader("Done", "center", "50px");
+
+		rw = datasheet.addRow("dbid1", g_numrows++);
+		rw.addCell("1", "center", null, null, true);
+		rw.addCell("Row 1");
+		rw.addCell("Row 1");
+		rw.addCell("<input type='checkbox'>", "center", null, null, true);
+
+		rw = datasheet.addRow("dbid2", g_numrows++);
+		rw.addCell("2", "center", null, null, true);
+		rw.addCell("Row 2");
+		rw.addCell("Row 2");
+		rw.addCell("<input type='checkbox'>", "center", null, null, true);
+
+		rw = datasheet.addRow("new", "*");
+		rw.addCell("auto", "center", null, null, true);
+		rw.addCell("");
+		rw.addCell("");
+		rw.addCell("<input type='checkbox'>", "center", null, null, true);
+
+		datasheet.onCellUpdate = function(rowname, colname) // Every change made as key is pressed
+		{
+			if (rowname == "new")
+			{
+				this.rows(rowname).setTitle(g_numrows);
+				this.rows(rowname).cols(0).setTitle(g_numrows);
+				this.rows(rowname).setName("rowid"+g_numrows);
+				g_numrows++;
+
+				var newrow = datasheet.addRow("new", "*");
+				newrow.addCell("auto", "center", null, null, true);
+				newrow.addCell("");
+				newrow.addCell("<input type='checkbox'>", "center", null, null, true);
+			}
+		}
+
+		datasheet.print(con);
+	}
+
+	function BuildDropdown(con)
+	{
+		ClearCon(con);
+
+		// Add dropdown
+		var dm = new CDropdownMenu();
+		for (i = 1; i < 10; i++)
+		{
+			var dm_sub = dm.addSubmenu("Entry " + i);
+			for (j = 1; j < 10; j++)
+			{
+				var dmsubsub = dm_sub.addSubmenu("Sub "+j, null, "alert('Clicked');");
+
+				for (var m = 1; m < 10; m++)
+				{
+					dmsubsub.addEntry("Sub "+m, "alert('Clicked');");
+				}
+			}
+		}
+
+		con.appendChild(dm.createButtonMenu("Click for Dropdown"));
+
+		// Create add entry button
+		var btn = new CButton("Add Entry", DropdownAddEntry, [dm, "Added Entry"], "b1");
+		btn.print(con);
+
+		// Create context menu
+		var contextdiv = ALib.m_document.createElement("div");
+		alib.dom.styleSet(contextdiv, "clear", "both");
+		alib.dom.styleSet(contextdiv, "padding-top", "20px");
+		contextdiv.innerHTML = "Context (right click) Test";	
+
+		var dm = new CDropdownMenu();
+		dm.addEntry("Red", function (e) { e.style.color = 'red'; }, null, null, [contextdiv]);
+		dm.addEntry("Blue", function (e) { e.style.color = 'blue'; }, null, null, [contextdiv]);
+		dm.addEntry("Black", function (e) { e.style.color = 'black'; }, null, null, [contextdiv]);
+		dm.createContextMenu(contextdiv)
+		con.appendChild(contextdiv);
+
+		var dmcon = new CDropdownMenu();
+		var dcon = dmcon.addCon();
+		dcon.innerHTML = "Test Con";
+		dcon.onclick = function() { this.menuref.unloadMe(); }
+		con.appendChild(dmcon.createButtonMenu("Dropdown Container"));
+
+		var of_con = alib.dom.createElement("div", con);
+		of_con.id = "test_overflow";
+		alib.dom.styleSet(of_con, "margin-top", "20px");
+		alib.dom.styleSet(of_con, "height", "200px");
+		alib.dom.styleSet(of_con, "overflow", "auto");
+
+		var sp = alib.dom.createElement("div", of_con);
+		alib.dom.styleSet(sp, "height", "300px");
+
+		var dm = new CDropdownMenu();
+		var dm_sub = dm.addSubmenu("Entry 1");
+		var dm_sub = dm.addSubmenu("Entry 2");
+		of_con.appendChild(dm.createButtonMenu("Click for Dropdown"));
+	}
+	
+	function DropdownAddEntry(dm, name)
+	{
+		var dm_sub = dm.addSubmenu(name);
+		for (j = 1; j < 10; j++)
+		{
+			dm_sub.addEntry("Sub "+j, "alert('Clicked');");
+		}
+	}
+
+	function BuildDragAndDrop(con)
+	{
+		ClearCon(con);
+		var tabs = new CTabs();
+		tabs.print(con);
+
+		// Test tab 1
+		// ------------------------------------------
+		var tabcon1 = tabs.addTab("Standard Drag");
+		alib.dom.styleSet(tabcon1, "height", "200px");
+		var dv_f = document.createElement("div");
+		dv_f.innerHTML = "Drag Me Anywhere";
+		dv_f.style.border = "1px solid blue";
+		dv_f.style.width = "100px";
+		tabcon1.appendChild(dv_f);
+		DragAndDrop.registerDragable(dv_f);
+		dv_f.onDragEnd = function (x, y)
+		{
+			this.style.position = "absolute";
+			this.style.top = y + "px";
+			this.style.left = x + "px";
+		}
+
+		// Test tab 2
+		// ------------------------------------------
+		var tabcon2 = tabs.addTab("Drag & Drop");
+		alib.dom.styleSet(tabcon2, "height", "200px");
+		// Attached to dropzone
+		var dv = document.createElement("div");
+		dv.innerHTML = "Trow Me Away";
+		dv.style.border = "1px solid blue";
+		dv.style.width = "100px";
+		tabcon2.appendChild(dv);
+		DragAndDrop.registerDragable(dv, null, "dzGroup1");
+		// Create dropzone
+		var dv_drop = document.createElement("div");
+		dv_drop.innerHTML = "Trash Can";
+		dv_drop.style.border = "1px solid black";
+		dv_drop.style.width = "100px";
+		dv_drop.style.height = "100px";
+		dv_drop.style.position = "absolute";
+		dv_drop.style.top = "100px";
+		dv_drop.style.left = "600px";
+		tabcon2.appendChild(dv_drop);
+		DragAndDrop.registerDropzone(dv_drop, "dzGroup1");
+		dv_drop.onDragEnter = function(e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid red");
+		}
+		dv_drop.onDragExit = function(e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+		dv_drop.onDragDrop = function(e)
+		{
+			e.innerHTML = "Deleted!";
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+
+		// Test tab 3
+		// ------------------------------------------
+		var tabcon3 = tabs.addTab("Custom Drag Icon");
+		alib.dom.styleSet(tabcon3, "height", "200px");
+		var dv_c = document.createElement("div");
+		dv_c.innerHTML = "Drag Me Anywhere";
+		dv_c.style.border = "1px solid blue";
+		dv_c.style.width = "100px";
+		tabcon3.appendChild(dv_c);
+		DragAndDrop.registerDragable(dv_c);
+		var dv_icon = ALib.m_document.createElement("div");
+		alib.dom.styleSet(dv_icon, "width", "100px");
+		alib.dom.styleSet(dv_icon, "height", "100px");
+		dv_icon.innerHTML = "draging";
+		DragAndDrop.setDragGuiCon(dv_c, dv_icon, 15, 15);
+		dv_c.onDragEnd = function (x, y)
+		{
+			this.style.position = "absolute";
+			this.style.top = y + "px";
+			this.style.left = x + "px";
+		}
+
+		// Test tab 4
+		// ------------------------------------------
+		var tabcon4 = tabs.addTab("With Boundaries");
+		alib.dom.styleSet(tabcon4, "height", "300px");
+		var dv_b = document.createElement("div");
+		dv_b.innerHTML = "Drag Me (with limits)";
+		dv_b.style.border = "1px solid blue";
+		dv_b.style.width = "100px";
+		tabcon4.appendChild(dv_b);
+		DragAndDrop.registerDragable(dv_b, null, null, 200, 350, 100, 200);
+		dv_b.onDragEnd = function (x, y)
+		{
+			this.style.position = "absolute";
+			this.style.top = y + "px";
+			this.style.left = x + "px";
+		}
+
+
+		// Test tab 5
+		// ------------------------------------------
+		var tabcon5 = tabs.addTab("MultiDropzones");
+		alib.dom.styleSet(tabcon5, "height", "300px");
+
+		// Group 1
+		var dv_b = document.createElement("div");
+		dv_b.innerHTML = "Group 1";
+		dv_b.style.border = "1px solid blue";
+		dv_b.style.width = "100px";
+		tabcon5.appendChild(dv_b);
+		DragAndDrop.registerDragable(dv_b, null, "dz_multiOne");	
+		// Create dropzone 1
+		var dv_drop = document.createElement("div");
+		dv_drop.innerHTML = "Dropzone 1";
+		dv_drop.style.border = "1px solid black";
+		dv_drop.style.width = "100px";
+		dv_drop.style.height = "50px";
+		dv_drop.style.position = "absolute";
+		dv_drop.style.top = "50px";
+		dv_drop.style.left = "400px";
+		tabcon5.appendChild(dv_drop);
+		DragAndDrop.registerDropzone(dv_drop, "dz_multiOne");
+		dv_drop.onDragEnter = function (e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid red");
+		}
+		dv_drop.onDragExit = function (e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+		dv_drop.onDragDrop = function (e)
+		{
+			e.innerHTML = "Deleted!";
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+
+		// Group 2
+		var dv_b = document.createElement("div");
+		dv_b.innerHTML = "Group 2";
+		dv_b.style.border = "1px solid blue";
+		dv_b.style.width = "100px";
+		tabcon5.appendChild(dv_b);
+		DragAndDrop.registerDragable(dv_b, null, "dz_multiTwo");
+		// Create dropzone 1
+		var dv_drop = document.createElement("div");
+		dv_drop.innerHTML = "Dropzone 2";
+		dv_drop.style.border = "1px solid black";
+		dv_drop.style.width = "100px";
+		dv_drop.style.height = "50px";
+		dv_drop.style.position = "absolute";
+		dv_drop.style.top = "100px";
+		dv_drop.style.left = "400px";
+		tabcon5.appendChild(dv_drop);
+		DragAndDrop.registerDropzone(dv_drop, "dz_multiTwo");
+		dv_drop.onDragEnter = function(e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid red");
+		}
+		dv_drop.onDragExit = function(e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+		dv_drop.onDragDrop = function(e)
+		{
+			e.innerHTML = "Deleted!";
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+
+		// FREE!
+		var dv_b = document.createElement("div");
+		dv_b.innerHTML = "I'm Free";
+		dv_b.style.border = "1px solid blue";
+		dv_b.style.width = "100px";
+		tabcon5.appendChild(dv_b);
+		DragAndDrop.registerDragable(dv_b);
+		dv_b.onDragEnd = function (x, y)
+		{
+			this.style.position = "absolute";
+			this.style.top = y + "px";
+			this.style.left = x + "px";
+		}
+
+		// Test tab 6
+		// ------------------------------------------
+		var tabcon6 = tabs.addTab("With Handle");
+		alib.dom.styleSet(tabcon6, "height", "300px");
+		var dv_root = document.createElement("div");
+		tabcon6.appendChild(dv_root);
+		dv_root.style.border = "1px solid blue";
+		dv_root.style.width = "150px";
+		dv_root.style.padding = "25px";
+		var dv_b = document.createElement("div");
+		dv_root.appendChild(dv_b);
+		dv_b.innerHTML = "Drag Me";
+		dv_b.style.border = "1px solid red";
+		dv_b.style.width = "100px";
+		DragAndDrop.registerDragable(dv_b, dv_root);
+		dv_root.onDragEnd = function (x, y)
+		{
+			this.style.position = "absolute";
+			this.style.top = y + "px";
+			this.style.left = x + "px";
+		}
+
+		// Dashboard
+		// ------------------------------------------
+		var tabcon7 = tabs.addTab("Sort");
+		alib.dom.styleSet(tabcon7, "height", "300px");
+		BuildDragAndDropDashboard(tabcon7);
+
+		// Dashboard
+		// ------------------------------------------
+		var tabcon8 = tabs.addTab("Dashboard");
+		alib.dom.styleSet(tabcon8, "height", "300px");
+		BuildDragAndDropDashboard(tabcon8);
+	}
+
+	function BuildDragAndDropDashboard(con)
+	{
+		// Source Column
+		var dv_orig = document.createElement("div");
+		dv_orig.style.border = "1px solid red";
+		dv_orig.style.width = "100px";
+		dv_orig.style.height = "50px";
+		dv_orig.style.display= "inline-block";
+		con.appendChild(dv_orig);
+
+		// Group 1
+		var dv_b = document.createElement("div");
+		dv_b.innerHTML = "Group 1";
+		dv_b.style.border = "1px solid blue";
+		dv_b.style.width = "100px";
+		dv_orig.appendChild(dv_b);
+		DragAndDrop.registerDragable(dv_b, null, "dz_multiOne");	
+
+		// Group 2
+		var dv_b = document.createElement("div");
+		dv_b.innerHTML = "Group 2";
+		dv_b.style.border = "1px solid blue";
+		dv_b.style.width = "100px";
+		dv_orig.appendChild(dv_b);
+		DragAndDrop.registerDragable(dv_b, null, "dz_multiTwo");
+
+		// Create dropzone 1
+		var dv_drop = document.createElement("div");
+		dv_drop.style.border = "1px solid black";
+		dv_drop.style.width = "100px";
+		dv_drop.style.height = "50px";
+		dv_drop.style.display= "inline-block";
+		con.appendChild(dv_drop);
+		DragAndDrop.registerDropzone(dv_drop, "dz_multiOne");
+		dv_drop.onDragEnter = function (e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid red");
+		}
+		dv_drop.onDragExit = function (e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+		dv_drop.onDragDrop = function (e)
+		{
+			e.innerHTML = "Deleted!";
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+
+		// Create dropzone 2
+		var dv_drop = document.createElement("div");
+		dv_drop.style.border = "1px solid black";
+		dv_drop.style.width = "100px";
+		dv_drop.style.height = "50px";
+		dv_drop.style.display= "inline-block";
+		con.appendChild(dv_drop);
+		DragAndDrop.registerDropzone(dv_drop, "dz_multiTwo");
+		dv_drop.onDragEnter = function(e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid red");
+		}
+		dv_drop.onDragExit = function(e)
+		{
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+		dv_drop.onDragDrop = function(e)
+		{
+			e.innerHTML = "Deleted!";
+			alib.dom.styleSet(this, "border", "1px solid black");
+		}
+	}
+
+	function BuildSplit(main_con)
+	{
+		ClearCon(main_con);
+		
+		var tabs = new CTabs();
+
+		// Test tab 1
+		var tabcon1 = tabs.addTab("Vertical");
+		var con = new CSplitContainer("verticle", "100%", "400px");
+		con.resizable = true;
+		var pane1 = con.addPanel("150px");
+		var pane2 = con.addPanel("*");
+		var pane3 = con.addPanel("100px");
+		for (var i = 0; i < 100; i++)
+			pane1.innerHTML += "Left<br />";
+		pane2.innerHTML = "Center";
+		pane3.innerHTML = "Right";
+		con.print(tabcon1);
+		con.m_p1 = pane1;
+		con.onPanelResize = function(sizes)
+		{
+			this.m_p1.innerHTML = "Left: " + this.m_p1.offsetWidth;	
+		};
+
+		// Test tab 1
+		var tabcon2 = tabs.addTab("Horizontal");
+		var con2 = new CSplitContainer("horizontal", "100%", "400px");
+		con2.resizable = true;
+		// Create Navigation Panel
+		pane1 = con2.addPanel("150px");
+		// Main Application Panel
+		pane2 = con2.addPanel("*");
+		for (var i = 0; i < 100; i++)
+			pane1.innerHTML += "Top<br />";
+		pane2.innerHTML = "bottom";
+		con2.print(tabcon2);
+
+		
+		tabs.print(main_con);
+		
+	}
+
+	function BuildAjax(con)
+	{
+		con.innerHTML = "";
+
+		// XML
+		var frm = new CWindowFrame("XML");
+		var content = frm.getCon();
+		frm.print(con);
+		var ajax = new CAjax("xml");
+		ajax.m_con = content;
+		ajax.onload = function(root) 
+		{
+			BuildAjaxTable(root, this.m_con, this);
+		};
+		ajax.exec("/test/xmltable.xml");
+
+
+		// JSON
+		var frm = new CWindowFrame("JSON");
+		var content = frm.getCon();
+		frm.print(con);
+		var ajax = new CAjax("json");
+		ajax.m_con = content;
+		ajax.onload = function(root) 
+		{
+			this.m_con.innerHTML = root.value;
+		};
+		ajax.exec("/test/jsondata.json");
+	}
+
+	function BuildStatusAler(con)
+	{
+		ClearCon(con);
+		con.innerHTML = "See Status Alert";
+		ALib.statusShowAlert("Center...", 2000);
+		ALib.statusShowAlert("BRight", 3000, "bottom", "right");
+		ALib.statusShowAlert("TRight", 4000, "top", "right");
+		ALib.statusShowAlert("BLeft", 5000, "bottom", "left");
+
+		// Show with overlay
+		// --------------------------------------------
+		var funct = function()
+		{
+			ALib.statusShowAlert("Center...", 2000, "middle", "center", true);
+		}
+		var btn = new CButton("Overlay", funct);
+		btn.print(con);
+	}
+	
+	function BuildDialog(con)
+	{
+		ClearCon(con);
+
+		// Show MessageBox
+		// --------------------------------------------
+		var btn = new CButton("Alert", function() { ALib.Dlg.messageBox("Say Something"); });
+		btn.print(con);
+
+		// SPACER
+		// --------------------------------------------
+		var spacer = ALib.m_document.createElement("div");
+		alib.dom.styleSet(spacer, "height", "10px");
+		con.appendChild(spacer);
+
+		// Show Confirm
+		// --------------------------------------------
+		var funct = function()
+		{
+			ALib.Dlg.confirmBox("Are you sure?", "Confirm Box");
+			ALib.Dlg.onConfirmOk = function()
+			{
+				ALib.Dlg.messageBox("You Said Yes");
+			}
+			ALib.Dlg.onConfirmCancel = function()
+			{
+				ALib.Dlg.messageBox("You Said No");
+			}
+		}
+		var btn = new CButton("Confirm", funct);
+		btn.print(con);
+
+		// SPACER
+		// --------------------------------------------
+		var spacer = ALib.m_document.createElement("div");
+		alib.dom.styleSet(spacer, "height", "10px");
+		con.appendChild(spacer);
+
+		// Show Prompt
+		// --------------------------------------------
+		var funct = function()
+		{
+			var dlg_p = new CDialog();
+			dlg_p.promptBox("Enter Your Name", "Name:", "Default Value");
+			dlg_p.onPromptOk = function(val)
+			{
+				ALib.Dlg.messageBox("Your Name: " + val);
+			}
+			dlg_p.onPromptCancel = function()
+			{
+			}
+			
+		}
+		var btn = new CButton("Prompt", funct);
+		btn.print(con);
+
+		// SPACER
+		// --------------------------------------------
+		var spacer = ALib.m_document.createElement("div");
+		alib.dom.styleSet(spacer, "height", "10px");
+		con.appendChild(spacer);
+
+		// Show custom
+		// --------------------------------------------
+		var dlg = new CDialog();
+		var dv = alib.dom.createElement("div");
+		dv.m_input = alib.dom.createElement("input", dv);
+		var dv_btn = alib.dom.createElement("div", dv);
+		var btn = new CButton("OK", function(dv, dlg) {  var b =dv.m_input.value; dlg.hide(); ALib.Dlg.messageBox("You Said " + b); }, [dv, dlg]);
+		btn.print(dv_btn);
+		var btn = new CButton("Cancel", function(dlg) {  dlg.hide(); }, [dlg]);
+		btn.print(dv_btn);
+
+		var btn = new CButton("Custom", function(dv, dlg) { dlg.customDialog(dv, 200, 200); }, [dv, dlg], "b1");
+		btn.print(con);
+
+
+		// SPACER
+		// --------------------------------------------
+		var spacer = ALib.m_document.createElement("div");
+		alib.dom.styleSet(spacer, "height", "10px");
+		con.appendChild(spacer);
+	}
+
+	function BuildAjaxTable(root, con, ajax)
+	{
+		ClearCon(con);
+
+		// Add table
+		var tbl = new CToolTable("100%");
+		tbl.addHeader("#", "center", "20px");
+		tbl.addHeader("Data1");
+		tbl.addHeader("Data2", "center", "50px");
+
+		var rw = null;
+		var num = root.getNumChildren();
+		for (i = 0; i < num; i++)
+		{
+			var row = root.getChildNode(i);	
+			rw = tbl.addRow();
+			rw.addCell(i + 1, true, "center");
+
+			// Populate vars
+			var cell_num = row.getNumChildren();
+			for (j = 0; j < cell_num; j++)
+			{
+				var cell = row.getChildNode(j);
+				rw.addCell(cell.text());
+
+				switch (cell.name())
+				{
+				case "name":
+					var day_name = cell.text();
+				}
+			}
+		}
+
+		tbl.print(con);
+	}
+
+	function BuildTreeView(con)
+	{
+		ClearCon(con);
+
+		var icon = "../images/CTreeView/icon.gif";
+
+		var tv = new CTreeView();
+
+		var n1 = tv.addNode("Parent Node", icon, "alert('Clicked');");
+
+		var su1 = n1.addNode("Sub Node 1", null);
+		var susu1 = su1.addNode("Sub Sub 1", icon);
+		var susu2 = su1.addNode("Sub Sub 2", icon);
+		var susu3 = su1.addNode("Sub Sub 3", icon);
+
+		var sususu1 = susu3.addNode("Sub Sub Sub 1", icon);
+		susu3.id = "testid";
+		var sususu2 = susu3.addNode("Sub Sub Sub 2", icon, function() {alert("Hi"); });
+		var sususu3 = susu3.addNode("Sub Sub Sub 3", icon);
+
+		var su2 = n1.addNode("Sub Node 2", icon);
+		var su3 = n1.addNode("Sub Node 3 (right click)", icon);
+		var dm = su3.createContextMenu();
+		dm.addEntry("Add Folder", AddTreeNode, null, "+", [su3, "New Node (right click)", icon]);
+		//dm.addEntry("Delete Folder", function (e) { e.style.color = 'blue'; }, null, "+", [contextdiv]);
+
+		tv.print(con);
+
+		var btn = new CButton("Find By Id", function(tv) { alert(tv.getTvNodeById("testid")); }, [tv], "b1");
+		btn.print(con);
+	}
+
+	function AddTreeNode(p_node, title, icon)
+	{
+		var node = p_node.addNode(title, icon, "alert('Hi');");
+		p_node.expand();
+
+		var dm = node.createContextMenu();
+		dm.addEntry("Add Folder", AddTreeNode, null, "+", [node, "New Node (right click)", icon]);
+		dm.addEntry("Delete Folder", function(nd) { nd.remove(); }, null, "x", [node]);
+		dm.addEntry("Rename Folder", function(nd) { nd.editBody(); }, null, "r", [node]);
+	}
+
+	function BuildRte(con)
+	{
+		ClearCon(con);
+
+		ALIB_ROOT = "../"; // Define for images
+		var rte = new CRte();
+		rte.print(con, '90%', '200px', "<p>My name is Sky Sky <span id='myid'>orig</span> – my </p>");
+
+		rte.setElementHtml('myid', 'replaced');
+	}
+
+	function BuildNewRte(con)
+	{
+		ClearCon(con);
+
+		var rteCon = alib.dom.createElement("div", con);
+
+		ALIB_ROOT = "../"; // Define for images
+		var rte = alib.ui.Editor();
+		rte.print(rteCon, '90%', '200px', "<p>My name is Sky Sky <span id='myid'>orig</span> – my </p>");
+
+		var a = alib.dom.createElement("div", con);
+		a.rte = rte;
+		a.onclick = function() { this.rte.setElementHtml('myid', 'replaced'); };
+		a.innerHTML = "Replace";
+	
+
+		/*
+		var rte = new CRte();
+		rte.print(con, '90%', '200px', "<p>My name is Sky Sky <span id='myid'>orig</span> – my </p>");
+
+		*/
+	}
+
+	function BuildEffect(con)
+	{
+		ClearCon(con);
+
+		var pdv = alib.dom.createElement("div", con);
+		//alib.dom.styleSet(pdv, "background-color", "black");
+		alib.dom.styleSet(pdv, "background-image", "url(http://ifelse.co.uk/images/beautiful_china.jpg)");
+		alib.dom.styleSet(pdv, "padding", "10px");
+
+		var dv = alib.dom.createElement("div", pdv);
+		alib.dom.styleSet(dv, "background-color", "#cccccc");
+		alib.dom.styleSet(dv, "color", "white");
+		alib.dom.styleSet(dv, "height", "300px");
+		alib.dom.styleSet(dv, "width", "200px");
+		alib.dom.styleSet(dv, "float", "left");
+		dv.innerHTML = "Rounded Edge";
+		ALib.Effect.round(dv, 3);
+
+		var dv2 = alib.dom.createElement("div", pdv);
+		alib.dom.styleSet(dv2, "background-color", "#cccccc");
+		alib.dom.styleSet(dv2, "color", "white");
+		alib.dom.styleSet(dv2, "height", "300px");
+		alib.dom.styleSet(dv2, "margin-left", "220px");
+		dv2.innerHTML = "Rounded Edge";
+		ALib.Effect.round(dv2, 3, 3);
+
+		var pdv = alib.dom.createElement("div", con);
+		alib.dom.styleSet(pdv, "background-color", "gray");
+		alib.dom.styleSet(pdv, "margin-top", "10px");
+		pdv.innerHTML = "Click to Fade";
+		pdv.onclick = function()
+		{
+			ALib.Effect.fade(this, 200);
+		}
+
+		var rdv = alib.dom.createElement("div", con);
+		alib.dom.styleSet(rdv, "margin-top", "10px");
+		alib.dom.styleSet(rdv, "height", "10px");
+		alib.dom.styleSet(rdv, "border", "1px solid black");
+		ALib.Effect.round(rdv, 0, 0, 3, 3);
+		//rdv.innerHTML = "Content with borders";
+		var bdv = alib.dom.createElement("div", con);
+		alib.dom.styleSet(bdv, "margin-top", "20px");
+		alib.dom.styleSet(bdv, "height", "10px");
+		alib.dom.styleSet(bdv, "background-color", "#f00");
+		alib.dom.styleSet(bdv, "border", "3px dashed #000");
+		ALib.Effect.round(bdv, 20, 20, 20, 20);
+	}
+
+	function BuildAutoComplete(con)
+	{
+		ClearCon(con);
+		
+		// Calendar AC
+		// -------------------------------------------
+		var lbl = alib.dom.createElement("span", con);
+		lbl.innerHTML = "Calendar: ";
+
+		var cal_inp = alib.dom.createElement("input", con);
+		alib.dom.styleSet(cal_inp, "width", "75px");
+
+		var cal_an = alib.dom.createElement("a", con);
+		//cal_an.innerHTML = "[sel]";
+
+		var cal_ac = new CAutoCompleteCal(cal_inp, cal_an);
+		//cal_ac.addDisabledDates('5/1/2009', null);
+		//cal_ac.addDisabledDates(null, '3/1/2009');
+
+		// Add a spacer
+		// -------------------------------------------
+		var spacer = ALib.m_document.createElement("div");
+		alib.dom.styleSet(spacer, "height", "10px");
+		con.appendChild(spacer);
+
+		// Time Autocomplete
+		// -------------------------------------------
+		var lbl = alib.dom.createElement("span", con);
+		lbl.innerHTML = "Enter Time: ";
+
+		var time_inp = alib.dom.createElement("input", con);
+		alib.dom.styleSet(time_inp, "width", "75px");
+		time_inp.value="8:30 AM";
+
+		var tobj = new CAutoCompleteTime(time_inp);
+
+		var spacer = ALib.m_document.createElement("div");
+		alib.dom.styleSet(spacer, "text-align", "right");
+		spacer.id = "debug_box";
+		con.appendChild(spacer);
+
+
+		// Add a spacer
+		// -------------------------------------------
+		var spacer = ALib.m_document.createElement("div");
+		alib.dom.styleSet(spacer, "height", "10px");
+		con.appendChild(spacer);
+
+		// Std Autocomplete
+		// -------------------------------------------
+		var lbl = alib.dom.createElement("span", con);
+		lbl.innerHTML = "Enter State: ";
+
+		var state_inp = alib.dom.createElement("input", con);
+		alib.dom.styleSet(state_inp, "width", "150px");
+
+		var customarray = new Array('oregon <or>','washington','california','idaho','','arizona', 'new york','kingcup','kingdom','kingfisher','kingpin');
+		
+
+		var obj = new CAutoComplete(state_inp,customarray);
+		//var obj = new alib.ui.AutoComplete(state_inp, {data: customarray});
+
+		// Add a spacer
+		// -------------------------------------------
+		var spacer = ALib.m_document.createElement("div");
+		alib.dom.styleSet(spacer, "height", "10px");
+		con.appendChild(spacer);
+
+		// Textarea Autocomplete
+		// -------------------------------------------
+		var lbl = alib.dom.createElement("span", con);
+		lbl.innerHTML = "Same as above with text area: ";
+
+		var state_ta_inp = alib.dom.createElement("textarea", con);
+		alib.dom.styleSet(state_ta_inp, "width", "350px");
+		alib.dom.styleSet(state_ta_inp, "height", "26px");
+
+		//var obj = new CAutoComplete(state_ta_inp,customarray);
+		var obj = new alib.ui.AutoComplete(state_ta_inp, {data: customarray});
+
+		// Add a spacer
+		// -------------------------------------------
+		var spacer = ALib.m_document.createElement("div");
+		alib.dom.styleSet(spacer, "height", "10px");
+		con.appendChild(spacer);
+
+		// Remote
+		// ------------------------------------------
+		var lbl = alib.dom.createElement("span", con);
+		lbl.innerHTML = "Enter State (remote): ";
+
+		var state_inp_rem = alib.dom.createElement("input", con);
+
+		var obj = new alib.ui.AutoComplete(state_inp_rem, {url: "./ac_remotedata.js"});
+	}
+
+	function BuildTextBox(con)
+	{
+		ClearCon(con);
+		
+		// Manual tags
+		// -------------------------------------------
+		var lbl = alib.dom.createElement("div", con);
+		lbl.innerHTML = "Tags: (hit enter)";
+
+		var tags_inp = alib.dom.createElement("input", con);
+		alib.dom.styleSet(tags_inp, "width", "300px");
+
+		var t = new CTextBoxList(tags_inp, {  });
+		t.add('Tag 1');
+		t.add('Tag 2');
+		t.add('Tag 3');
+
+		// Manual tags
+		// -------------------------------------------
+		var lbl = alib.dom.createElement("div", con);
+		lbl.innerHTML = "Tags: (Use comma or simicolon to enter)";
+
+		var comm_inp = alib.dom.createElement("input", con);
+		comm_inp.value = "my, test, keys";
+		var t2 = new CTextBoxList(comm_inp, {bitsOptions:{editable:{addKeys: [188, 13, 186, 59]}}}); // comma, simicolon (186, 59ff), and enter
+		var btn = new CButton("Get Values", function(t2) {alert(t2.getValues().length);}, [t2], "b1");
+		btn.print(con);
+
+		//var t2 = new $.TextboxList(comm_inp, {bitsOptions:{editable:{addKeys: [188, 13, 186, 59]}}}); // comma, simicolon (186, 59ff), and enter
+	}
+
+	function BuildDetectActive(con)
+	{
+		ClearCon(con);
+		
+		statusDiv = alib.dom.createElement("div", con);
+
+		statusDiv.innerHTML = (alib.dom.userActive) ? "User is active" : "User is not active";
+
+		setTimeout(function() { BuildDetectActive(con); }, 1000);
+	}
+
+	function BuildTestItemDrop(con)
+	{
+		ClearCon(con);
+
+		var dv = document.createElement("div");
+		dv.innerHTML = "Trow Me Away";
+		dv.style.border = "1px solid blue";
+		dv.style.width = "100px";
+		con.appendChild(dv);
+		DragAndDrop.registerDragable(dv, null, "dzNavbarDrop");
+	}
+    
+    function BuildTooltip(con)
+    {
+        ClearCon(con);
+
+        var dv = document.createElement("div");        
+        con.appendChild(dv);
+        
+        var dvButton = alib.dom.createElement("input", dv);
+        dvButton.value = "Mouse Hover Here";
+        dvButton.type = "button";
+        alib.dom.styleSet(dvButton, "marginTop", "200px");
+        alib.dom.styleSet(dvButton, "marginLeft", "200px");
+        
+        var toolTip = alib.ui.Tooltip(dvButton, "test");
+        
+        // We try to modify the existing tooltip
+        alib.dom.styleSet(toolTip.getTooltip(), "width", "300px");
+        alib.dom.styleSet(toolTip.getTooltip(), "border", "3px solid red");
+    }
+	</script>
+</head>
+<body onload='appmain()'>
+	<div id='maincon' style='height:100%;'>
+	</div>
+</body>
+</html>

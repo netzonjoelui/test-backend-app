@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Test Events</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<link rel="STYLESHEET" type="text/css" href="../style.css" />
+
+	<script language="javascript" type="text/javascript" src="../jquery.min.js"></script>
+	<script language="javascript" type="text/javascript" src="../alib.js"></script>
+	<script language="javascript" type="text/javascript" src="../dom.js"></script>
+	<script language="javascript" type="text/javascript" src="../events.js"></script>
+	<script language="javascript" type="text/javascript" src="../events/EventWrapper.js"></script>
+	<script language="javascript" type="text/javascript" src="../ui.js"></script>
+	<script language="javascript" type="text/javascript" src="../userAgent.js"></script>
+	<script language="javascript" type="text/javascript" src="../CEffect.js"></script>
+	<script language="javascript" type="text/javascript" src="../CDialog.js"></script>
+</head>
+<body>
+	<h1>alib.events Demo</h1>
+
+	<h2>Regular Dom Events</h2>
+	<button id="domDetect">1 Move mouse here or click</button>
+	<button id="domDetect2">2 Same but differnt elment</button>
+	<div id="domDetectLog" style='border:1px solid; height:150px; overflow:auto;'>* Log will go here</div>
+	<script language='javascript' type='text/javascript'>
+		// Test dom events
+		var con = document.getElementById("domDetect");
+		var con2 = document.getElementById("domDetect2");
+		var conLog = document.getElementById("domDetectLog");
+
+		alib.events.listen(con, "mouseover", function(evnt) { alib.dom.createElement("div", conLog, "1. Mouse Over"); });
+		alib.events.listen(con, "click", function(evnt) { alib.dom.createElement("div", conLog, "1. Mouse Clicked"); });
+
+		alib.events.listen(con2, "mouseover", function(evnt) { alib.dom.createElement("div", conLog, "2. Mouse Over"); });
+		alib.events.listen(con2, "click", function(evnt) { alib.dom.createElement("div", conLog, "2. Mouse Clicked"); });
+	</script>
+
+	<h2>Custom Event in Dom Element</h2>
+	<button id="objDetect">Click to fire event</button>
+	<div id="objDetectLog" style='border:1px solid; height:150px; overflow:auto;'>* Log will go here</div>
+	<script language='javascript' type='text/javascript'>
+		// Test dom events
+		var con = document.getElementById("objDetect");
+		con.onclick = function()
+		{
+			alib.events.triggerEvent(this, "customEvent", {passVal: "Passed Value"});
+		}
+		alib.events.listen(document.getElementById("objDetect"), "customEvent", function(evnt) { 
+			alib.dom.createElement("div", document.getElementById("objDetectLog"), evnt.data.passVal); 
+		});
+	</script>
+
+	<h2>Custom Event in Object</h2>
+	<button id="custObjButton">Click to fire event</button>
+	<div id="objCustLog" style='border:1px solid; height:150px; overflow:auto;'>* Log will go here</div>
+	<script language='javascript' type='text/javascript'>
+		// Test dom events
+		var obj = new Object();
+		var con = document.getElementById("custObjButton");
+		con.obj = obj;
+		con.onclick = function()
+		{
+			alib.events.triggerEvent(this.obj, "customEvent", {passVal: "Passed Value"});
+		}
+		alib.events.listen(obj, "customEvent", function(evnt) { 
+				alib.dom.createElement("div", document.getElementById("objCustLog"), evnt.data.passVal); 
+		});
+	</script>
+</body>
+</html>

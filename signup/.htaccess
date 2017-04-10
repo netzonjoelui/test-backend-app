@@ -1,0 +1,11 @@
+<Files site_style.css>
+	ForceType text/css
+</Files>
+
+php_value memory_limit 200M
+
+RewriteEngine on 
+
+RewriteRule enterprise$ index.php?edition=enterprise [QSA]
+RewriteRule professional$ index.php?edition=professional [QSA]
+RewriteRule personal$ index.php?edition=personal [QSA]

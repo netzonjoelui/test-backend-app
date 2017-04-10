@@ -1,0 +1,59 @@
+<?php
+	require_once("../lib/AntConfig.php");
+	require_once("ant.php");
+	require_once("users/user_functions.php");
+	require_once("datacenter_functions.awp");
+
+	$dbh = $ANT->dbh;
+	$DBID = $_GET['dbid'];
+
+	$query = rawurldecode($_GET['query']);
+	
+	// Parse the query
+	header("Content-type: text/xml");
+	echo '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'; 
+
+	echo "<result>";
+
+	// Get list of columns
+	$result = $dbh->Query("SET search_path TO zudb_".$DBID.";".$query);
+	echo "SET search_path TO zudb_".$DBID.";".$query;
+	$fnum = $dbh->GetNumFields($result);
+	echo "<collist>";
+	for ($i = 0; $i < $fnum; $i++)
+	{
+		$fname = $dbh->GetFieldName($result, $i);
+
+		echo "<column>";
+		if (substr($fname, 0, 13) == "antfs_folder_")
+		{
+			echo "<name>".rawurlencode(substr($fname, 13))."</name>";
+			echo "<type>antfs_folder</type>";
+		}
+		else
+		{
+			echo "<name>".rawurlencode($fname)."</name>";
+			echo "<type>".$dbh->GetFieldType($result, $i)."</type>";
+		}
+		echo "</column>";
+	}
+	echo "</collist>";
+
+	echo "<dataset>";
+	$num = $dbh->GetNumberRows($result);
+	for ($i = 0; $i < $num; $i++)
+	{
+		$row = $dbh->GetNextRow($result, $i, PGSQL_ASSOC);
+
+		// If insert the sytem will return id as retval
+		echo "<row>";
+		foreach ($row as $name=>$val)
+		{
+			echo "<$name>".rawurlencode($val)."</$name>";
+		}
+		echo "</row>";
+	}
+	echo "</dataset>";
+
+	echo "</result>";
+?>

@@ -1,0 +1,103 @@
+/**************************************************************************************
+*	LIB:		CContentTable
+*	Purpose:	aereus.lib.js class used throughout ant for each content table
+***************************************************************************************/
+/* outer table */
+.ContentTable 
+{
+	border-width:1px;
+	border-style:solid; 
+	border-left-color:#758397; 
+	border-left-width:1px; 
+	border-top-width:1px; 
+	border-top-color:#758397; 
+	border-bottom-color:#758397; 
+	border-bottom-width:1px;  
+	border-right-color:#758397; 
+	border-right-width:1px;
+}
+
+.ContentTableTitleLeftCorn
+{
+	width:0px;
+}
+.ContentTableTitleCenter 
+{
+	background-color:transparent; 
+	background-image:url(/images/themes/future2/windowHeaderShade.png); 
+	background-position:0px 0px; 
+	background-repeat:repeat-x;
+	height:18px;
+}
+.ContentTableTitleRightCorn
+{
+	width:0px;
+}
+
+.ContentTableTitleLabel /* The Cell containing the title text */
+{
+	font-family:Arial, Helvetica, sans-serif; 
+	font-size:12px; 
+	font-weight:bold; 
+	color:#FFFFFF; 
+	padding-left:3px;
+	padding-top:3px;
+}
+/* Context Container - For title */
+.ContentTableTitleContext
+{
+	padding-top:4px;
+	padding-right:2px;
+}
+
+/* The body where content is placed */
+.ContentTableBodyLeft
+{
+	width:0px;
+}
+.ContentTableBody 
+{
+	background-color:#FFFFFF; 
+	padding:0px; 
+	background-image:url('/images/themes/future2/windowBodyShade.gif'); 
+	background-position:0px 0px; 
+	background-repeat:repeat-x;
+	height:100%
+}
+.ContentTableBodyRight
+{
+	width:0px;
+}
+
+/* Small 1px hr at the bottom of the table */
+.ContentTableFooterHrLeft
+{
+	width:0px;
+}
+.ContentTableFooterHr 
+{
+	background-color:#CCCCCC;
+	height:1px;
+}
+.ContentTableFooterHrRight
+{
+	width:0px;
+}
+
+/* The fotter row where the menu might optionally be placed */
+.ContentTableFooterLeftCorn
+{
+	width:0px;
+}
+
+.ContentTableFooterRow
+{
+	height:10px;
+	background-image:url('/images/themes/future2/windowFooterShade.gif');
+	background-position:0px 0px;
+}
+
+.ContentTableFooterRightCorn
+{
+	width:0px;
+}

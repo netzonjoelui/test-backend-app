@@ -1,0 +1,17 @@
+<?php
+	if (!$debug_functions_set_) 
+	{
+		$debug_functions_set_ = true;
+		
+		function WriteLog($logevent, $filename)
+		{
+			global $debug;
+			if ($debug)
+			{
+				$fHandle = fopen($filename,'a+');
+				fwrite($fHandle, $logevent);
+				fclose($fHandle);
+			}
+		}
+	}
+?>

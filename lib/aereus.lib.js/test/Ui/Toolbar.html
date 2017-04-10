@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Test Toolbar</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<link rel="STYLESHEET" type="text/css" href="../../style.css" />
+
+	<script language="javascript" type="text/javascript" src="../../jquery-1.10.2.js"></script>
+	<script language="javascript" type="text/javascript" src="../../alib.js"></script>
+	<script language="javascript" type="text/javascript" src="../../dom.js"></script>
+	<script language="javascript" type="text/javascript" src="../../events.js"></script>
+	<script language="javascript" type="text/javascript" src="../../events/EventWrapper.js"></script>
+	<script language="javascript" type="text/javascript" src="../../CEffect.js"></script>
+	<script language="javascript" type="text/javascript" src="../../CDialog.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/Editor.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/Button.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/ButtonToggler.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/Toolbar.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/ToolbarButton.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/ToolbarToggleButton.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui/ToolbarSeparator.js"></script>
+	<script language="javascript" type="text/javascript" src="../../ui.js"></script>
+	<script language="javascript" type="text/javascript" src="../../userAgent.js"></script>
+	<script language="javascript" type="text/javascript" src="../../CToolbar.js"></script>
+	<script language="javascript" type="text/javascript" src="../../CDropdownMenu.js"></script>
+</head>
+<body>
+	<h1>alib.ui.Toolbar demo</h1>
+
+	<h2>Toolbar created programmatically using ToolbarButtons</h2>
+	<div id="toolbarCon">
+	</div>
+	<script language='javascript' type='text/javascript'>
+		var con = document.getElementById("toolbarCon");
+
+		var tb = alib.ui.Toolbar();
+
+		tb.addChild(new alib.ui.ToolbarToggleButton("<img src='../../images/bold.gif' />"), true, "bold");
+		tb.getChild("bold").toggle(true);
+
+		tb.addChild(new alib.ui.ToolbarButton("Print", {}), true);
+
+		tb.addChild(new alib.ui.ToolbarSeparator(), true);
+
+		// A toggle buttons
+		var toggler = new alib.ui.ButtonToggler();
+		var b1 = new alib.ui.ToolbarButton("<img src='../../images/left_just.gif' />", {});
+		toggler.add(b1, "left");
+		tb.addChild(b1, true);
+		b1.toggle(true);
+		var b2 = new alib.ui.ToolbarButton("<img src='../../images/centre.gif' />", {});
+		toggler.add(b2, "center");
+		tb.addChild(b2, true);
+		var b3 = new alib.ui.ToolbarButton("<img src='../../images/right_just.gif' />", {});
+		toggler.add(b3, "right");
+		tb.addChild(b3, true);
+
+		tb.addChild(new alib.ui.ToolbarSeparator(), true);
+
+		// Add select/dropdown
+
+		tb.print(con);
+	</script>
+
+	<h2>Toolbar with regular buttons</h2>
+	<div id="toolbarCon2">
+	</div>
+	<script language='javascript' type='text/javascript'>
+		var tb = alib.ui.Toolbar();
+
+		tb.addChild(new alib.ui.Button("Bold", {toggle:true}), true, "bold");
+		tb.getChild("bold").toggle(true);
+
+		tb.addChild(new alib.ui.Button("Italic", {}), true);
+
+		tb.print(document.getElementById("toolbarCon2"));
+	</script>
+</body>
+</html>

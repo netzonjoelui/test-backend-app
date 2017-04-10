@@ -1,0 +1,23 @@
+<?php
+function NotesGetLabelArray(&$dbh, $nid)
+{
+	if (is_numeric($nid))
+	{
+		$labels = array();
+		$query = "select user_notes_categories.id, user_notes_categories.name from
+					user_notes_categories, user_notes_cat_mem
+					where user_notes_cat_mem.note_id='$nid' and
+					user_notes_cat_mem.category_id=user_notes_categories.id";
+		$result = $dbh->Query($query);
+		$num = $dbh->GetNumberRows($result);
+		for ($i = 0; $i < $num; $i++)
+		{
+			$row = $dbh->GetNextRow($result, $i);
+			$labels[$row['id']] = $row['name'];
+		}
+		$dbh->FreeResults($result);
+	}
+	
+	return $labels;
+}
+?>

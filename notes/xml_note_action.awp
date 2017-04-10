@@ -1,0 +1,46 @@
+<?php
+	header("Content-type: text/xml");			// Returns XML document
+	require_once("../lib/AntConfig.php");
+	require_once("../validate_user.php");
+	require_once("../users/user_functions.php");
+	require_once("../lib/CDatabase.awp");
+	
+	$dbh = new CDatabase();
+	
+	$USERNAME = $_SESSION["USER_NAME"];
+	$USERID = $_SESSION["USER_ID"];
+	$selid = $_GET['selid'];
+					
+	echo '<?xml version="1.0" encoding="UTF-8"
+	  standalone="yes"?><response>'; 
+
+	if (is_numeric($selid))
+	{
+		switch ($_GET['act'])
+		{
+		case 'delete':
+			// Delete messages			
+			$dbh->Query("delete from user_notes where id='$selid'");
+			break;
+		case 'addlbl':
+			// Add category to contact if not already added
+			$lblid = $_GET['lblid'];
+			$query = "select category_id from user_notes_cat_mem where 
+					  note_id='$selid' and category_id='$lblid'";
+			if (!$dbh->GetNumberRows($dbh->Query($query)))
+			{
+				$dbh->Query("insert into user_notes_cat_mem(category_id, note_id) 
+							 values('$lblid', '$selid')");
+			}
+			break;
+		case 'remlbl':
+			// Add category to contact if not already added
+			$lblid = $_GET['lblid'];
+			$dbh->Query("delete from user_notes_cat_mem where category_id='$lblid' 
+						 and note_id='$selid'");
+			break;
+		}
+	}
+
+	echo "<result>1</result></response>";
+?>

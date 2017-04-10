@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>Test</title>
+	
+	<link rel="STYLESHEET" type="text/css" href="../style.css" />
+
+	<script language="javascript" type="text/javascript" src="../userAgent.js"></script>
+	<script language="javascript" type="text/javascript" src="../dom.js"></script>
+	<script language="javascript" type="text/javascript" src="../CTabs.js"></script>
+	<script language="javascript" type="text/javascript" src="../CSplitContainer.js"></script>
+	<script language="javascript" type="text/javascript" src="../alib.js"></script>
+	<script language='javascript' type='text/javascript'>
+	function appmain()
+	{
+		var main_con = document.getElementById("maincon");
+
+		var con = new CSplitContainer();
+
+		// Test tab 1
+		var pane1 = con.addPanel("150px");
+		pane1.innerHTML = "Content of test 1";
+		// Test tab 1
+		var pane2 = con.addPanel("*");
+		pane2.innerHTML = "Main app content";
+		
+		con.print(main_con);
+	}
+	</script>
+</head>
+<body onload='appmain()'>
+	<div id='maincon'>
+	</div>
+</body>
+</html>
+
